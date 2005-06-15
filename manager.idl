@@ -1,0 +1,286 @@
+/* -*- mode: c -*- */
+/* $Id: manager.idl,v 1.3 2005/06/14 14:41:05 bjeannet Exp $ */
+
+quote(C, "
+#include \"caml/custom.h\"
+#include \"cudd_caml.h\"
+#include \"stdio.h\"
+")
+
+/* \section{Management of abstract datatypes} %============================== */
+
+typedef [abstract,c2ml(manager_c2ml),ml2c(manager_ml2c)] struct DdManager* manager__t;
+
+enum reorder {
+    CUDD_REORDER_SAME,
+    CUDD_REORDER_NONE,
+    CUDD_REORDER_RANDOM,
+    CUDD_REORDER_RANDOM_PIVOT,
+    CUDD_REORDER_SIFT,
+    CUDD_REORDER_SIFT_CONVERGE,
+    CUDD_REORDER_SYMM_SIFT,
+    CUDD_REORDER_SYMM_SIFT_CONV,
+    CUDD_REORDER_WINDOW2,
+    CUDD_REORDER_WINDOW3,
+    CUDD_REORDER_WINDOW4,
+    CUDD_REORDER_WINDOW2_CONV,
+    CUDD_REORDER_WINDOW3_CONV,
+    CUDD_REORDER_WINDOW4_CONV,
+    CUDD_REORDER_GROUP_SIFT,
+    CUDD_REORDER_GROUP_SIFT_CONV,
+    CUDD_REORDER_ANNEALING,
+    CUDD_REORDER_GENETIC,
+    CUDD_REORDER_LINEAR,
+    CUDD_REORDER_LINEAR_CONVERGE,
+    CUDD_REORDER_LAZY_SIFT,
+    CUDD_REORDER_EXACT
+};
+
+enum aggregation {
+    CUDD_NO_CHECK,
+    CUDD_GROUP_CHECK,
+    CUDD_GROUP_CHECK2,
+    CUDD_GROUP_CHECK3,
+    CUDD_GROUP_CHECK4,
+    CUDD_GROUP_CHECK5,
+    CUDD_GROUP_CHECK6,
+    CUDD_GROUP_CHECK7,
+    CUDD_GROUP_CHECK8,
+    CUDD_GROUP_CHECK9
+};
+
+enum lazygroup {
+    CUDD_LAZY_NONE,
+    CUDD_LAZY_SOFT_GROUP,
+    CUDD_LAZY_HARD_GROUP,
+    CUDD_LAZY_UNGROUP
+};
+
+enum vartype {
+    CUDD_VAR_PRIMARY_INPUT,
+    CUDD_VAR_PRESENT_STATE,
+    CUDD_VAR_NEXT_STATE
+};
+
+enum mtr { MTR_DEFAULT=0, MTR_FIXED=4 };
+
+enum error {
+    CUDD_NO_ERROR,
+    CUDD_MEMORY_OUT,
+    CUDD_TOO_MANY_NODES,
+    CUDD_MAX_MEM_EXCEEDED,
+    CUDD_INVALID_ARG,
+    CUDD_INTERNAL_ERROR
+};
+
+quote(MLMLI,"type tbool = False | True | Top")
+
+quote(MLI,"val dummy : t")
+quote(MLI,"val print_limit : int ref")
+quote(ML,"let print_limit = ref 30")
+
+/* \section{Managers} %====================================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Managers *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI,"external set_gc: int -> (unit -> unit) -> (unit -> unit) -> unit = \"camlidl_dd_set_gc\"")
+
+manager__t make(unsigned int numVars, unsigned int numVarsZ, unsigned int numSlots, unsigned int cacheSize, unsigned long maxMemory)
+  quote(call,
+"  if (numSlots==0) numSlots = CUDD_UNIQUE_SLOTS;
+   if (cacheSize==0) cacheSize = CUDD_CACHE_SLOTS;
+   _res = Cudd_Init(numVars, numVarsZ, numSlots, cacheSize, maxMemory);
+   {
+     int res;
+     res = Cudd_AddHook(_res,camlidl_dd_garbage,CUDD_PRE_GC_HOOK);
+     if (res!=1)
+      failwith(\"Manager.make: unable to add the garbage collection hook\");
+     res = Cudd_AddHook(_res,camlidl_dd_reordering,CUDD_PRE_REORDERING_HOOK);
+     if (res!=1)
+      failwith(\"Manager.make: unable to add the reordering hook\");
+}
+");
+
+void free(manager__t man)	
+     quote(call, "Cudd_Quit(man);");
+
+boolean debugcheck(manager__t man)
+     quote(call,
+"_res = Cudd_DebugCheck(man);
+ fflush(man->err);
+ if (_res == CUDD_OUT_OF_MEM)
+   failwith(\"Dd.debugcheck returned CUDD_OUT_OF_MEM\");
+");
+int check_keys(manager__t man)
+     quote(call, "_res = Cudd_CheckKeys(man);");
+
+
+
+/* \section{Variables, Reordering and Mapping} %============================= */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Variables, Reordering and Mapping *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+int level_of_var(manager__t man, int var)
+     quote(call, "_res = Cudd_ReadPerm(man,var);");
+int var_of_level(manager__t man, int level)
+     quote(call, "_res = Cudd_ReadInvPerm(man,level);");
+
+void reduce_heap(manager__t man, enum reorder heuristic, int minsize)
+     quote(call, 
+"{
+  int ok = Cudd_ReduceHeap(man,heuristic,minsize);
+  if (ok==0) failwith(\"Manager.reduce_heap failed\");
+}");
+void shuffle_heap(manager__t man, int permut[])
+     quote(call,
+"{
+  int ok = Cudd_ShuffleHeap(man,permut);
+  if (ok==0) failwith(\"Manager.shuffle_heap failed\");
+}");
+void enable_autodyn(manager__t man, enum reorder heuristic)
+     quote(call, "Cudd_AutodynEnable(man,heuristic);");
+void disable_autodyn(manager__t man)
+     quote(call, "Cudd_AutodynDisable(man);");
+
+boolean autodyn_status(manager__t man, [out] enum reorder * heuristic)
+     quote(call,"_res = Cudd_ReorderingStatus(man,(Cudd_ReorderingType*)heuristic);");
+
+void group(manager__t man, int low, int size, enum mtr type)
+     quote(call, "Cudd_MakeTreeNode(man, low, size, type);");
+void set_varmap(manager__t man, [size_is(size)] int permut[], int size)
+     quote(call,
+"{
+  int ok = Cuddaux_SetVarMap(man,permut);
+  if (ok==0) failwith(\"Manager.set_varmap failed\");
+}");
+
+/* \section{Parameters} %==================================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Parameters *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI,"(* ------------------------------------------------------ *)")
+quote(MLMLI,"(* RDDs *)")
+quote(MLMLI,"(* ------------------------------------------------------ *)")
+
+double get_background(manager__t man)
+     quote(call,
+"{
+  DdNode* add = Cudd_ReadBackground(man);
+  _res = cuddV(add);
+}");
+void   set_background(manager__t man, double v)
+     quote(call,
+"{
+  DdNode* add = Cudd_addConst(man,v);
+  cuddRef(add);
+  Cudd_SetBackground(man,add);
+}");
+double get_epsilon(manager__t man) VAL_OF_MAN(Cudd_ReadEpsilon);
+void   set_epsilon(manager__t man, double v) UNIT_OF_MAN_VAL(Cudd_SetEpsilon);
+
+quote(MLMLI,"(* ------------------------------------------------------ *)")
+quote(MLMLI,"(* Cache related *)")
+quote(MLMLI,"(* ------------------------------------------------------ *)")
+
+int    get_min_hit(manager__t man) VAL_OF_MAN(Cudd_ReadMinHit);
+void   set_min_hit(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetMinHit);
+int    get_max_cache_hard(manager__t man) VAL_OF_MAN(Cudd_ReadMaxCacheHard);
+void   set_max_cache_hard(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetMaxCacheHard);
+
+quote(MLMLI,"(* ------------------------------------------------------ *)")
+quote(MLMLI,"(* Manager *)")
+quote(MLMLI,"(* ------------------------------------------------------ *)")
+
+int    get_looseupto(manager__t man) VAL_OF_MAN(Cudd_ReadLooseUpTo);
+void   set_looseupto(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetLooseUpTo);
+int    get_max_live(manager__t man) VAL_OF_MAN(Cudd_ReadMaxLive);
+void   set_max_live(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetMaxLive);
+int    get_max_mem(manager__t man) VAL_OF_MAN(Cudd_ReadMaxMemory);
+void   set_max_mem(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetMaxMemory);
+
+quote(MLMLI,"(* ------------------------------------------------------ *)")
+quote(MLMLI,"(* Reordering methods *)")
+quote(MLMLI,"(* ------------------------------------------------------ *)")
+
+int    get_sift_max_swap(manager__t man) VAL_OF_MAN(Cudd_ReadSiftMaxSwap);
+void   set_sift_max_swap(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetSiftMaxSwap);
+int    get_sift_max_var(manager__t man) VAL_OF_MAN(Cudd_ReadSiftMaxVar);
+void   set_sift_max_var(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetSiftMaxVar);
+enum aggregation get_groupcheck(manager__t man) VAL_OF_MAN(Cudd_ReadGroupcheck);
+void   set_groupcheck(manager__t man, enum aggregation v) UNIT_OF_MAN_VAL(Cudd_SetGroupcheck);
+int    get_arcviolation(manager__t man) VAL_OF_MAN(Cudd_ReadArcviolation);
+void   set_arcviolation(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetArcviolation);
+int    get_crossovers(manager__t man) VAL_OF_MAN(Cudd_ReadNumberXovers);
+void   set_crossovers(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetNumberXovers);
+int    get_population(manager__t man) VAL_OF_MAN(Cudd_ReadPopulationSize);
+void   set_population(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetPopulationSize);
+int    get_recomb(manager__t man) VAL_OF_MAN(Cudd_ReadRecomb);
+void   set_recomb(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetRecomb);
+int    get_symmviolation(manager__t man) VAL_OF_MAN(Cudd_ReadSymmviolation);
+void   set_symmviolation(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetSymmviolation);
+
+quote(MLMLI,"(* ------------------------------------------------------ *)")
+quote(MLMLI,"(* Dynamic reordering *)")
+quote(MLMLI,"(* ------------------------------------------------------ *)")
+
+double get_max_growth(manager__t man) VAL_OF_MAN(Cudd_ReadMaxGrowth);
+void   set_max_growth(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetMaxGrowth);
+double get_max_growth_alt(manager__t man) VAL_OF_MAN(Cudd_ReadMaxGrowthAlternate);
+void   set_max_growth_alt(manager__t man, double v) UNIT_OF_MAN_VAL(Cudd_SetMaxGrowthAlternate);
+int    get_reordering_cycle(manager__t man) VAL_OF_MAN(Cudd_ReadReorderingCycle);
+void   set_reordering_cycle(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetReorderingCycle);
+int    get_next_autodyn(manager__t man) VAL_OF_MAN(Cudd_ReadNextReordering);
+void   set_next_autodyn(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetNextReordering);
+
+/* \section{Statistics} %==================================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Statistics *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+double get_cache_hits(manager__t man) VAL_OF_MAN(Cudd_ReadCacheHits);
+double get_cache_lookups(manager__t man) VAL_OF_MAN(Cudd_ReadCacheLookUps);
+int    get_cache_slots(manager__t man) VAL_OF_MAN(Cudd_ReadCacheSlots);
+double get_cache_used_slots(manager__t man) VAL_OF_MAN(Cudd_ReadCacheUsedSlots);
+int    get_dead(manager__t man) VAL_OF_MAN(Cudd_ReadDead);
+enum error get_error(manager__t man) VAL_OF_MAN(Cudd_ReadErrorCode);
+int    get_gc_time(manager__t man) VAL_OF_MAN(Cudd_ReadGarbageCollectionTime);
+int    get_gc_nb(manager__t man) VAL_OF_MAN(Cudd_ReadGarbageCollections);
+int    get_keys(manager__t man) VAL_OF_MAN(Cudd_ReadKeys);
+int    get_linear(manager__t man, int x, int y) 
+     quote(call, "_res = Cudd_ReadLinear(man,x,y);");
+int    get_max_cache(manager__t man) VAL_OF_MAN(Cudd_ReadMaxCache);
+int    get_min_dead(manager__t man) VAL_OF_MAN(Cudd_ReadMinDead);
+int    get_node_count(manager__t man) VAL_OF_MAN(Cudd_ReadNodeCount);
+int    get_node_count_peak(manager__t man) VAL_OF_MAN(Cudd_ReadPeakNodeCount);
+int    get_reordering_time(manager__t man) VAL_OF_MAN(Cudd_ReadReorderingTime);
+int    get_reordering_nb(manager__t man) VAL_OF_MAN(Cudd_ReadReorderings);
+int    get_bddvar_nb(manager__t man) VAL_OF_MAN(Cudd_ReadSize);
+int    get_zddvar_nb(manager__t man) VAL_OF_MAN(Cudd_ReadZddSize);
+int    get_slots(manager__t man) VAL_OF_MAN(Cudd_ReadSlots);
+double get_used_slots(manager__t man) VAL_OF_MAN(Cudd_ReadUsedSlots);
+double get_swap_nb(manager__t man) VAL_OF_MAN(Cudd_ReadSwapSteps);
+
+
+
+
+void print_info(manager__t man)
+  quote(call, 
+"  fflush(stdout);
+   Cudd_PrintInfo(man,stdout);
+   fflush(stdout);
+");
+
+
+quote(ML,"
+let _ = Callback.register \"gc_full_major\" Gc.full_major
+
+let dummy = 
+  let res = make 0 0 1 1 0 in
+  set_max_mem res 1;
+  set_max_live res 4;
+  set_max_cache_hard res 1;
+  res
+")

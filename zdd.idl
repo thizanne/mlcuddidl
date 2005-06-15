@@ -1,0 +1,9 @@
+int level_of_var(manager man, int var);
+     quote(call, "_res = Cudd_ReadPermZdd(man,var);");
+int var_of_level(manager man, int level);
+     quote(call, "_res = Cudd_ReadInvPermZdd(man,level);");
+
+void Cudd_AutodynEnableZdd(manager man, enum reorder heuristic);
+void Cudd_AutodynDisableZdd(manager man);
+void Cudd_MakeZddTreeNode(manager man, int low, int size, enum mtr type);
+int zddsize(manager man) quote(call, "_res = Cudd_ReadZddSize(man);");

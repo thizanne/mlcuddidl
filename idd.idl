@@ -1,0 +1,303 @@
+/* -*- mode: c -*- */
+/* $Id: idd.idl,v 1.2 2004/10/01 16:48:13 bjeannet Exp $ */
+
+quote(C, "
+#include \"caml/custom.h\"
+#include \"cudd_caml.h\"
+")
+
+import "manager.idl";
+import "bdd.idl";
+
+/* \section{Management of abstract datatypes} %============================== */
+
+/* For nodes that need Garbage collection */
+typedef [abstract,c2ml(node_c2ml),ml2c(node_ml2c)] struct node__t idd__t;
+
+quote(MLMLI,"
+type idd = 
+| Leaf of int
+| Ite of int * t * t
+type id_unop
+type id_binop
+type id_combinop
+")
+quote(MLI,"val dummy : t")
+
+/* \section{Extractors} %==================================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Extractors *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI,"
+external manager : t -> Manager.t = \"camlidl_bdd_manager\"
+external is_cst : t -> bool = \"camlidl_bdd_is_cst\"
+external topvar : t -> int = \"camlidl_bdd_topvar\"
+external dthen : t -> t = \"camlidl_rdd_dthen\"
+external delse : t -> t = \"camlidl_rdd_delse\"
+external cofactors : int -> t ->  t*t = \"camlidl_rdd_cofactors\"
+external cofactor : t -> Bdd.t -> t = \"camlidl_rdd_cofactor\"
+")
+int dval(idd__t no) quote(call,"_res = (int)(cuddV(no.node));");
+quote(MLMLI,"external inspect: t -> idd = \"camlidl_idd_inspect\"")
+
+/* \section{Supports} %====================================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Supports *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI,"
+external support : t -> Bdd.t = \"camlidl_bdd_support\"
+external supportsize : t -> int = \"camlidl_bdd_supportsize\"
+external is_var_in : int -> t -> bool = \"camlidl_bdd_is_var_in\"
+external vectorsupport : t array -> Bdd.t = \"camlidl_bdd_vectorsupport\"
+external vectorsupport2 : Bdd.t array -> t array -> Bdd.t = \"camlidl_rdd_vectorsupport2\"
+")
+
+
+/* \section{Classical operations} */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Classical operations *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+idd__t cst(manager__t man, int val)
+  quote(call, "_res.man = man; _res.node = Cudd_addConst(man,(int)val);");
+
+quote(MLMLI,"
+external ite : Bdd.t -> t -> t -> t = \"camlidl_rdd_ite\"
+external compose : int -> Bdd.t -> t -> t = \"camlidl_rdd_compose\"
+external vectorcompose: Bdd.t array -> idd__t -> idd__t = \"camlidl_rdd_vectorcompose\"
+")
+
+quote(ML,"let dummy = cst Manager.dummy (int_of_float (Manager.get_background Manager.dummy))")
+
+/* \section{Logical tests} %================================================= */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Logical tests *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI,"
+external is_equal : t -> t -> bool = \"camlidl_bdd_is_equal\"
+external is_equal_when: t -> t -> Bdd.t -> bool = \"camlidl_bdd_is_equal_when\"
+")
+
+[unique] int * is_eval_cst(idd__t no1, bdd__t no2)
+quote(call,
+"  {
+     static int storage;
+     DdNode* node;
+
+     CHECK_MAN2;
+     node = Cuddaux_addEvalConst(no1.man,no2.node,no1.node);
+     if (node==DD_NON_CONSTANT || ! cuddIsConstant(node))
+       _res = 0;
+     else {
+       storage = (int)(cuddV(node));
+       _res = &storage;
+     }
+   }
+");
+
+[unique] int * is_ite_cst(bdd__t no1, idd__t no2, idd__t no3)
+quote(call,
+"  {
+     static int storage;
+
+     DdNode* node;
+     CHECK_MAN3;
+     node = Cuddaux_addIteConstant(no1.man,no1.node,no2.node,no3.node);
+     if (node==DD_NON_CONSTANT || ! cuddIsConstant(node))
+       _res = 0;
+     else {
+       storage = (int)(cuddV(node));
+       _res = &storage;
+     }
+   }
+");
+
+/* \section{Structural information} %======================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Structural information *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI,"
+external size : t -> int = \"camlidl_bdd_size\"
+external nbpaths : t -> float = \"camlidl_bdd_nbpaths\"
+external nbnonzeropaths : t -> float = \"camlidl_rdd_nbnonzeropaths\"
+external nbminterms : int -> t -> float = \"camlidl_bdd_nbminterms\"
+external density : int -> t -> float = \"camlidl_bdd_density\"
+external nbleaves : t -> int = \"camlidl_rdd_nbleaves\"
+")
+
+/* \section{Variable Mapping} %============================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Variable mapping *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI,"
+external varmap : t -> t = \"camlidl_rdd_varmap\"  
+external permute : int array -> t -> t = \"camlidl_rdd_permute\"  
+")
+/* \section{Iterators} %============================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Iterators *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI, "
+external iter_node: (t -> unit) -> t -> unit = \"camlidl_dd_iter_node\"
+external iter_cube: (Manager.tbool array -> int -> unit) -> t -> unit = \"camlidl_idd_iter_cube\"
+")
+
+/* \section{Leaves and guards} */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Leaves and guards *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI,"
+external guard_of_node : t -> t -> Bdd.t = \"camlidl_rdd_guard_of_node\"
+external guard_of_nonbackground : t -> Bdd.t = \"camlidl_rdd_guard_of_nonbackground\"
+external nodes_below_level: t -> int option -> t array = \"camlidl_rdd_nodes_below_level\"
+external leaves: t -> int array = \"camlidl_idd_leaves\"
+")
+
+bdd__t guard_of_leaf(idd__t no, int val)
+     quote(call,"
+Begin_roots1(_v_no);
+{
+DdNode* nval = Cudd_addConst(no.man, (double)val);
+cuddRef(nval);
+_res.man = no.man;
+_res.node = Cuddaux_addGuardOfNode(no.man,no.node,nval);
+cuddRef(_res.node);
+Cudd_RecursiveDeref(no.man,nval);
+cuddDeref(_res.node);
+}
+End_roots();
+");
+
+quote(MLI,"val guardleafs : t -> (Bdd.t * int) array")
+quote(ML,"
+let guardleafs rdd =
+  let tab = leaves rdd in
+  Array.map (fun leaf -> (guard_of_leaf rdd leaf,leaf)) tab
+")
+
+/* \section{Minimizations} %============================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Minimizations *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI,"
+external constrain: t -> Bdd.t -> t = \"camlidl_rdd_constrain\"
+external tdconstrain: t -> Bdd.t -> t = \"camlidl_rdd_tdconstrain\"
+external restrict: t -> Bdd.t -> t = \"camlidl_rdd_restrict\"
+external tdrestrict : t -> Bdd.t -> t = \"camlidl_rdd_tdrestrict\"
+")
+/* \section{Conversions} %============================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Conversions *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI,"
+external to_bdd : t -> Bdd.t = \"camlidl_rdd_to_bdd\"
+external to_rdd : t -> Rdd.t = \"%identity\"
+")
+
+/* \section{User Operations} */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* User operations *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI,"
+external alloc_unop: (int -> int) -> id_unop = \"camlidl_idd_alloc_unop\"
+external alloc_binop: (int -> int -> int) -> id_binop = \"camlidl_idd_alloc_binop\"
+external alloc_combinop: (int -> int -> int) -> id_combinop = \"camlidl_idd_alloc_combinop\"
+external apply_unop: id_binop -> t -> t = \"camlidl_idd_apply_unop\"
+external apply_binop: id_binop -> t -> t -> t = \"camlidl_idd_apply_binop\"
+external apply_combinop: id_combinop -> t -> t -> t = \"camlidl_idd_apply_combinop\"
+")
+quote(C,"ALLOCAPPLY_USEROP(idd,Val_int,Int_val)")
+
+/* \section{Miscellaneous} %============================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Miscellaneous *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI,"
+external transfer : t -> Manager.t -> t = \"camlidl_rdd_transfer\"
+")
+
+/* \section{Printing} %============================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Printing *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI,"external _print: t -> unit = \"camlidl_dd_print\"")
+
+quote(MLI,"
+val print__minterm: Format.formatter -> t -> unit
+val print_minterm: (int -> string) -> (int -> string) -> Format.formatter -> t -> unit
+val print: (int -> string) -> (int -> string) -> Format.formatter -> t -> unit
+")
+
+
+quote(ML,"
+open Format
+
+let print__minterm fmt rdd =
+  if is_cst rdd then pp_print_int fmt (dval rdd)
+  else 
+    let nb = nbpaths rdd in
+    if nb > (float_of_int !Manager.print_limit) then
+      fprintf fmt \"rdd with %i nodes, %i leaves and %g paths\" (size rdd) (nbleaves rdd) nb
+  else begin
+    fprintf fmt \"@[<v>\";
+    let first = ref true in
+    iter_cube 
+      (begin fun cube leaf ->
+	if not !first then fprintf fmt \"@ \" else first := false;
+	let str = String.create (Array.length cube) in
+	Array.iteri
+	  (begin fun i elt -> 
+	    str.[i] <- 
+	      begin match elt with
+	      | Manager.False -> '0'
+	      | Manager.True -> '1'
+	      | Manager.Top -> '-'
+	      end
+	  end)
+	  cube;
+	fprintf fmt \"%s -> %i\" str leaf
+      end)
+      rdd;
+    fprintf fmt \"@]\"
+  end
+
+let print_minterm bassoc nassoc fmt rdd =
+  if is_cst rdd then pp_print_string fmt (nassoc (dval rdd))
+  else 
+    let nb = nbpaths rdd in
+    if nb > (float_of_int !Manager.print_limit) then
+      fprintf fmt \"rdd with %i nodes, %i leaves and %g paths\" (size rdd) (nbleaves rdd) nb
+  else begin
+    let leaves = leaves rdd in
+    fprintf fmt \"{ @[<v>\";
+    for i=Array.length leaves - 1 downto 0 do
+      let leaf = leaves.(i) in
+      let bdd = guard_of_leaf rdd leaf in
+      fprintf fmt \"%s IF %a\"
+	(nassoc leaf) (Bdd.print_minterm bassoc) bdd;
+      if i > 0 then
+	fprintf fmt \",@ \";
+    done;
+    fprintf fmt \"@] }\"
+  end
+
+let rec print bassoc nassoc formatter rdd =
+  match inspect rdd with
+  | Leaf(v) -> pp_print_string formatter (nassoc v)
+  | Ite(var,alors,sinon) ->
+      fprintf formatter \"ITE(@[<hv>%s;@,%a;@,%a)@]\"
+        (bassoc var) (print bassoc nassoc) alors (print bassoc nassoc) sinon
+")
+

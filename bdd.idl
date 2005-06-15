@@ -1,0 +1,577 @@
+/* -*- mode: c -*- */
+/* $Id: bdd.idl,v 1.5 2005/06/14 14:39:58 bjeannet Exp $ */
+
+quote(C, "
+#include \"caml/custom.h\"
+#include \"cudd_caml.h\"
+")
+
+import "manager.idl";
+
+/* \section{Management of abstract datatypes} %============================== */
+
+/* For nodes that need Garbage collection */
+typedef [abstract,c2ml(bdd_c2ml),ml2c(node_ml2c)] struct node__t bdd__t;
+
+quote(MLMLI,"
+type bdd =
+| Bool of bool
+| Ite of int * t * t
+")
+quote(MLI,"val dummy : t")
+
+
+/* \section{Extractors} %==================================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Extractors *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+manager__t manager(bdd__t no) quote(call, "_res=no.man;");
+boolean is_cst(bdd__t no) quote(call, "_res = Cudd_IsConstant(no.node);");
+boolean is_complement(bdd__t no) quote(call, "_res = Cudd_IsComplement(no.node);");
+int topvar(bdd__t no) quote(call, "_res = Cudd_Regular(no.node)->index;");
+bdd__t dthen(bdd__t no)
+     quote(call, "
+_res.man = no.man;
+_res.node = Cudd_T(no.node);
+if (Cudd_IsComplement(no.node)) _res.node = Cudd_Not(_res.node);
+");
+bdd__t delse(bdd__t no)
+     quote(call, "
+_res.man = no.man;
+_res.node = Cudd_E(no.node);
+if (Cudd_IsComplement(no.node)) _res.node = Cudd_Not(_res.node);
+");
+
+void cofactors(int var, bdd__t no, [out] bdd__t noa, [out] bdd__t nob)
+  quote(call,
+" {
+  DdNode* cof;
+  noa.man = nob.man = no.man;
+  Begin_roots1(_v_no);
+  cof = Cudd_bddIthVar(no.man, var);
+  noa.node = Cudd_Cofactor(no.man,no.node,cof);
+  nob.node = Cudd_Cofactor(no.man,no.node,Cudd_Not(cof));
+  End_roots();
+  }
+");
+
+bdd__t cofactor(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_Cofactor);
+
+quote(MLMLI,"external inspect: bdd__t -> bdd = \"camlidl_bdd_inspect\"")
+
+
+
+/* \section{Supports} %====================================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Supports *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+bdd__t support(bdd__t no)
+     NO_OF_MAN_NO(Cudd_Support);
+int supportsize(bdd__t no)
+     quote(call, "_res = Cudd_SupportSize(no.man,no.node);");
+boolean is_var_in(int var, bdd__t no)
+     quote(call, "
+Begin_roots1(_v_no);
+{
+DdNode* v = Cudd_bddIthVar(no.man,var);
+_res = Cuddaux_IsVarIn(no.man, no.node, v);
+}
+End_roots();
+");
+
+quote(MLMLI, "external vectorsupport : t array -> t = \"camlidl_bdd_vectorsupport\"")
+
+/* \section{Manipulation of Supports} %====================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Manipulation of supports *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+bdd__t support_inter(bdd__t no1, bdd__t no2)
+     NO_OF_MAN_NO12(Cudd_bddLiteralSetIntersection);
+
+quote(MLMLI, "
+external support_union: t -> t -> t = \"camlidl_bdd_dand\"
+external support_diff: t -> t -> t = \"camlidl_bdd_cofactor\"
+external list_of_support: t -> int list = \"camlidl_dd_list_of_support\"
+")
+
+/* \section{Constants and Variables} %======================================= */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Constants and Variables *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+bdd__t dtrue(manager__t man)
+     quote(call, "_res.man = man; _res.node = DD_ONE(man);");
+bdd__t dfalse(manager__t man)
+     quote(call, "_res.man = man; _res.node = Cudd_Not(DD_ONE(man));");
+bdd__t ithvar(manager__t man, int var)
+     quote(call, "_res.man = man; _res.node = Cudd_bddIthVar(man,var);");
+bdd__t newvar(manager__t man)
+     quote(call, "_res.man = man; _res.node = Cudd_bddNewVar(man);");
+bdd__t newvar_at_level(manager__t man, int level)
+     quote(call, "_res.man = man; _res.node = Cudd_bddNewVarAtLevel(man,level);");
+quote(ML,"let dummy = dtrue Manager.dummy")
+
+
+/* \section{Logical tests} %================================================= */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Logical tests *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+boolean is_true(bdd__t no)
+     quote(call, "_res = (no.node == DD_ONE(no.man));");
+boolean is_false(bdd__t no)
+     quote(call, "_res = (no.node == Cudd_Not(DD_ONE(no.man)));");
+boolean is_equal(bdd__t no1, bdd__t no2)
+     quote(call, "CHECK_MAN2; _res = (no1.node==no2.node);");
+boolean is_leq(bdd__t no1, bdd__t no2)
+     quote(call, "CHECK_MAN2; _res = Cudd_bddLeq(no1.man, no1.node, no2.node);");
+boolean is_inter_empty(bdd__t no1, bdd__t no2)
+     quote(call, "CHECK_MAN2; _res = Cudd_bddLeq(no1.man, no1.node, Cudd_Not(no2.node));");
+boolean is_equal_when(bdd__t no1, bdd__t no2,bdd__t no3)
+     quote(call,"CHECK_MAN3; _res=Cudd_EquivDC(no1.man,no1.node,no2.node,Cudd_Not(no3.node));");
+boolean is_leq_when(bdd__t no1, bdd__t no2,bdd__t no3)
+     quote(call,"CHECK_MAN3; _res=Cudd_bddLeqUnless(no1.man,no1.node,no2.node,Cudd_Not(no3.node));");
+
+quote(MLMLI,"external is_included_in: t -> t -> bool = \"camlidl_bdd_is_leq\"")
+
+[unique] boolean * is_ite_cst(bdd__t no1, bdd__t no2, bdd__t no3)
+quote(call,
+"  {
+     static int storage;
+
+     DdNode* node;
+     CHECK_MAN3;
+     node = Cudd_bddIteConstant(no1.man,no1.node,no2.node,no3.node);
+     if (node==DD_NON_CONSTANT || Cudd_Regular(node)!=DD_ONE(no1.man))
+       _res = 0;
+     else {
+       storage = (node==DD_ONE(no1.man));
+       _res = &storage;
+     }
+   }
+");
+
+boolean is_var_dependent(int var, bdd__t no)
+     quote(call, "
+Begin_roots1(_v_no);
+{
+DdNode* v = Cudd_bddIthVar(no.man,var);
+_res = Cudd_bddVarIsDependent(no.man, no.node, v);
+}
+End_roots();
+");
+boolean is_var_essential(int index, int phase, bdd__t no)
+     quote(call, "_res = Cudd_bddIsVarEssential(no.man,no.node,index,phase);");
+
+/* \section{Structural information} %======================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Structural information *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+int size(bdd__t no) quote(call, "_res = Cudd_DagSize(no.node);");
+double nbpaths(bdd__t no)
+quote(call,
+"_res = Cudd_CountPath(no.node); \
+if (_res==(double)CUDD_OUT_OF_MEM){ \
+  failwith(\"Bdd.nbpaths returned CUDD_OUT_OF_MEM\"); \
+}");
+double nbminterms(int nvar, bdd__t no)
+quote(call,
+"_res = Cudd_CountMinterm(no.man,no.node,nvar); \
+if (_res==(double)CUDD_OUT_OF_MEM){ \
+  failwith(\"Bdd.nbminterms returned CUDD_OUT_OF_MEM\"); \
+}");
+double density(int nvar, bdd__t no)
+quote(call,
+"_res = Cudd_Density(no.man,no.node,nvar); \
+if (_res==(double)CUDD_OUT_OF_MEM){ \
+  failwith(\"Bdd.density returned CUDD_OUT_OF_MEM\"); \
+}");
+
+/* \section{Logical operations} %============================================ */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Logical operations *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+bdd__t dnot(bdd__t no) NO_OF_NO(Cudd_Not);
+bdd__t dand(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddAnd);
+bdd__t dor(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddOr);
+bdd__t xor(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddXor);
+bdd__t nand(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddNand);
+bdd__t nor(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddNor);
+bdd__t nxor(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddXnor);
+
+quote(MLMLI,"external eq: bdd__t -> bdd__t -> bdd__t = \"camlidl_bdd_nxor\"")
+
+bdd__t ite(bdd__t no1, bdd__t no2, bdd__t no3) NO_OF_MAN_NO123(Cudd_bddIte);
+bdd__t compose(int var, bdd__t no1, bdd__t no2)
+     quote(call, "
+CHECK_MAN2;
+Begin_roots2(_v_no1,_v_no2);
+_res.man = no1.man;
+_res.node = Cudd_bddCompose(no1.man, no2.node, no1.node, var);
+End_roots();
+");
+quote(MLMLI,"external vectorcompose: bdd__t array -> bdd__t -> bdd__t = \"camlidl_bdd_vectorcompose\"")
+
+bdd__t intersect(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddIntersect);
+
+/* \section{Variable Mapping} %============================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Variable mapping *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+bdd__t varmap(bdd__t no) NO_OF_MAN_NO(Cudd_bddVarMap)
+     quote(call, "
+Begin_roots1(_v_no);
+if (no.man->map == NULL){
+  failwith(\"Bdd.varmap: empty table, Manager.set_varmap has not been called !\");
+_res.man = no.man;
+_res.node = Cudd_bddVarMap(no.man,no.node);
+End_roots();
+");
+
+quote(MLMLI,"external permute : t -> int array -> t = \"camlidl_bdd_permute\"")
+
+/* \section{Iterators} %============================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Iterators *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI, "
+external iter_node: (t -> unit) -> t -> unit = \"camlidl_dd_iter_node\"
+external iter_cube: (Manager.tbool array -> unit) -> t -> unit = \"camlidl_bdd_iter_cube\"
+")
+
+/* \section{Quantifications} %============================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Quantifications *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+bdd__t exist(bdd__t no1, bdd__t no2)
+     NO_OF_MAN_NO21(Cudd_bddExistAbstract);
+bdd__t forall(bdd__t no1, bdd__t no2)
+     NO_OF_MAN_NO21(Cudd_bddUnivAbstract);
+bdd__t existand(bdd__t no1, bdd__t no2, bdd__t no3)
+     NO_OF_MAN_NO231(Cudd_bddAndAbstract);
+bdd__t existxor(bdd__t no1, bdd__t no2, bdd__t no3)
+     NO_OF_MAN_NO231(Cudd_bddXorExistAbstract);
+bdd__t booleandiff(bdd__t no, int index)
+     quote(call, "
+Begin_roots1(_v_no);
+_res.man = no.man;
+_res.node = Cudd_bddBooleanDiff(no.man,no.node,index);
+End_roots();
+");
+
+quote(MLMLI, "
+external cube_of_bdd: t -> t = \"camlidl_dd_cube_of_bdd\"
+external list_of_cube: t -> (int*bool) list = \"camlidl_dd_list_of_cube\"
+")
+
+bdd__t cube_union(bdd__t no1, bdd__t no2)
+     NO_OF_MAN_NO12(Cuddaux_bddCubeUnion);
+
+
+
+/* \section{Minimizations} %============================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Minimizations *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+bdd__t constrain(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddConstrain);
+bdd__t tdconstrain(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_bddTDConstrain);
+bdd__t restrict(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_bddRestrict);
+bdd__t tdrestrict(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_bddTDRestrict);
+
+bdd__t minimize(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddMinimize);
+bdd__t licompaction(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddLICompaction);
+bdd__t squeeze(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddSqueeze);
+
+/* \section{Approx} %============================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Approximations *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+bdd__t clippingand(bdd__t no1, bdd__t no2, int maxdepth, boolean direction)
+     quote(call,"
+CHECK_MAN2;
+Begin_roots2(_v_no1,_v_no2);
+_res.man=no1.man;
+_res.node = Cudd_bddClippingAnd(no1.man,no1.node,no2.node,maxdepth,direction);
+End_roots();
+");
+bdd__t clippingexistand(bdd__t no1, bdd__t no2, bdd__t no3, int maxdepth, boolean direction)
+     quote(call,"
+CHECK_MAN3;
+Begin_roots3(_v_no1,_v_no2,_v_no3);
+_res.man=no1.man;
+_res.node = Cudd_bddClippingAndAbstract(no1.man,no2.node,no3.node,no1.node,maxdepth,direction);
+End_roots();
+");
+
+bdd__t underapprox(int nvars, int threshold, int safe, double quality, bdd__t no)
+     quote(call,"
+Begin_roots1(_v_no);
+_res.man=no.man;
+_res.node=Cudd_UnderApprox(no.man,no.node,nvars,threshold,safe,quality);
+End_roots();
+");
+
+bdd__t overapprox(int nvars, int threshold, int safe, double quality, bdd__t no)
+     quote(call,"
+Begin_roots1(_v_no);
+_res.man=no.man;
+_res.node=Cudd_OverApprox(no.man,no.node,nvars,threshold,safe,quality);
+End_roots();
+");
+
+bdd__t remapunderapprox(int nvars, int threshold, double quality, bdd__t no)
+     quote(call,"
+Begin_roots1(_v_no);
+_res.man=no.man;
+_res.node=Cudd_RemapUnderApprox(no.man,no.node,nvars,threshold,quality);
+End_roots();
+");
+
+bdd__t remapoverapprox(int nvars, int threshold, double quality, bdd__t no)
+     quote(call,"
+Begin_roots1(_v_no);
+_res.man=no.man;
+_res.node=Cudd_RemapOverApprox(no.man,no.node,nvars,threshold,quality);
+End_roots();
+");
+
+bdd__t biasedunderapprox(int nvars, int threshold, double quality1, double quality0, bdd__t no1, bdd__t no2)
+     quote(call,"
+CHECK_MAN2;
+Begin_roots2(_v_no1,_v_no2);
+_res.man=no1.man;
+_res.node=Cudd_BiasedUnderApprox(no1.man,no1.node,no2.node,nvars,threshold,quality1,quality0);
+End_roots();
+");
+
+bdd__t biasedoverapprox(int nvars, int threshold, double quality1, double quality0, bdd__t no1, bdd__t no2)
+     quote(call,"
+CHECK_MAN2;
+Begin_roots2(_v_no1,_v_no2);
+_res.man=no1.man;
+_res.node=Cudd_BiasedOverApprox(no1.man,no1.node,no2.node,nvars,threshold,quality1,quality0);
+End_roots();
+");
+
+bdd__t subsetcompress(int nvars, int threshold, bdd__t no)
+     SUBSUPERSET(Cudd_SubsetCompress);
+bdd__t supersetcompress(int nvars, int threshold, bdd__t no)
+     SUBSUPERSET(Cudd_SupersetCompress);
+bdd__t subsetHB(int nvars, int threshold, bdd__t no)
+     SUBSUPERSET(Cudd_SubsetHeavyBranch);
+bdd__t supersetHB(int nvars, int threshold, bdd__t no)
+     SUBSUPERSET(Cudd_SupersetHeavyBranch);
+bdd__t subsetSP(int nvars, int threshold, boolean hardlimit, bdd__t no)
+     quote(call,"
+Begin_roots1(_v_no);
+_res.man=no.man;
+_res.node = Cudd_SubsetShortPaths(no.man,no.node,nvars,threshold,hardlimit);
+End_roots();
+");
+bdd__t supersetSP(int nvars, int threshold, boolean hardlimit, bdd__t no)
+     quote(call,"
+Begin_roots1(_v_no);
+_res.man=no.man;
+_res.node = Cudd_SupersetShortPaths(no.man,no.node,nvars,threshold,hardlimit);
+End_roots();
+");
+
+DECOMP(approxconjdecomp, Cudd_bddApproxConjDecomp)
+DECOMP(approxdisjdecomp, Cudd_bddApproxDisjDecomp)
+DECOMP(iterconjdecomp, Cudd_bddIterConjDecomp)
+DECOMP(iterdisjdecomp, Cudd_bddIterDisjDecomp)
+DECOMP(genconjdecomp, Cudd_bddGenConjDecomp)
+DECOMP(gendisjdecomp, Cudd_bddGenDisjDecomp)
+DECOMP(varconjdecomp, Cudd_bddVarConjDecomp)
+DECOMP(vardisjdecomp, Cudd_bddVarDisjDecomp)
+
+/* \section{Miscellaneous} %============================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Miscellaneous *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+bdd__t transfer(bdd__t no, manager__t man)
+     quote(call, "
+Begin_roots1(_v_no);
+_res.man = man;
+_res.node = Cudd_bddTransfer(no.man,man,no.node);
+End_roots();
+");
+
+double correlation(bdd__t no1, bdd__t no2)
+     quote(call, "CHECK_MAN2; _res = Cudd_bddCorrelation(no1.man,no1.node,no2.node);");
+
+double correlationweights(bdd__t no1, bdd__t no2, [size_is(size)] double prob[], int size)
+quote(call, "CHECK_MAN2; _res = Cudd_bddCorrelationWeights(no1.man,no1.node,no2.node,prob);");
+
+
+/* \section{Printing} %============================================== */
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Printing *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI,"external _print: t -> unit = \"camlidl_dd_print\"")
+
+quote(MLI,"
+val print__minterm: Format.formatter -> t -> unit
+val print_minterm: (int -> string) -> Format.formatter -> t -> unit
+val print: (int -> string) -> Format.formatter -> t -> unit
+val print_list: (int -> string) -> Format.formatter -> (int *bool) list -> unit
+")
+
+quote(ML,"
+open Format
+
+let print__minterm fmt bdd =
+  if is_false bdd then pp_print_string fmt \"false\"
+  else if is_true bdd then pp_print_string fmt \"true\"
+  else
+    let nb = nbpaths bdd in
+    if nb > (float_of_int !Manager.print_limit) then
+      fprintf fmt \"bdd with %i nodes and %g paths\" (size bdd) nb
+  else begin
+    fprintf fmt \"@[<v>\";
+    let first = ref true in
+    iter_cube
+      (begin fun cube ->
+	if not !first then fprintf fmt \"@ \" else first := false;
+	let str = String.create (Array.length cube) in
+	Array.iteri
+	  (begin fun i elt ->
+	    str.[i] <-
+	      begin match elt with
+	      | Manager.False -> '0'
+	      | Manager.True -> '1'
+	      | Manager.Top -> '-'
+	      end
+	  end)
+	  cube;
+	pp_print_string fmt str
+      end)
+      bdd;
+    fprintf fmt \"@]\"
+  end
+
+let print_minterm bassoc fmt bdd =
+  let _print fmt bdd =
+    if is_true bdd then pp_print_string fmt \"true\"
+    else if is_false bdd then pp_print_string fmt \"false\"
+    else begin
+    fprintf fmt \"@[<hov>\";
+    let first = ref true in
+    iter_cube
+      (begin fun cube ->
+	if not !first then
+	  fprintf fmt \" +@ @[<hov>\"
+	else begin
+	  first := false;
+	  fprintf fmt \"@[<hov>\"
+	end;
+	let firstm = ref true in
+	Array.iteri
+	  (begin fun i elt ->
+	    match elt with
+	    | Manager.False ->
+		if not !firstm then fprintf fmt \"^@,\" else firstm := false;
+		fprintf fmt \"!%s\" (bassoc i)
+	    | Manager.True ->
+		if not !firstm then fprintf fmt \"^@,\" else firstm := false;
+		fprintf fmt \"%s\" (bassoc i)
+	    | Manager.Top -> ()
+	  end)
+	  cube;
+	fprintf fmt \"@]\"
+      end)
+      bdd;
+    fprintf fmt \"@]\"
+  end
+  in
+  let nb = nbpaths bdd in
+  if nb > (float_of_int !Manager.print_limit) then
+    fprintf fmt \"@[<hv>bdd with %i nodes and %g paths@,(mon=%a)@]\"
+      (size bdd) nb
+      _print (cube_of_bdd bdd)
+  else
+    _print fmt bdd
+")
+
+quote(ML,"
+let rec print_list bassoc formatter = function
+  | (v,b)::suite ->
+      fprintf formatter \"%s%s\"(if b then \"\" else \"!\") (bassoc v);
+      if suite<>[] then
+	fprintf formatter \"^@,%a\" (print_list bassoc) suite
+  | [] -> ()
+
+let rec print bassoc formatter bdd =
+  if is_true bdd then
+    pp_print_string formatter \"true\"
+  else if is_false bdd then
+    pp_print_string formatter \"false\"
+  else
+    let mon = cube_of_bdd bdd in
+    let reste = cofactor bdd mon in
+    let istrue = is_true mon in
+    if not istrue then
+      fprintf formatter \"@[<h>%a@]\" (print_list bassoc) (list_of_cube mon);
+    match inspect reste with
+    | Bool(_) -> ()
+    | Ite(var,alors,sinon) ->
+	if not istrue then pp_print_char formatter '^';
+	fprintf formatter \"ITE(@[<hv>%s;@,%a;@,%a)@]\"
+	  (bassoc var) (print bassoc) alors (print bassoc) sinon
+")
+
+
+
+let print_minterm bassoc fmt bdd =
+  let _print fmt bdd =
+    if is_true bdd then pp_print_string fmt \"true\"
+    else if is_false bdd then pp_print_string fmt \"false\"
+    else begin
+    fprintf fmt \"@[<hov>\";
+    let first = ref true in
+    iter_cube
+      (begin fun cube ->
+	if not !first then
+	  fprintf fmt \" +@ @[<hov>\"
+	else begin
+	  first := false;
+	  fprintf fmt \"@[<hov>\"
+	end;
+	let firstm = ref true in
+	Array.iteri
+	  (begin fun i elt ->
+	    match elt with
+	    | Manager.False ->
+		if not !firstm then fprintf fmt \"^@,\" else firstm := false;
+		fprintf fmt \"!%s\" (bassoc i)
+	    | Manager.True ->
+		if not !firstm then fprintf fmt \"^@,\" else firstm := false;
+		fprintf fmt \"%s\" (bassoc i)
+	    | Manager.Top -> ()
+	  end)
+	  cube;
+	fprintf fmt \"@]\"
+      end)
+      bdd;
+    fprintf fmt \"@]\"
+  end
+  in
+  let nb = nbpaths bdd in
+  if nb > (float_of_int !Manager.print_limit) then
+    fprintf fmt \"@[<hv>bdd with %i nodes and %g paths@,(mon=%a)@]\"
+      (size bdd) nb
+      _print (cube_of_bdd bdd)
+  else
+    _print fmt bdd

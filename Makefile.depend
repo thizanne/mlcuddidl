@@ -1,0 +1,14 @@
+bdd.cmi: manager.cmi 
+rdd.cmi: bdd.cmi manager.cmi 
+idd.cmi: bdd.cmi manager.cmi rdd.cmi 
+mtbdd.cmi: bdd.cmi idd.cmi manager.cmi 
+manager.cmo: manager.cmi 
+manager.cmx: manager.cmi 
+bdd.cmo: manager.cmi bdd.cmi 
+bdd.cmx: manager.cmx bdd.cmi 
+rdd.cmo: bdd.cmi manager.cmi rdd.cmi 
+rdd.cmx: bdd.cmx manager.cmx rdd.cmi 
+idd.cmo: bdd.cmi manager.cmi rdd.cmi idd.cmi 
+idd.cmx: bdd.cmx manager.cmx rdd.cmx idd.cmi 
+mtbdd.cmo: bdd.cmi idd.cmi manager.cmi mtbdd.cmi 
+mtbdd.cmx: bdd.cmx idd.cmx manager.cmx mtbdd.cmi 

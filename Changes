@@ -1,0 +1,20 @@
+-------------
+MLCuddIDL 1.2:
+-------------
+
+Call to Manager.set_varmap prior to call to Bdd.varmap or Rdd.varmap is
+checked. Last version working with OCaml-3.07 and older (problem with OCaml
+runtime C function gc_full_major() renamed as caml_gc_full_major()).
+
+-------------
+MLCuddIDL 1.1:
+-------------
+
+Function Bdd.is_complement added.
+
+
+MLCuddIDL 1.0:
+-------------
+
+Starting point of Changes file.
+
