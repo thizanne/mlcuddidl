@@ -93,7 +93,7 @@ module type S =
     val alloc_unop: (leaf -> leaf) -> id_unop
     val alloc_binop: (leaf -> leaf -> leaf) -> id_binop
     val alloc_combinop: (leaf -> leaf -> leaf) -> id_combinop
-    external apply_unop: id_binop -> t -> t = "camlidl_idd_apply_unop"
+    external apply_unop: id_unop -> t -> t = "camlidl_idd_apply_unop"
     external apply_binop: id_binop -> t -> t -> t = "camlidl_idd_apply_binop"
     external apply_combinop: id_combinop -> t -> t -> t = "camlidl_idd_apply_combinop"
     (* Miscellaneous *) 

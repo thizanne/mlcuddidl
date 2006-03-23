@@ -212,7 +212,7 @@ quote(MLMLI,"
 external alloc_unop: (int -> int) -> id_unop = \"camlidl_idd_alloc_unop\"
 external alloc_binop: (int -> int -> int) -> id_binop = \"camlidl_idd_alloc_binop\"
 external alloc_combinop: (int -> int -> int) -> id_combinop = \"camlidl_idd_alloc_combinop\"
-external apply_unop: id_binop -> t -> t = \"camlidl_idd_apply_unop\"
+external apply_unop: id_unop -> t -> t = \"camlidl_idd_apply_unop\"
 external apply_binop: id_binop -> t -> t -> t = \"camlidl_idd_apply_binop\"
 external apply_combinop: id_combinop -> t -> t -> t = \"camlidl_idd_apply_combinop\"
 ")

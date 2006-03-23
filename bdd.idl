@@ -530,10 +530,10 @@ let rec print bassoc formatter bdd =
 	if not istrue then pp_print_char formatter '^';
 	fprintf formatter \"ITE(@[<hv>%s;@,%a;@,%a)@]\"
 	  (bassoc var) (print bassoc) alors (print bassoc) sinon
+
 ")
 
-
-
+/*
 let print_minterm bassoc fmt bdd =
   let _print fmt bdd =
     if is_true bdd then pp_print_string fmt \"true\"
@@ -575,3 +575,4 @@ let print_minterm bassoc fmt bdd =
       _print (cube_of_bdd bdd)
   else
     _print fmt bdd
+*/

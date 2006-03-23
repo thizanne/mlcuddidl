@@ -71,7 +71,7 @@ MLINT = $(MLMODULES:%=%.cmi)
 MLOBJ = $(MLMODULES:%=%.cmo)
 MLOBJx = $(MLMODULES:%=%.cmx)
 MLLIB_TOINSTALL = $(MLMODULES:%=%.mli) $(MLMODULES:%=%.cmi) cudd.cma 
-MLLIB_TOINSTALLx = $(MLMODULES:%=%.mli) $(MLMODULES:%=%.cmx) cudd.cmxa cudd.a
+MLLIB_TOINSTALLx = $(MLMODULES:%=%.cmx) cudd.cmxa cudd.a
 
 CCMODULES = cudd_caml $(IDLMODULES:%=%_caml)
 CCSRC = cudd_caml.h $(CCMODULES:%=%.c)
