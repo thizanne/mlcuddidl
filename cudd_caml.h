@@ -12,9 +12,9 @@
 
 #include "caml/mlvalues.h"
 
-extern int camlidl_dd_garbage(DdManager* dd, const char* s, void* data);
-extern int camlidl_dd_reordering(DdManager* dd, const char* s, void* data);
-value camlidl_dd_set_gc(value _v_heap, value _v_gc, value _v_reordering);
+extern int camlidl_cudd_garbage(DdManager* dd, const char* s, void* data);
+extern int camlidl_cudd_reordering(DdManager* dd, const char* s, void* data);
+value camlidl_cudd_set_gc(value _v_heap, value _v_gc, value _v_reordering);
 
 typedef struct DdManager* manager__t;
 struct node__t {
@@ -30,10 +30,10 @@ typedef struct node__t mtbdd__t;
 typedef DdNode*(*unop_t)(DdManager *,DdNode *);
 typedef DdNode*(*binop_t)(DdManager *,DdNode **,DdNode **);
 
-value manager_c2ml(manager__t* man);
-void manager_ml2c(value val, manager__t* man);
-value node_c2ml(struct node__t* no);
-void node_ml2c(value val, struct node__t *node);
-value bdd_c2ml(struct node__t* bdd);
+value camlidl_cudd_manager_c2ml(manager__t* man);
+void camlidl_cudd_manager_ml2c(value val, manager__t* man);
+value camlidl_cudd_node_c2ml(struct node__t* no);
+void camlidl_cudd_node_ml2c(value val, struct node__t *node);
+value camlidl_cudd_bdd_c2ml(struct node__t* bdd);
 
 #endif

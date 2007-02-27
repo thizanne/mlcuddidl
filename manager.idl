@@ -9,7 +9,7 @@ quote(C, "
 
 /* \section{Management of abstract datatypes} %============================== */
 
-typedef [abstract,c2ml(manager_c2ml),ml2c(manager_ml2c)] struct DdManager* manager__t;
+typedef [abstract,c2ml(camlidl_cudd_manager_c2ml),ml2c(camlidl_cudd_manager_ml2c)] struct DdManager* manager__t;
 
 enum reorder {
     CUDD_REORDER_SAME,
@@ -84,7 +84,7 @@ quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(* Managers *)")
 quote(MLMLI,"(* ====================================================== *)")
 
-quote(MLMLI,"external set_gc: int -> (unit -> unit) -> (unit -> unit) -> unit = \"camlidl_dd_set_gc\"")
+quote(MLMLI,"external set_gc: int -> (unit -> unit) -> (unit -> unit) -> unit = \"camlidl_cudd_set_gc\"")
 
 manager__t make(unsigned int numVars, unsigned int numVarsZ, unsigned int numSlots, unsigned int cacheSize, unsigned long maxMemory)
   quote(call,
@@ -93,10 +93,10 @@ manager__t make(unsigned int numVars, unsigned int numVarsZ, unsigned int numSlo
    _res = Cudd_Init(numVars, numVarsZ, numSlots, cacheSize, maxMemory);
    {
      int res;
-     res = Cudd_AddHook(_res,camlidl_dd_garbage,CUDD_PRE_GC_HOOK);
+     res = Cudd_AddHook(_res,camlidl_cudd_garbage,CUDD_PRE_GC_HOOK);
      if (res!=1)
       failwith(\"Manager.make: unable to add the garbage collection hook\");
-     res = Cudd_AddHook(_res,camlidl_dd_reordering,CUDD_PRE_REORDERING_HOOK);
+     res = Cudd_AddHook(_res,camlidl_cudd_reordering,CUDD_PRE_REORDERING_HOOK);
      if (res!=1)
       failwith(\"Manager.make: unable to add the reordering hook\");
 }

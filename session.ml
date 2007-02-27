@@ -11,7 +11,8 @@ let g = Bdd.dand (Bdd.dand y z) (Bdd.dnot w);;
 
 let idd1 = Idd.ite f (Idd.cst man 0) (Idd.cst man 1);;
 let supp = Idd.support idd1;;
-Idd.guard_of_nonbackground idd1;;
+let h = Idd.guard_of_nonbackground idd1;;
+Bdd.gendisjdecomp h;;
 Idd.nbpaths idd1;;
 Idd.nbnonzeropaths idd1;;
 Idd.nbminterms 4 idd1;;

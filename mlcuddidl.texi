@@ -58,6 +58,10 @@ This manual documents how to install and use the MLCUDDIDL interface to the BDD 
 * Appendices::                  
 @end menu
 
+@ifhtml
+@uref{../index.html, Back to MLCuddIDL main page}
+@end ifhtml
+
 @c *******************************************************************
 @node Introduction, Manager, Top, Top
 @chapter Introduction
@@ -181,7 +185,7 @@ generated.
 @item CUDD BDD library
 @uref{http://vlsi.colorado.edu/software.html}
 @item CUDDAUX extension library
-@uref{http://www.irisa.fr/prive/bjeannet/mlcuddidl.html}
+@uref{http://pop-art.inrialpes.fr/people/bjeannet/mlcuddidl/index.html}
 @item OBJECTIVE CAML 3.0
 @uref{http://caml.inria.fr}
 @item CAMLIDL 1.04
@@ -902,16 +906,24 @@ Permutes the variables as it is specified by
 @c ===================================================================
 
 @defun iter_node @t{: f:(t -> unit) -> t -> unit}
-Variation of @code{Cudd_ForEachNode}@*
+Variation of @code{Cudd_ForeachNode}@*
 Apply the function @code{f} to each (regularized) node of the
 @sc{Bdd}.
 @end defun
 @defun iter_cube @t{: f:(Manager.tbool array -> unit) -> t -> unit}
-Variation of @code{Cudd_ForEachCube}@* Apply the function @code{f} to
+Variation of @code{Cudd_ForeachCube}@* Apply the function @code{f} to
 each cube of the @sc{Bdd}. The cubes are specified as arrays of
 elements of type @code{Manager.tbool}. The size of the arrays is equal
 to @code{Manager.get_bddvar_nb}, the number of variables present in
 the manager.
+@end defun
+@defun iter_prime @t{: f:(Manager.tbool array -> unit) -> t -> t -> unit}
+Variation of @code{Cudd_ForeachPrime}@* Apply the function @code{f} to
+each prime covering the @sc{Bdd} interval. The first @sc{Bdd} argument is the lower bound, the second the upper bound (which may be equal to the lower bound).
+The primes are specified as arrays of elements of type
+@code{Manager.tbool}. The size of the arrays is equal to
+@code{Manager.get_bddvar_nb}, the number of variables present in the
+manager.
 @end defun
 
 @c ===================================================================
@@ -946,6 +958,10 @@ respect to x.
 @code{Cudd_FindEssential}@* 
 Returns the smallest cube (in the sens of inclusion) included in the
 @sc{Bdd}.
+@end defun
+@defun cube_of_minterm @t{: Manager.t -> Manager.tbool array -> t}
+@code{Cudd_CubeArrayToBdd}@* 
+Converts a minterm to a @sc{Bdd} (which is a cube).
 @end defun
 @defun list_of_cube @t{: t -> (int * bool) list}
 Converts a cube into a list of pairs of a variable and a phase.
@@ -1229,7 +1245,7 @@ should be at least @code{Manager.get_bddvar_nb}.
 
 @c ===================================================================
 @node Rdd variable mapping, Rdd logical tests, Rdd classical operations, Rdd
-@section Rdd vraible mapping
+@section Rdd variable mapping
 @c ===================================================================
 
 @defun varmap @t{: t -> t}

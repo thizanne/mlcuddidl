@@ -7,7 +7,7 @@ dnl
 dnl ***************************************************************************
 dnl Macros to wrap the transformation DdNode* en node__t
 dnl ***************************************************************************
-dnl 
+dnl
 dnl Unary operations: name of the arg. of type node__t is no,
 dnl Binary operations: no1, no2
 dnl Ternary operations: no1,no2,no3
@@ -67,7 +67,7 @@ _res.node = $1(no1.man,no1.node,no2.node);
 End_roots();
 ")')dnl
 define(`NO_OF_MAN_NO21',
-`quote(call, 
+`quote(call,
 "CHECK_MAN2();
 Begin_roots2(_v_no1,_v_no2);
 _res.man = no1.man;
@@ -75,7 +75,7 @@ _res.node = $1(no1.man,no2.node,no1.node);
 End_roots();
 ")')dnl
 define(`NO_OF_MAN_NO123',
-`quote(call, 
+`quote(call,
 "CHECK_MAN3();
 Begin_roots3(_v_no1,_v_no2,_v_no3);
 _res.man = no1.man;
@@ -83,7 +83,7 @@ _res.node = $1(no1.man,no1.node,no2.node,no3.node);
 End_roots();
 ")')dnl
 define(`NO_OF_MAN_NO231',
-`quote(call, 
+`quote(call,
 "CHECK_MAN3();
 Begin_roots3(_v_no1,_v_no2,_v_no3);
 _res.man = no1.man;
@@ -114,33 +114,35 @@ value camlidl_bdd_$1(value _v_no)
   CAMLparam1(_v_no); CAMLlocal4(_v_res,_v_a,_v_b,_v_pair);
   bdd__t no;
   int res;
-  DdNode*** ptab;
+  DdNode** tab;
   bdd__t a;
   bdd__t b;
 
-  node_ml2c(_v_no,&no);
-  res = $2(no.man,no.node,ptab);
+  camlidl_cudd_node_ml2c(_v_no,&no);
+  res = $2(no.man,no.node,&tab);
   switch(res){
   case 0:
     failwith(\"Bdd.$1: decomposition function failed (probably CUDD_OUT_OF_MEM)\");
     break;
   case 1:
-    _v_res = Val_int(0);   
-    free(*ptab);
+    _v_res = Val_int(0);
+    cuddDeref(tab[0]);		
+    free(tab);
     break;
   case 2:
     a.man = b.man = no.man;
-    a.node = (*ptab)[0];
-    b.node = (*ptab)[1];
+    a.node = tab[0];
+    b.node = tab[1];
     cuddDeref(a.node);
-    _v_a = bdd_c2ml(&a);
+    _v_a = camlidl_cudd_bdd_c2ml(&a);
     cuddDeref(b.node);
-    _v_b = bdd_c2ml(&b);
+    _v_b = camlidl_cudd_bdd_c2ml(&b);
     _v_pair = alloc_small(0,2);
     Field(_v_pair,0) = _v_a;
     Field(_v_pair,1) = _v_b;
     _v_res = alloc_small(0,1);
     Field(_v_res,0) = _v_pair;
+    free(tab);	
     break;
   }
   CAMLreturn(_v_res);
@@ -179,13 +181,13 @@ dnl
 define(`FORLOOP',`pushdef(`$1', `$2')_FORLOOP(`$1', `$2', `$3', `$4')popdef(`$1')')dnl
 define(`_FORLOOP',
        `$4`'ifelse($1, `$3', ,
-     		   `define(`$1', incr($1))_FORLOOP(`$1', `$2', `$3', `$4')')')dnl
+		   `define(`$1', incr($1))_FORLOOP(`$1', `$2', `$3', `$4')')')dnl
 dnl
 dnl ===========================================================================
 dnl Template for user operations
 dnl ===========================================================================
 dnl
-dnl DEF_USEROP(name of the module, 
+dnl DEF_USEROP(name of the module,
 dnl            macro to convert double into value,
 dnl            macro to convert value into double,
 dnl            index of the copy)
@@ -202,7 +204,7 @@ static DdNode* camlidl_$1_unop_$4(DdManager* man, DdNode* f)
     _v_val = callback(camlidl_$1_unclosures[$4], _v_f);
     val = $3(_v_val);
     res = cuddUniqueConst(man,val);
-  } 
+  }
   else {
     res = NULL;
   }
@@ -221,7 +223,7 @@ static DdNode* camlidl_$1_binop_$4(DdManager* man, DdNode** f, DdNode** g)
     _v_val = callback2(camlidl_$1_binclosures[$4], _v_F, _v_G);
     val = $3(_v_val);
     res = cuddUniqueConst(man,val);
-  } 
+  }
   else {
     res = NULL;
   }
@@ -235,12 +237,12 @@ static DdNode* camlidl_$1_combinop_$4(DdManager* man, DdNode** f, DdNode** g)
 
   F = *f; G = *g;
   if (cuddIsConstant(F) && cuddIsConstant(G)) {
-    _v_F = $2(cuddV(F)); 
+    _v_F = $2(cuddV(F));
     _v_G = $2(cuddV(G));
     _v_val = callback2(camlidl_$1_combinclosures[$4], _v_F, _v_G);
     val = $3(_v_val);
     res = cuddUniqueConst(man,val);
-  } 
+  }
   else {
     if (F > G) {
       *f = G;
@@ -266,14 +268,14 @@ value camlidl_$1_combinclosures[NB_USEROPS];
 
 FORLOOP(`INDEX',0,decr(NB_USEROPS),`DEF_USEROP($1,$2,$3,INDEX)')
 
-unop_t camlidl_$1_unops[NB_USEROPS] = { 
-  FORLOOP(`INDEX',0,decr(NB_USEROPS),`&camlidl_$1_unop_`'INDEX, ') 
+unop_t camlidl_$1_unops[NB_USEROPS] = {
+  FORLOOP(`INDEX',0,decr(NB_USEROPS),`&camlidl_$1_unop_`'INDEX, ')
 };
-binop_t camlidl_$1_binops[NB_USEROPS] = { 
-  FORLOOP(`INDEX',0,decr(NB_USEROPS),`&camlidl_$1_binop_`'INDEX, ') 
+binop_t camlidl_$1_binops[NB_USEROPS] = {
+  FORLOOP(`INDEX',0,decr(NB_USEROPS),`&camlidl_$1_binop_`'INDEX, ')
 };
-binop_t camlidl_$1_combinops[NB_USEROPS] = { 
-  FORLOOP(`INDEX',0,decr(NB_USEROPS),`&camlidl_$1_combinop_`'INDEX, ') 
+binop_t camlidl_$1_combinops[NB_USEROPS] = {
+  FORLOOP(`INDEX',0,decr(NB_USEROPS),`&camlidl_$1_combinop_`'INDEX, ')
 };
 
 int camlidl_$1_nb_unop = 0;
@@ -329,11 +331,11 @@ value camlidl_$1_apply_unop(value _v_id, value _v_no)
   int id;
 
   id = Int_val(_v_id);
-  node_ml2c(_v_no,&no);
-  
+  camlidl_cudd_node_ml2c(_v_no,&no);
+
   _res.man = no.man;
   _res.node = Cudd_addMonadicApply(no.man,camlidl_$1_unops[id], no.node);
-  _v_res = node_c2ml(&_res);
+  _v_res = camlidl_cudd_node_c2ml(&_res);
   CAMLreturn(_v_res);
 }
 value camlidl_$1_apply_binop(value _v_id, value _v_no1, value _v_no2)
@@ -343,12 +345,12 @@ value camlidl_$1_apply_binop(value _v_id, value _v_no1, value _v_no2)
   int id;
 
   id = Int_val(_v_id);
-  node_ml2c(_v_no1,&no1);
-  node_ml2c(_v_no2,&no2);
+  camlidl_cudd_node_ml2c(_v_no1,&no1);
+  camlidl_cudd_node_ml2c(_v_no2,&no2);
   CHECK_MAN2;
   _res.man = no1.man;
   _res.node = Cudd_addApply(no1.man,camlidl_$1_binops[id], no1.node, no2.node);
-  _v_res = node_c2ml(&_res);
+  _v_res = camlidl_cudd_node_c2ml(&_res);
   CAMLreturn(_v_res);
 }
 value camlidl_$1_apply_combinop(value _v_id, value _v_no1, value _v_no2)
@@ -358,12 +360,12 @@ value camlidl_$1_apply_combinop(value _v_id, value _v_no1, value _v_no2)
   int id;
 
   id = Int_val(_v_id);
-  node_ml2c(_v_no1,&no1);
-  node_ml2c(_v_no2,&no2);
-  CHECK_MAN2;  
+  camlidl_cudd_node_ml2c(_v_no1,&no1);
+  camlidl_cudd_node_ml2c(_v_no2,&no2);
+  CHECK_MAN2;
   _res.man = no1.man;
   _res.node = Cudd_addApply(no1.man,camlidl_$1_combinops[Int_val(_v_id)],no1.node,no2.node);
-  _v_res = node_c2ml(&_res);
+  _v_res = camlidl_cudd_node_c2ml(&_res);
   CAMLreturn(_v_res);
 }')dnl
 dnl
@@ -379,8 +381,8 @@ value $1(value _v_array, value _v_no1, value _v_no2)
   DdNode** array;
   node__t no,no1,no2;
 
-  node_ml2c(_v_no1,&no1);
-  node_ml2c(_v_no2,&no2);
+  camlidl_cudd_node_ml2c(_v_no1,&no1);
+  camlidl_cudd_node_ml2c(_v_no2,&no2);
   CHECK_MAN2();
   size = Wosize_val(_v_array);
   array = malloc(size * sizeof(DdNode*));
@@ -391,7 +393,7 @@ value $1(value _v_array, value _v_no1, value _v_no2)
   }
   no.man = no1.man;
   no.node = $2(no1.man,no1.node,no2.node,array,size);
-  _v_res = node_c2ml(&no);
+  _v_res = camlidl_cudd_node_c2ml(&no);
   free(array);
   CAMLreturn(_v_res);
 }')dnl

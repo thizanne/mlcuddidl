@@ -37,71 +37,71 @@ module type S =
     external of_idd: Idd.t -> t = "%identity"
 
     (* Extractors *)
-    external manager : t -> Manager.t = "camlidl_bdd_manager"
-    external is_cst: t -> bool = "camlidl_bdd_is_cst"
-    external topvar: t -> int = "camlidl_bdd_topvar"
-    external dthen: t -> t = "camlidl_rdd_dthen"
-    external delse: t -> t = "camlidl_rdd_delse"
-    external cofactors: int -> t -> (t * t) = "camlidl_rdd_cofactors"
-    external cofactor: t -> Bdd.t -> t = "camlidl_rdd_cofactor"
+    external manager : t -> Manager.t = "camlidl_cudd_bdd_manager"
+    external is_cst: t -> bool = "camlidl_cudd_bdd_is_cst"
+    external topvar: t -> int = "camlidl_cudd_bdd_topvar"
+    external dthen: t -> t = "camlidl_cudd_rdd_dthen"
+    external delse: t -> t = "camlidl_cudd_rdd_delse"
+    external cofactors: int -> t -> (t * t) = "camlidl_cudd_rdd_cofactors"
+    external cofactor: t -> Bdd.t -> t = "camlidl_cudd_rdd_cofactor"
     val dval: t -> leaf
     val inspect: t -> mtbdd
     (* Supports *)
-    external support: t -> Bdd.t = "camlidl_bdd_support"
-    external supportsize: t -> int = "camlidl_bdd_supportsize"
-    external is_var_in: int -> t -> bool = "camlidl_bdd_is_var_in"
-    external vectorsupport : t array -> Bdd.t = "camlidl_bdd_vectorsupport"
-    external vectorsupport2 : Bdd.t array -> t array -> Bdd.t = "camlidl_rdd_vectorsupport2"
+    external support: t -> Bdd.t = "camlidl_cudd_bdd_support"
+    external supportsize: t -> int = "camlidl_cudd_bdd_supportsize"
+    external is_var_in: int -> t -> bool = "camlidl_cudd_bdd_is_var_in"
+    external vectorsupport : t array -> Bdd.t = "camlidl_cudd_bdd_vectorsupport"
+    external vectorsupport2 : Bdd.t array -> t array -> Bdd.t = "camlidl_cudd_rdd_vectorsupport2"
     (* Classical operations *)
     val cst: Manager.t -> leaf -> t
-    external ite: Bdd.t -> t -> t -> t = "camlidl_rdd_ite"
-    external compose: int -> Bdd.t -> t -> t = "camlidl_rdd_compose"
-    external vectorcompose: Bdd.t array -> t -> t = "camlidl_rdd_vectorcompose"
+    external ite: Bdd.t -> t -> t -> t = "camlidl_cudd_rdd_ite"
+    external compose: int -> Bdd.t -> t -> t = "camlidl_cudd_rdd_compose"
+    external vectorcompose: Bdd.t array -> t -> t = "camlidl_cudd_rdd_vectorcompose"
     (* Logical tests *)
-    external is_equal : t -> t -> bool = "camlidl_bdd_is_equal"
-    external is_equal_when: t -> t -> Bdd.t -> bool = "camlidl_bdd_is_equal_when"
+    external is_equal : t -> t -> bool = "camlidl_cudd_bdd_is_equal"
+    external is_equal_when: t -> t -> Bdd.t -> bool = "camlidl_cudd_bdd_is_equal_when"
     val is_eval_cst: t -> Bdd.t -> leaf option
     val is_ite_cst: Bdd.t -> t -> t -> leaf option
     (* Structural information *)
-    external size : t -> int = "camlidl_bdd_size"
-    external nbpaths : t -> float = "camlidl_bdd_nbpaths"
-    external nbnonzeropaths : t -> float = "camlidl_rdd_nbnonzeropaths"
-    external nbminterms : int -> t -> float = "camlidl_bdd_nbminterms"
-    external density : int -> t -> float = "camlidl_bdd_density"
-    external nbleaves : t -> int = "camlidl_rdd_nbleaves"
+    external size : t -> int = "camlidl_cudd_bdd_size"
+    external nbpaths : t -> float = "camlidl_cudd_bdd_nbpaths"
+    external nbnonzeropaths : t -> float = "camlidl_cudd_rdd_nbnonzeropaths"
+    external nbminterms : int -> t -> float = "camlidl_cudd_bdd_nbminterms"
+    external density : int -> t -> float = "camlidl_cudd_bdd_density"
+    external nbleaves : t -> int = "camlidl_cudd_rdd_nbleaves"
       
     (* Variable mapping *)
-    external varmap : t -> t = "camlidl_rdd_varmap"  
-    external permute : int array -> t -> t = "camlidl_rdd_permute"  
+    external varmap : t -> t = "camlidl_cudd_rdd_varmap"  
+    external permute : int array -> t -> t = "camlidl_cudd_rdd_permute"  
 
     (* Iterators *)
-    external iter_node: (t -> unit) -> t -> unit = "camlidl_dd_iter_node"
+    external iter_node: (t -> unit) -> t -> unit = "camlidl_cudd_iter_node"
     val iter_cube: (Manager.tbool array -> leaf -> unit) -> t -> unit 
     (* Leaves and guards *)
-    external guard_of_node: t -> t -> Bdd.t = "camlidl_rdd_guard_of_node"
-    external guard_of_nonbackground : t -> Bdd.t = "camlidl_rdd_guard_of_nonbackground"
-    external nodes_below_level: t -> int option -> t array = "camlidl_rdd_nodes_below_level"
+    external guard_of_node: t -> t -> Bdd.t = "camlidl_cudd_rdd_guard_of_node"
+    external guard_of_nonbackground : t -> Bdd.t = "camlidl_cudd_rdd_guard_of_nonbackground"
+    external nodes_below_level: t -> int option -> t array = "camlidl_cudd_rdd_nodes_below_level"
     val leaves: t -> leaf array
     val guard_of_leaf: t -> leaf -> Bdd.t
     val guardleafs: t -> (Bdd.t * leaf) array
     (* Minimizations *)
-    external constrain: t -> Bdd.t -> t = "camlidl_rdd_constrain"
-    external tdconstrain: t -> Bdd.t -> t = "camlidl_rdd_tdconstrain"
-    external restrict: t -> Bdd.t -> t = "camlidl_rdd_restrict"
-    external tdrestrict : t -> Bdd.t -> t = "camlidl_rdd_tdrestrict"
+    external constrain: t -> Bdd.t -> t = "camlidl_cudd_rdd_constrain"
+    external tdconstrain: t -> Bdd.t -> t = "camlidl_cudd_rdd_tdconstrain"
+    external restrict: t -> Bdd.t -> t = "camlidl_cudd_rdd_restrict"
+    external tdrestrict : t -> Bdd.t -> t = "camlidl_cudd_rdd_tdrestrict"
     (* Conversions *)
-    external to_bdd : t -> Bdd.t = "camlidl_rdd_to_bdd"
+    external to_bdd : t -> Bdd.t = "camlidl_cudd_rdd_to_bdd"
    (* User operations *)
     val alloc_unop: (leaf -> leaf) -> id_unop
     val alloc_binop: (leaf -> leaf -> leaf) -> id_binop
     val alloc_combinop: (leaf -> leaf -> leaf) -> id_combinop
-    external apply_unop: id_unop -> t -> t = "camlidl_idd_apply_unop"
-    external apply_binop: id_binop -> t -> t -> t = "camlidl_idd_apply_binop"
-    external apply_combinop: id_combinop -> t -> t -> t = "camlidl_idd_apply_combinop"
+    external apply_unop: id_unop -> t -> t = "camlidl_cudd_idd_apply_unop"
+    external apply_binop: id_binop -> t -> t -> t = "camlidl_cudd_idd_apply_binop"
+    external apply_combinop: id_combinop -> t -> t -> t = "camlidl_cudd_idd_apply_combinop"
     (* Miscellaneous *) 
-    external transfer : t -> Manager.t -> t = "camlidl_rdd_transfer"
+    external transfer : t -> Manager.t -> t = "camlidl_cudd_rdd_transfer"
     (* Printing *)
-    external _print: t -> unit = "camlidl_dd_print"
+    external _print: t -> unit = "camlidl_cudd_print"
     val print__minterm: Format.formatter -> t -> unit
     val print_minterm: (int -> string) -> (leaf -> string) -> Format.formatter -> t -> unit
     val print: (int -> string) -> (leaf -> string) -> Format.formatter -> t -> unit
@@ -166,32 +166,32 @@ module Make (Leaf : LeafType) =
     (* We are now ready to adapt needed operations. *)
 
     (* structural tests and extractors *)
-    external manager : t -> Manager.t = "camlidl_bdd_manager"
-    external is_cst: t -> bool = "camlidl_bdd_is_cst"
-    external topvar: t -> int = "camlidl_bdd_topvar"
-    external dthen: t -> t = "camlidl_rdd_dthen"
-    external delse: t -> t = "camlidl_rdd_delse"
-    external cofactors: int -> t -> (t * t) = "camlidl_rdd_cofactors"
-    external cofactor: t -> Bdd.t -> t = "camlidl_rdd_cofactor"
+    external manager : t -> Manager.t = "camlidl_cudd_bdd_manager"
+    external is_cst: t -> bool = "camlidl_cudd_bdd_is_cst"
+    external topvar: t -> int = "camlidl_cudd_bdd_topvar"
+    external dthen: t -> t = "camlidl_cudd_rdd_dthen"
+    external delse: t -> t = "camlidl_cudd_rdd_delse"
+    external cofactors: int -> t -> (t * t) = "camlidl_cudd_rdd_cofactors"
+    external cofactor: t -> Bdd.t -> t = "camlidl_cudd_rdd_cofactor"
     let dval t = leaf_of_id (Idd.dval t)
     let inspect t = 
       match (Idd.inspect t) with
       | Idd.Leaf(id) -> Leaf (leaf_of_id id)
       | Idd.Ite(i,t,e) -> Ite(i,t,e)
     (* variables and support *)
-    external support: t -> Bdd.t = "camlidl_bdd_support"
-    external supportsize: t -> int = "camlidl_bdd_supportsize"
-    external is_var_in: int -> t -> bool = "camlidl_bdd_is_var_in"
-    external vectorsupport : t array -> Bdd.t = "camlidl_bdd_vectorsupport"
-    external vectorsupport2 : Bdd.t array -> t array -> Bdd.t = "camlidl_rdd_vectorsupport2"
+    external support: t -> Bdd.t = "camlidl_cudd_bdd_support"
+    external supportsize: t -> int = "camlidl_cudd_bdd_supportsize"
+    external is_var_in: int -> t -> bool = "camlidl_cudd_bdd_is_var_in"
+    external vectorsupport : t array -> Bdd.t = "camlidl_cudd_bdd_vectorsupport"
+    external vectorsupport2 : Bdd.t array -> t array -> Bdd.t = "camlidl_cudd_rdd_vectorsupport2"
     (* classical operations *)
     let cst man l = Idd.cst man (id_of_leaf l)
-    external ite: Bdd.t -> t -> t -> t = "camlidl_rdd_ite"
-    external compose: int -> Bdd.t -> t -> t = "camlidl_rdd_compose"
-    external vectorcompose: Bdd.t array -> t -> t = "camlidl_rdd_vectorcompose"
+    external ite: Bdd.t -> t -> t -> t = "camlidl_cudd_rdd_ite"
+    external compose: int -> Bdd.t -> t -> t = "camlidl_cudd_rdd_compose"
+    external vectorcompose: Bdd.t array -> t -> t = "camlidl_cudd_rdd_vectorcompose"
     (* tests *)
-    external is_equal : t -> t -> bool = "camlidl_bdd_is_equal"
-    external is_equal_when: t -> t -> Bdd.t -> bool = "camlidl_bdd_is_equal_when"
+    external is_equal : t -> t -> bool = "camlidl_cudd_bdd_is_equal"
+    external is_equal_when: t -> t -> Bdd.t -> bool = "camlidl_cudd_bdd_is_equal_when"
     let is_eval_cst t bdd =
       match Idd.is_eval_cst t bdd with
       | None -> None
@@ -200,35 +200,35 @@ module Make (Leaf : LeafType) =
       match Idd.is_ite_cst f g h with
       | None -> None
       | Some(id) -> Some (leaf_of_id id)
-    external size : t -> int = "camlidl_bdd_size"
-    external nbpaths : t -> float = "camlidl_bdd_nbpaths"
-    external nbnonzeropaths : t -> float = "camlidl_rdd_nbnonzeropaths"
-    external nbminterms : int -> t -> float = "camlidl_bdd_nbminterms"
-    external density : int -> t -> float = "camlidl_bdd_density"
-    external nbleaves : t -> int = "camlidl_rdd_nbleaves"
+    external size : t -> int = "camlidl_cudd_bdd_size"
+    external nbpaths : t -> float = "camlidl_cudd_bdd_nbpaths"
+    external nbnonzeropaths : t -> float = "camlidl_cudd_rdd_nbnonzeropaths"
+    external nbminterms : int -> t -> float = "camlidl_cudd_bdd_nbminterms"
+    external density : int -> t -> float = "camlidl_cudd_bdd_density"
+    external nbleaves : t -> int = "camlidl_cudd_rdd_nbleaves"
       
     (* variable mapping *)
-    external varmap : t -> t = "camlidl_rdd_varmap"  
-    external permute : int array -> t -> t = "camlidl_rdd_permute"  
+    external varmap : t -> t = "camlidl_cudd_rdd_varmap"  
+    external permute : int array -> t -> t = "camlidl_cudd_rdd_permute"  
 
     (* Iterators *)
-    external iter_node: (t -> unit) -> t -> unit = "camlidl_dd_iter_node"
+    external iter_node: (t -> unit) -> t -> unit = "camlidl_cudd_iter_node"
     let iter_cube f t =
       Idd.iter_cube (fun cube id -> f cube (leaf_of_id id)) t
     (* Leaves and guards *)
-    external guard_of_node: t -> t -> Bdd.t = "camlidl_rdd_guard_of_node"
-    external guard_of_nonbackground : t -> Bdd.t = "camlidl_rdd_guard_of_nonbackground"
-    external nodes_below_level: t -> int option -> t array = "camlidl_rdd_nodes_below_level"
+    external guard_of_node: t -> t -> Bdd.t = "camlidl_cudd_rdd_guard_of_node"
+    external guard_of_nonbackground : t -> Bdd.t = "camlidl_cudd_rdd_guard_of_nonbackground"
+    external nodes_below_level: t -> int option -> t array = "camlidl_cudd_rdd_nodes_below_level"
     let leaves t = Array.map leaf_of_id (Idd.leaves t)
     let guard_of_leaf t l = Idd.guard_of_leaf t (id_of_leaf l)
     let guardleafs rdd =
       let tab = Idd.leaves rdd in
       Array.map (fun id -> (Idd.guard_of_leaf rdd id, leaf_of_id id)) tab
     (* Minimizations *)
-    external constrain: t -> Bdd.t -> t = "camlidl_rdd_constrain"
-    external tdconstrain: t -> Bdd.t -> t = "camlidl_rdd_tdconstrain"
-    external restrict: t -> Bdd.t -> t = "camlidl_rdd_restrict"
-    external tdrestrict : t -> Bdd.t -> t = "camlidl_rdd_tdrestrict"
+    external constrain: t -> Bdd.t -> t = "camlidl_cudd_rdd_constrain"
+    external tdconstrain: t -> Bdd.t -> t = "camlidl_cudd_rdd_tdconstrain"
+    external restrict: t -> Bdd.t -> t = "camlidl_cudd_rdd_restrict"
+    external tdrestrict : t -> Bdd.t -> t = "camlidl_cudd_rdd_tdrestrict"
     (* User operations *)
     let wrap_binop leaf_op =
       let id_op = 
@@ -249,15 +249,15 @@ module Make (Leaf : LeafType) =
       let op = wrap_binop lop in
       Idd.alloc_combinop op
 
-    external apply_unop: id_unop -> t -> t = "camlidl_idd_apply_unop"
-    external apply_binop: id_binop -> t -> t -> t = "camlidl_idd_apply_binop"
-    external apply_combinop: id_combinop -> t -> t -> t = "camlidl_idd_apply_combinop"
+    external apply_unop: id_unop -> t -> t = "camlidl_cudd_idd_apply_unop"
+    external apply_binop: id_binop -> t -> t -> t = "camlidl_cudd_idd_apply_binop"
+    external apply_combinop: id_combinop -> t -> t -> t = "camlidl_cudd_idd_apply_combinop"
     (* Miscellaneous *) 
-    external to_bdd : t -> Bdd.t = "camlidl_rdd_to_bdd"
-    external transfer : t -> Manager.t -> t = "camlidl_rdd_transfer"
+    external to_bdd : t -> Bdd.t = "camlidl_cudd_rdd_to_bdd"
+    external transfer : t -> Manager.t -> t = "camlidl_cudd_rdd_transfer"
 
     (* Printing *)
-    external _print: t -> unit = "camlidl_dd_print"
+    external _print: t -> unit = "camlidl_cudd_print"
     let print__minterm = Idd.print__minterm
     let print_minterm bassoc lassoc formatter rdd =
       Idd.print_minterm 

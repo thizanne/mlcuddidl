@@ -13,7 +13,7 @@ import "bdd.idl";
 /* \section{Management of abstract datatypes} %============================== */
 
 /* For nodes that need Garbage collection */
-typedef [abstract,c2ml(node_c2ml),ml2c(node_ml2c)] struct node__t rdd__t;
+typedef [abstract,c2ml(camlidl_cudd_node_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t rdd__t;
 
 quote(MLMLI,"
 type rdd = 
@@ -181,7 +181,7 @@ quote(MLMLI,"(* Iterators *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI, "
-external iter_node: (t -> unit) -> t -> unit = \"camlidl_dd_iter_node\"
+external iter_node: (t -> unit) -> t -> unit = \"camlidl_cudd_iter_node\"
 external iter_cube: (Manager.tbool array -> float -> unit) -> t -> unit = \"camlidl_rdd_iter_cube\"
 ")
 
@@ -382,7 +382,7 @@ quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(* Printing *)")
 quote(MLMLI,"(* ====================================================== *)")
 
-quote(MLMLI,"external _print: t -> unit = \"camlidl_dd_print\"")
+quote(MLMLI,"external _print: t -> unit = \"camlidl_cudd_print\"")
 
 quote(MLI,"
 val print__minterm: Format.formatter -> t -> unit

@@ -11,7 +11,7 @@ import "manager.idl";
 /* \section{Management of abstract datatypes} %============================== */
 
 /* For nodes that need Garbage collection */
-typedef [abstract,c2ml(bdd_c2ml),ml2c(node_ml2c)] struct node__t bdd__t;
+typedef [abstract,c2ml(camlidl_cudd_bdd_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t bdd__t;
 
 quote(MLMLI,"
 type bdd =
@@ -94,7 +94,7 @@ bdd__t support_inter(bdd__t no1, bdd__t no2)
 quote(MLMLI, "
 external support_union: t -> t -> t = \"camlidl_bdd_dand\"
 external support_diff: t -> t -> t = \"camlidl_bdd_cofactor\"
-external list_of_support: t -> int list = \"camlidl_dd_list_of_support\"
+external list_of_support: t -> int list = \"camlidl_cudd_list_of_support\"
 ")
 
 /* \section{Constants and Variables} %======================================= */
@@ -242,8 +242,9 @@ quote(MLMLI,"(* Iterators *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI, "
-external iter_node: (t -> unit) -> t -> unit = \"camlidl_dd_iter_node\"
+external iter_node: (t -> unit) -> t -> unit = \"camlidl_cudd_iter_node\"
 external iter_cube: (Manager.tbool array -> unit) -> t -> unit = \"camlidl_bdd_iter_cube\"
+external iter_prime: (Manager.tbool array -> unit) -> t -> t -> unit = \"camlidl_bdd_iter_prime\"
 ")
 
 /* \section{Quantifications} %============================================== */
@@ -267,9 +268,14 @@ _res.node = Cudd_bddBooleanDiff(no.man,no.node,index);
 End_roots();
 ");
 
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(* Cubes *)")
+quote(MLMLI,"(* ====================================================== *)")
+
 quote(MLMLI, "
-external cube_of_bdd: t -> t = \"camlidl_dd_cube_of_bdd\"
-external list_of_cube: t -> (int*bool) list = \"camlidl_dd_list_of_cube\"
+external cube_of_bdd: t -> t = \"camlidl_cudd_cube_of_bdd\"
+external cube_of_minterm: Manager.t -> Manager.tbool array -> t = \"camlidl_cudd_cube_of_minterm\"
+external list_of_cube: t -> (int*bool) list = \"camlidl_cudd_list_of_cube\"
 ")
 
 bdd__t cube_union(bdd__t no1, bdd__t no2)
@@ -420,7 +426,7 @@ quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(* Printing *)")
 quote(MLMLI,"(* ====================================================== *)")
 
-quote(MLMLI,"external _print: t -> unit = \"camlidl_dd_print\"")
+quote(MLMLI,"external _print: t -> unit = \"camlidl_cudd_print\"")
 
 quote(MLI,"
 val print__minterm: Format.formatter -> t -> unit

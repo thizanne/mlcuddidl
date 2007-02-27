@@ -29,7 +29,8 @@ Inspect Makefile and set properly variables.
 make all: build the bytecode version of the interface
 make opt: build the native version of the interface
 make install: installs the two versions of the interface
-make cuddrun: builds a OCaml bytecode interpreter containing the polyhedra librarymake cuddtop: builds a OCaml toplevel containing the interface
+make cuddrun: builds a OCaml bytecode interpreter containing the CUDD and CUDDAUX libraries
+make cuddtop: builds a OCaml toplevel containing the interface
 
 IMPORTANT REMARK: The C compilation flags (processor, alignement)
 should be the same than those with which CUDD and CUDDAUX are compiled.
