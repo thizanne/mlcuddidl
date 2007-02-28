@@ -1,5 +1,8 @@
 (*i $Id: mtbdd.ml,v 1.2 2004/10/01 16:53:37 bjeannet Exp $ i*)
 
+(* This file is part of the MLCUDDIDL Library, released under LGPL license.
+   Please read the COPYING file packaged in the distribution. *)
+
 open Format
 
 module type LeafType =

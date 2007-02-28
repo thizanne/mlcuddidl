@@ -1,6 +1,9 @@
 /* -*- mode: c -*- */
 /* $Id: rdd.idl,v 1.4 2004/10/01 18:05:23 bjeannet Exp $ */
 
+/* This file is part of the MLCUDDIDL Library, released under LGPL license.
+   Please read the COPYING file packaged in the distribution  */
+
 quote(C, "
 #include \"caml/custom.h\"
 #include \"cudd_caml.h\"
@@ -14,21 +17,30 @@ import "bdd.idl";
 
 /* For nodes that need Garbage collection */
 typedef [abstract,c2ml(camlidl_cudd_node_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t rdd__t;
+quote(MLI,"(** Binary Decision Diagrams with [float] leaves *)")
 
-quote(MLMLI,"
-type rdd = 
-| Leaf of float
-| Ite of int * t * t
-type id_unop
-type id_binop
-type id_combinop
+quote(MLMLI,"\
+(** Public type for exploring the abstract type [t] *)\n\
+type rdd = \n\
+| Leaf of float \n\
+| Ite of int * t * t \n\
+\n\
+\n\
+type id_unop \n\
+type id_binop \n\
+type id_combinop \n\
+  (** For user-defined operations *)\n\
 ")
+
+quote(MLI,"(** Dummy value (useful in some cases) *)")
 quote(MLI,"val dummy : t")
 
 /* \section{Extractors} %==================================================== */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Extractors *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Extractors} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external manager : t -> Manager.t = \"camlidl_bdd_manager\"
@@ -56,9 +68,11 @@ rdd__t cofactor(rdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_Cofactor);
 quote(MLMLI,"external inspect: rdd__t -> rdd = \"camlidl_rdd_inspect\"")
 
 /* \section{Supports} %====================================================== */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Supports *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Supports} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external support : t -> Bdd.t = \"camlidl_bdd_support\"
@@ -70,9 +84,11 @@ external vectorsupport2 : Bdd.t array -> t array -> Bdd.t = \"camlidl_rdd_vector
 
 
 /* \section{Classical operations} */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Classical operations *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Classical operations} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 rdd__t cst(manager__t man, double val)
   quote(call, "_res.man = man; _res.node = Cudd_addConst(man,val);");
@@ -90,9 +106,11 @@ quote(MLMLI,"external vectorcompose: bdd__t array -> rdd__t -> rdd__t = \"camlid
 quote(ML,"let dummy = cst Manager.dummy (Manager.get_background Manager.dummy)")
 
 /* \section{Variable Mapping} %============================================== */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Variable mapping *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Variable mapping} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 rdd__t varmap(rdd__t no)
      quote(call, "
@@ -107,9 +125,11 @@ End_roots();
 quote(MLMLI,"external permute : t -> int array -> t = \"camlidl_rdd_permute\"")
 
 /* \section{Logical tests} %================================================= */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Logical tests *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Logical tests} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external is_equal: t -> t -> bool = \"camlidl_bdd_is_equal\"
@@ -151,9 +171,11 @@ quote(call,
 ");
 
 /* \section{Structural information} %======================================== */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Structural information *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Structural information} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external size :  t -> int = \"camlidl_bdd_size\"
@@ -176,9 +198,11 @@ if (_res==CUDD_OUT_OF_MEM){ \
 }");
 
 /* \section{Iterators} %============================================== */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Iterators *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Iterators} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 quote(MLMLI, "
 external iter_node: (t -> unit) -> t -> unit = \"camlidl_cudd_iter_node\"
@@ -186,9 +210,11 @@ external iter_cube: (Manager.tbool array -> float -> unit) -> t -> unit = \"caml
 ")
 
 /* \section{Leaves and guards} */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Leaves and guards *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Leaves and guards} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 bdd__t guard_of_node(rdd__t no1, rdd__t no2) NO_OF_MAN_NO12(Cuddaux_addGuardOfNode);
 bdd__t guard_of_nonbackground(rdd__t no)
@@ -232,9 +258,11 @@ let guardleafs rdd =
 ")
 
 /* \section{Minimizations} %============================================== */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Minimizations *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Minimizations} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 rdd__t constrain(rdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_addConstrain);
 rdd__t tdconstrain(rdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_addTDConstrain);
@@ -242,9 +270,11 @@ rdd__t restrict(rdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_addRestrict);
 rdd__t tdrestrict(rdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_addTDRestrict);
 
 /* \section{Conversions} %============================================== */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Conversions *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Conversions} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 rdd__t of_bdd(bdd__t no) NO_OF_MAN_NO(Cudd_BddToAdd);
 bdd__t to_bdd(rdd__t no) NO_OF_MAN_NO(Cudd_addBddPattern);
@@ -271,9 +301,11 @@ End_roots();
 ");
 
 /* \section{Quantifications} %============================================== */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Quantifications *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Quantifications} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 rdd__t exist(bdd__t no1, rdd__t no2) 
      quote(call,"
@@ -314,9 +346,11 @@ rdd__t forall(bdd__t no1, rdd__t no2)
 */
 
 /* \section{Algebraic operations} */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Algebraic operations *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Algebraic operations} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 boolean is_leq(rdd__t no1, rdd__t no2)
   quote(call, "CHECK_MAN2; _res = Cudd_addLeq(no1.man,no1.node,no2.node);");
@@ -334,9 +368,11 @@ rdd__t setNZ(rdd__t no1, rdd__t no2) APPLYBINOP(Cudd_addSetNZ);
 rdd__t log(rdd__t no) APPLYUNOP(Cudd_addLog);
 
 /* \section{Matrix Operations} */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Matrix operations *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Matrix operations} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external matrix_multiply : int array -> t -> t -> t = \"camlidl_rdd_matrix_multiply\"
@@ -350,9 +386,11 @@ MATMUL(camlidl_rdd_triangle,Cudd_addTriangle)
 ")
 
 /* \section{User Operations} */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* User operations *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 User operations} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external alloc_unop: (float -> float) -> id_unop = \"camlidl_rdd_alloc_unop\"
@@ -365,9 +403,11 @@ external apply_combinop: id_combinop -> t -> t -> t = \"camlidl_rdd_apply_combin
 quote(C,"ALLOCAPPLY_USEROP(rdd,copy_double,Double_val)")
 
 /* \section{Miscellaneous} %============================================== */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Miscellaneous *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Miscellaneous} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 rdd__t transfer(rdd__t no, manager__t man)
      quote(call, "
@@ -378,9 +418,11 @@ End_roots();
 ");
 
 /* \section{Printing} %============================================== */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Printing *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Printing} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 quote(MLMLI,"external _print: t -> unit = \"camlidl_cudd_print\"")
 

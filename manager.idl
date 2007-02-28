@@ -1,6 +1,9 @@
 /* -*- mode: c -*- */
 /* $Id: manager.idl,v 1.3 2005/06/14 14:41:05 bjeannet Exp $ */
 
+/* This file is part of the MLCUDDIDL Library, released under LGPL license.
+   Please read the COPYING file packaged in the distribution  */
+
 quote(C, "
 #include \"caml/custom.h\"
 #include \"cudd_caml.h\"
@@ -10,6 +13,7 @@ quote(C, "
 /* \section{Management of abstract datatypes} %============================== */
 
 typedef [abstract,c2ml(camlidl_cudd_manager_c2ml),ml2c(camlidl_cudd_manager_ml2c)] struct DdManager* manager__t;
+quote(MLI,"(** Manager for CUDD *)")
 
 enum reorder {
     CUDD_REORDER_SAME,
@@ -80,9 +84,11 @@ quote(MLI,"val print_limit : int ref")
 quote(ML,"let print_limit = ref 30")
 
 /* \section{Managers} %====================================================== */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Managers *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Managers} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 quote(MLMLI,"external set_gc: int -> (unit -> unit) -> (unit -> unit) -> unit = \"camlidl_cudd_set_gc\"")
 
@@ -118,9 +124,11 @@ int check_keys(manager__t man)
 
 
 /* \section{Variables, Reordering and Mapping} %============================= */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Variables, Reordering and Mapping *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Variables, Reordering and Mapping} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 int level_of_var(manager__t man, int var)
      quote(call, "_res = Cudd_ReadPerm(man,var);");
@@ -157,13 +165,17 @@ void set_varmap(manager__t man, [size_is(size)] int permut[], int size)
 }");
 
 /* \section{Parameters} %==================================================== */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Parameters *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Parameters} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
-quote(MLMLI,"(* ------------------------------------------------------ *)")
-quote(MLMLI,"(* RDDs *)")
-quote(MLMLI,"(* ------------------------------------------------------ *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ------------------------------------------------------ *)")
+quote(MLMLI,"(** {3 RDDs} *)")
+quote(MLMLI,"(*  ------------------------------------------------------ *)")
+quote(MLMLI,"\n")
 
 double get_background(manager__t man)
      quote(call,
@@ -181,18 +193,22 @@ void   set_background(manager__t man, double v)
 double get_epsilon(manager__t man) VAL_OF_MAN(Cudd_ReadEpsilon);
 void   set_epsilon(manager__t man, double v) UNIT_OF_MAN_VAL(Cudd_SetEpsilon);
 
-quote(MLMLI,"(* ------------------------------------------------------ *)")
-quote(MLMLI,"(* Cache related *)")
-quote(MLMLI,"(* ------------------------------------------------------ *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ------------------------------------------------------ *)")
+quote(MLMLI,"(** {3 Cache related} *)")
+quote(MLMLI,"(*  ------------------------------------------------------ *)")
+quote(MLMLI,"\n")
 
 int    get_min_hit(manager__t man) VAL_OF_MAN(Cudd_ReadMinHit);
 void   set_min_hit(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetMinHit);
 int    get_max_cache_hard(manager__t man) VAL_OF_MAN(Cudd_ReadMaxCacheHard);
 void   set_max_cache_hard(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetMaxCacheHard);
 
-quote(MLMLI,"(* ------------------------------------------------------ *)")
-quote(MLMLI,"(* Manager *)")
-quote(MLMLI,"(* ------------------------------------------------------ *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ------------------------------------------------------ *)")
+quote(MLMLI,"(** {3 Manager} *)")
+quote(MLMLI,"(*  ------------------------------------------------------ *)")
+quote(MLMLI,"\n")
 
 int    get_looseupto(manager__t man) VAL_OF_MAN(Cudd_ReadLooseUpTo);
 void   set_looseupto(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetLooseUpTo);
@@ -201,9 +217,11 @@ void   set_max_live(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetMaxLive);
 int    get_max_mem(manager__t man) VAL_OF_MAN(Cudd_ReadMaxMemory);
 void   set_max_mem(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetMaxMemory);
 
-quote(MLMLI,"(* ------------------------------------------------------ *)")
-quote(MLMLI,"(* Reordering methods *)")
-quote(MLMLI,"(* ------------------------------------------------------ *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ------------------------------------------------------ *)")
+quote(MLMLI,"(** {3 Reordering methods} *)")
+quote(MLMLI,"(*  ------------------------------------------------------ *)")
+quote(MLMLI,"\n")
 
 int    get_sift_max_swap(manager__t man) VAL_OF_MAN(Cudd_ReadSiftMaxSwap);
 void   set_sift_max_swap(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetSiftMaxSwap);
@@ -222,9 +240,11 @@ void   set_recomb(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetRecomb);
 int    get_symmviolation(manager__t man) VAL_OF_MAN(Cudd_ReadSymmviolation);
 void   set_symmviolation(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetSymmviolation);
 
-quote(MLMLI,"(* ------------------------------------------------------ *)")
-quote(MLMLI,"(* Dynamic reordering *)")
-quote(MLMLI,"(* ------------------------------------------------------ *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ------------------------------------------------------ *)")
+quote(MLMLI,"(** {3 Dynamic reordering} *)")
+quote(MLMLI,"(*  ------------------------------------------------------ *)")
+quote(MLMLI,"\n")
 
 double get_max_growth(manager__t man) VAL_OF_MAN(Cudd_ReadMaxGrowth);
 void   set_max_growth(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetMaxGrowth);
@@ -236,9 +256,11 @@ int    get_next_autodyn(manager__t man) VAL_OF_MAN(Cudd_ReadNextReordering);
 void   set_next_autodyn(manager__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetNextReordering);
 
 /* \section{Statistics} %==================================================== */
-quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(* Statistics *)")
-quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"\n")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"(** {2 Statistics} *)")
+quote(MLMLI,"(*  ====================================================== *)")
+quote(MLMLI,"\n")
 
 double get_cache_hits(manager__t man) VAL_OF_MAN(Cudd_ReadCacheHits);
 double get_cache_lookups(manager__t man) VAL_OF_MAN(Cudd_ReadCacheLookUps);
