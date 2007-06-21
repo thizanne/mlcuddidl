@@ -36,7 +36,7 @@
 
 @title MLCUDDIDL
 @subtitle OCaml Interface for CUDD and CUDDAUX
-@subtitle Edition 1.0, 14 May 2002
+@subtitle Edition 1.3, March 2007
 @author by Bertrand Jeannet
 @c Include the Distribution inside the titlepage so
 @c that headings are turned off.
@@ -44,11 +44,12 @@
 
 @ifnottex
 This manual documents how to install and use the MLCUDDIDL interface to the BDD library CUDD. @value{VERSION}.
-@node Top, Introduction, (dir), (dir)
+@node Top, Copying, (dir), (dir)
 @top mlcuddidl
 @end ifnottex
 
 @menu
+* Copying::
 * Introduction::                
 * Manager::                     
 * Bdd::                         
@@ -63,7 +64,34 @@ This manual documents how to install and use the MLCUDDIDL interface to the BDD 
 @end ifhtml
 
 @c *******************************************************************
-@node Introduction, Manager, Top, Top
+@node Copying, Introduction, Top, Top
+@chapter MLCUDDIDL Copying Conditions (LGPL)
+@c *******************************************************************
+
+The MLCUDDIDL library is copyright @copyright{} by Bertrand Jeannet.
+
+The license applies to all files distributed in the MLCUDIDL library,
+including all source code, libraries, binaries, and documentation.
+
+The Library is distributed under the terms of the GNU Library General Public
+License version 2.
+
+As a special exception to the GNU Library General Public License, you
+may link, statically or dynamically, a "work that uses the Library"
+with a publicly distributed version of the Library to produce an
+executable file containing portions of the Library, and distribute
+that executable file under terms of your choice, without any of the
+additional requirements listed in clause 6 of the GNU Library General
+Public License. By "a publicly distributed version of the Library", we
+mean either the unmodified Library as distributed by INRIA, or a
+modified version of the Library that is distributed under the
+conditions defined in clause 3 of the GNU Library General Public
+License. This exception does not however invalidate any other reasons
+why the executable file might be covered by the GNU Library General
+Public License.
+
+@c *******************************************************************
+@node Introduction, Manager, Copying, Top
 @chapter Introduction
 @c *******************************************************************
 
@@ -71,9 +99,9 @@ This library provides an @sc{OCaml} interface to
 the BDD's library @sc{C}. The reader is supposed to have first
 read the user's manual of this library.
 
-Many but not all functions of the @sc{Cudd} library are interfaced; in
-particular, there is no interface for @sc{Zdd}s.
-
+Most functions of the @sc{Cudd} library are interfaced; with the
+exception of @sc{Zdd}s functions. If you need it, please tell me, I
+can do it quickly.
 
 @c ===================================================================
 @section Organization of the interface
@@ -206,7 +234,7 @@ GNU version: @uref{http://www.gnu.org/software}
 
 Flags should be properly set at the beginning of the Makefile.
 
-Also, the Make rules for some @file{dummy.ml} file shows how to compile 
+Also, the Make rules for some @file{example.ml} file shows how to compile 
 a program with the interface.
 
 @c *******************************************************************

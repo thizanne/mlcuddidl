@@ -1,5 +1,8 @@
 /* $Id: cudd_caml.c,v 1.3 2005/06/14 14:41:05 bjeannet Exp $ */
 
+/* This file is part of the MLCUDDIDL Library, released under LGPL license.
+   Please read the COPYING file packaged in the distribution  */
+
 #include <assert.h>
 #include <stdio.h>
 #include "caml/fail.h"
@@ -709,6 +712,9 @@ value camlidl_cudd_idd_iter_cube(value _v_closure, value _v_no)
     autodyn = 1;
     Cudd_AutodynDisable(no.man);
   }
+  else 
+    autodyn=0;
+
   size = no.man->size;
   Cudd_ForeachCube(no.man,no.node,gen,array,val)
     {

@@ -1,3 +1,6 @@
+dnl This file is part of the MLCUDDIDL Library, released under LGPL license.
+dnl Please read the COPYING file packaged in the distribution 
+dnl
 dnl ***************************************************************************
 dnl Number of user operations of each type (unary, binary, commutative binary)
 dnl ***************************************************************************
@@ -195,53 +198,62 @@ dnl
 define(`DEF_USEROP',`
 static DdNode* camlidl_$1_unop_$4(DdManager* man, DdNode* f)
 {
-  CAMLparam0(); CAMLlocal2(_v_f,_v_val);
+  value _v_f,_v_val;
   DdNode *res;
   double val;
 
   if (cuddIsConstant(f)){
-    _v_f = $2(cuddV(f));
-    _v_val = callback(camlidl_$1_unclosures[$4], _v_f);
-    val = $3(_v_val);
-    res = cuddUniqueConst(man,val);
+    _v_f = _v_val = 0;
+    Begin_roots2(_v_f,_v_val)
+      _v_f = $2(cuddV(f));
+      _v_val = callback(camlidl_$1_unclosures[$4], _v_f);
+      val = $3(_v_val);
+      res = cuddUniqueConst(man,val);
+    End_roots()
   }
   else {
     res = NULL;
   }
-  CAMLreturn(res);
+  return res;
 }
 static DdNode* camlidl_$1_binop_$4(DdManager* man, DdNode** f, DdNode** g)
 {
-  CAMLparam0(); CAMLlocal3(_v_F,_v_G,_v_val);
+  value _v_F,_v_G,_v_val;
   DdNode *F, *G, *res;
   double val;
 
   F = *f; G = *g;
   if (cuddIsConstant(F) && cuddIsConstant(G)) {
+    _v_F = _v_G = _v_val = 0;
+    Begin_roots3(_v_F,_v_G,_v_val)
     _v_F = $2(cuddV(F));
     _v_G = $2(cuddV(G));
     _v_val = callback2(camlidl_$1_binclosures[$4], _v_F, _v_G);
     val = $3(_v_val);
     res = cuddUniqueConst(man,val);
+    End_roots()
   }
   else {
     res = NULL;
   }
-  CAMLreturn(res);
+  return res;
 }
 static DdNode* camlidl_$1_combinop_$4(DdManager* man, DdNode** f, DdNode** g)
 {
-  CAMLparam0(); CAMLlocal3(_v_F,_v_G,_v_val);
+  value _v_F,_v_G,_v_val;
   DdNode *F, *G, *res;
   double val;
 
   F = *f; G = *g;
   if (cuddIsConstant(F) && cuddIsConstant(G)) {
+    _v_F = _v_G = _v_val = 0;
+    Begin_roots3(_v_F,_v_G,_v_val)
     _v_F = $2(cuddV(F));
     _v_G = $2(cuddV(G));
     _v_val = callback2(camlidl_$1_combinclosures[$4], _v_F, _v_G);
     val = $3(_v_val);
     res = cuddUniqueConst(man,val);
+    End_roots()
   }
   else {
     if (F > G) {
@@ -250,7 +262,7 @@ static DdNode* camlidl_$1_combinop_$4(DdManager* man, DdNode** f, DdNode** g)
     }
     res = NULL;
   }
-  CAMLreturn(res);
+  return res;
 }')dnl
 dnl
 dnl ===========================================================================

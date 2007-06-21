@@ -1,5 +1,7 @@
 /* $Id: cudd_caml.h,v 1.3 2005/06/14 14:41:05 bjeannet Exp $ */
 
+/* This file is part of the MLCUDDIDL Library, released under LGPL license.
+   Please read the COPYING file packaged in the distribution  */
 
 #ifndef __DDCOMMON_CAML_H__
 #define __DDCOMMON_CAML_H__

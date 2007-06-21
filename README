@@ -7,7 +7,7 @@ The basic distribution contain the following files:
 		    manager.mli    bdd.mli    rdd.mli    idd.mli    mtbdd.mli  
 		    manager.ml     bdd.ml     rdd.ml     idd.ml     mtbdd.ml   
 	cudd_caml.c manager_caml.c bdd_caml.c rdd_caml.c idd_caml.c
-	cudd_caml.h
+	cudd_caml.h sedscript_c sedscript_caml macros.m4
 	texinfo.tex mlcuddidl.texi
 	mlcuddidl.dvi mlcuddidl.info ./html/*.html
 
@@ -18,6 +18,7 @@ The basic distribution contain the following files:
 - The CUDDAUX extension library (same location as this package)
 - OBJECTIVE CAML 3.0 or higher (http://caml.inria.fr)
 - CAMLIDL 1.04 (http://caml.inria.fr/camlidl)
+
 - GREP, SED, M4 if you want to regenerate files from .idl files
 - TEXI2DVI, MAKEINFO, TEXI2HTML to rebuild the documentation
 
@@ -29,8 +30,16 @@ Inspect Makefile and set properly variables.
 make all: build the bytecode version of the interface
 make opt: build the native version of the interface
 make install: installs the two versions of the interface
-make cuddrun: builds a OCaml bytecode interpreter containing the CUDD and CUDDAUX libraries
+make cuddrun: builds a OCaml bytecode interpreter containing the
+              CUDD and CUDDAUX libraries
 make cuddtop: builds a OCaml toplevel containing the interface
+make example: build bytecode version of example.ml
+make example.opt: build native-code version of example.ml
+make clean: normal clean
+make mostylclean: delete also generated files (from .idl files)
+make rebuild: regenerate C and OCaml files from .idl files
+              (require m4, sed)
+make mlcuddidl.dvi:
 
 IMPORTANT REMARK: The C compilation flags (processor, alignement)
 should be the same than those with which CUDD and CUDDAUX are compiled.

@@ -1,4 +1,11 @@
 -------------
+MLCuddIDL 1.3:
+-------------
+
+LGPL license explicitly mentioned.
+Distribution slightly modified
+
+-------------
 MLCuddIDL 1.2:
 -------------
 
@@ -11,7 +18,6 @@ MLCuddIDL 1.1:
 -------------
 
 Function Bdd.is_complement added.
-
 
 MLCuddIDL 1.0:
 -------------

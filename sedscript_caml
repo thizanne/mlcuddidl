@@ -1,0 +1,11 @@
+1 a\\n(* This file is part of the MLCUDDIDL Library, released under LGPL license.\n   Please read the COPYING file packaged in the distribution  *)
+s/manager__t/t/g; 
+s/bdd__t/t/g;  
+s/rdd__t/t/g;  
+s/idd__t/t/g;  
+s/external manager_/external /g;  
+s/external bdd_/external /g;  
+s/external rdd_/external /g;  
+s/external idd_/external /g;  
+s/CUDD_//g;  
+s/camlidl_\(ml2c\|c2ml\|transl\|manager\|bdd\|idd\|rdd\|zdd\)/camlidl_cudd_\1/g;  
