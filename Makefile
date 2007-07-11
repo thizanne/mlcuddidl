@@ -126,11 +126,12 @@ libcudd_caml_debug.a: $(CCMODULES:%=%_debug.o)
 	$(RANLIB) $@
 
 # TEX rules
+.PHONY: html
 mlcuddidl.pdf: mlcuddidl.texi
 	$(TEXI2DVI) $<
 mlcuddidl.info: mlcuddidl.texi
 	makeinfo --no-split $<
-mlcuddidl.html: mlcuddidl.texi
+html: mlcuddidl.texi
 	$(TEXI2HTML) -split=chapter -nosec_nav -subdir=html $<
 
 #--------------------------------------------------------------
