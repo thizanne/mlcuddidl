@@ -1,3 +1,5 @@
+include Makefile.config
+
 #---------------------------------------
 # Directories
 #---------------------------------------
@@ -6,64 +8,19 @@ SRCDIR = $(shell pwd)
 #
 # Installation directory prefix
 #
-PREFIX = $(MLCUDDIDL_INSTALL)
+PREFIX = $(MLCUDDIDL_PREFIX)
 # C include and lib directories
 INCDIR = $(PREFIX)/include
 LIBDIR = $(PREFIX)/lib
 BINDIR = $(PREFIX)/bin
-#
-# Where to find necessary files
-#
-# Caml and Camlidl lib directory
-CAMLLIBDIR = $(CAML_INSTALL)/lib/ocaml
-CAMLIDLLIBDIR = $(CAMLIDL_INSTALL)/lib/ocaml
-# CUDD include and lib directories
-CUDDINCDIR = $(CUDD_INSTALL)/include
-CUDDLIBDIR = $(CUDD_INSTALL)/lib
-# CUDDAUX include and lib directories
-CUDDAUXLIBDIR = $(CUDDAUX_INSTALL)/lib
-CUDDAUXINCDIR = $(CUDDAUX_INSTALL)/include
-
-#---------------------------------------
-# CAML part
-#---------------------------------------
-OCAMLC = ocamlc.opt
-OCAMLOPT = ocamlopt.opt
-OCAMLDEP = ocamldep
-OCAMLLEX = ocamllex.opt
-OCAMLYACC = ocamlyacc
-OCAMLINC =
-OCAMLFLAGS = -g
-OCAMLOPTFLAGS = -inline 20
-
-CAMLIDL = camlidl
-M4 = m4
-SED = sed
-AR = ar
-RANLIB = ranlib
 
 #---------------------------------------
 # C part
 #---------------------------------------
 
-CC = gcc
 ICFLAGS = \
--I$(CUDDINCDIR) -I$(CUDDAUXINCDIR) \
--I$(CAMLLIBDIR) -I$(CAMLIDLLIBDIR) \
--Wcast-qual -Wswitch -Werror-implicit-function-declaration \
--Wall -Wextra -Wundef -Wbad-function-cast -Wcast-align -Wstrict-prototypes \
--Wno-unused \
--std=c99
-#
-# IMPORTANT:
-# XCFLAGS should be the same than the flags with which CUDD has been compiled
-#
-XCFLAGS = -march=pentium4 -malign-double -DHAVE_IEEE_754 -DBSD
-#XCFLAGS = -mcpu=ultrasparc -DHAVE_IEEE_754 -DUNIX100
-
-CFLAGS = $(ICFLAGS) $(XCFLAGS) -O3 -DNDEBUG
-CFLAGS_DEBUG = $(ICFLAGS) $(XCFLAGS) -O0 -g -UNDEBUG
-CFLAGS_PROF = $(CFLAGS) -g -pg
+-I$(CUDD_PREFIX)/include -I$(CUDDAUX_PREFIX)/include \
+-I$(CAML_PREFIX)/lib/ocaml -I$(CAMLIDL_PREFIX)/lib/ocaml
 
 #---------------------------------------
 # Files
@@ -82,8 +39,8 @@ MLLIB_TOINSTALLx = $(MLMODULES:%=%.cmx) cudd.cmxa cudd.a
 CCMODULES = cudd_caml $(IDLMODULES:%=%_caml)
 CCSRC = cudd_caml.h $(CCMODULES:%=%.c)
 
-CCBIN_TOINSTALL = cuddrun
-CCLIB_TOINSTALL = libcudd_caml.a libcudd_caml_debug.a libcudd_caml_prof.a
+CCBIN_TOINSTALL = cuddrun cuddtop
+CCLIB_TOINSTALL = libcudd_caml.a libcudd_caml_debug.a
 CCINC_TOINSTALL = cudd_caml.h
 
 #---------------------------------------
@@ -91,14 +48,12 @@ CCINC_TOINSTALL = cudd_caml.h
 #---------------------------------------
 
 # Global rules
-all: common libcudd_caml.a
-debug: common libcudd_caml_debug.a
-common: $(MLINT) $(MLOBJ) $(MLOBJx) cudd.cma cudd.cmxa
+all: $(MLINT) $(MLOBJ) $(MLOBJx) cudd.cma cudd.cmxa libcudd_caml.a libcudd_caml_debug.a
 
 cuddrun: cudd.cma libcudd_caml.a
-	$(OCAMLC) $(OCAMLFLAGS) -o $@ -make-runtime -cc "$(CC)" cudd.cma
-cuddtop: cudd.cma libcudd_caml_debug.a
-	ocamlmktop $(OCAMLFLAGS) -o $@ -custom -cc "$(CC)" cudd.cma
+	$(OCAMLC) $(OCAMLFLAGS) -o $@ -make-runtime -cc "$(CC)" -ccopt -L. cudd.cma
+cuddtop: cudd.cma libcudd_caml.a
+	ocamlmktop $(OCAMLFLAGS) -o $@ -custom -cc "$(CC)" -ccopt -L. cudd.cma
 
 # Example of compilation command
 # If the library is installed somewhere, add a -I $(PATH) option
@@ -150,16 +105,16 @@ dist: $(IDLMODULES:%=%.idl) macros.m4 $(MLSRC) $(CCSRC) Makefile README Changes 
 # CAML rules
 cudd.cma: $(MLOBJ)
 	$(OCAMLC) $(OCAMLFLAGS) -a -o $@ $^ \
-	-ccopt -L$(MLCUDDIDL_INSTALL)/lib -cclib -lcudd_caml \
-	-ccopt -L$(CAMLIDL_INSTALL)/lib/ocaml -cclib -lcamlidl \
-	-ccopt -L$(CUDDAUX_INSTALL)/lib -cclib -lcuddaux \
-	-ccopt -L$(CUDD_INSTALL)/lib -cclib "-lcudd -lmtr -lst -lutil -lepd"
+	-ccopt -L$(MLCUDDIDL_PREFIX)/lib -cclib -lcudd_caml \
+	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
+	-ccopt -L$(CUDDAUX_PREFIX)/lib -cclib -lcuddaux \
+	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd -lmtr -lst -lutil -lepd"
 cudd.cmxa: $(MLOBJx)
 	$(OCAMLOPT) $(OCAMLOPTFLAGS) -a -o $@ $^ \
-	-ccopt -L$(MLCUDDIDL_INSTALL)/lib -cclib -lcudd_caml \
-	-ccopt -L$(CAMLIDL_INSTALL)/lib/ocaml -cclib -lcamlidl \
-	-ccopt -L$(CUDDAUX_INSTALL)/lib -cclib -lcuddaux \
-	-ccopt -L$(CUDD_INSTALL)/lib -cclib "-lcudd -lmtr -lst -lutil -lepd"
+	-ccopt -L$(MLCUDDIDL_PREFIX)/lib -cclib -lcudd_caml \
+	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
+	-ccopt -L$(CUDDAUX_PREFIX)/lib -cclib -lcuddaux \
+	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd -lmtr -lst -lutil -lepd"
 	$(RANLIB) cudd.a
 
 libcudd_caml.a: $(CCMODULES:%=%.o)
@@ -172,17 +127,17 @@ libcudd_caml_debug.a: $(CCMODULES:%=%_debug.o)
 
 # TEX rules
 mlcuddidl.pdf: mlcuddidl.texi
-	texi2dvi $<
+	$(TEXI2DVI) $<
 mlcuddidl.info: mlcuddidl.texi
 	makeinfo --no-split $<
 mlcuddidl.html: mlcuddidl.texi
-	texi2html -split=chapter -nosec_nav -subdir=html $<
+	$(TEXI2HTML) -split=chapter -nosec_nav -subdir=html $<
 
 #--------------------------------------------------------------
 # IMPLICIT RULES AND DEPENDENCIES
 #--------------------------------------------------------------
 
-.SUFFIXES: .c .h .o .ml .mli .cmi .cmo .cmx .idl _debug.o _prof.o _caml.c
+.SUFFIXES: .c .h .o .ml .mli .cmi .cmo .cmx .idl _debug.o _caml.c
 
 #-----------------------------------
 # IDL
@@ -210,11 +165,9 @@ rebuild: macros.m4 sedscript_caml sedscript_c
 #-----------------------------------
 
 %.o: %.c cudd_caml.h
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(ICFLAGS) $(XCFLAGS) -c -o $@ $<
 %_debug.o: %.c cudd_caml.h
-	$(CC) $(CFLAGS_DEBUG) -c -o $@ $<
-%_prof.o: %.c cudd_caml.h
-	$(CC) $(CFLAGS_PROF) -c -o $@ $<
+	$(CC) $(CFLAGS_DEBUG) $(ICFLAGS) $(XCFLAGS) -c -o $@ $<
 
 #-----------------------------------
 # CAML

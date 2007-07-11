@@ -1,7 +1,7 @@
 * Files
 The basic distribution contain the following files:
 	README
-	Makefile
+	Makefile Makefile.config.model
 	Changes
 		    manager.idl    bdd.idl    rdd.idl    idd.idl 
 		    manager.mli    bdd.mli    rdd.mli    idd.mli    mtbdd.mli  
@@ -17,7 +17,7 @@ The basic distribution contain the following files:
 - The CUDD BDDs library (http://vlsi.colorado.edu/software.html)
 - The CUDDAUX extension library (same location as this package)
 - OBJECTIVE CAML 3.0 or higher (http://caml.inria.fr)
-- CAMLIDL 1.04 (http://caml.inria.fr/camlidl)
+- CAMLIDL 1.05 (http://caml.inria.fr/camlidl)
 
 - GREP, SED, M4 if you want to regenerate files from .idl files
 - TEXI2DVI, MAKEINFO, TEXI2HTML to rebuild the documentation
@@ -26,9 +26,11 @@ The basic distribution contain the following files:
 library. It generates five ML modules: Manager, Bdd, Rdd, Idd, Mtbdd.
 
 * To build,
-Inspect Makefile and set properly variables.
-make all: build the bytecode version of the interface
-make opt: build the native version of the interface
+Set Makefile.config from Makefile.config.model model.
+make rebuild: requested only if download from subvsersion directory.
+	      regenerate C and OCaml files from .idl files
+              (require m4, sed)
+make all: build the bytecode and native versions of the interface
 make install: installs the two versions of the interface
 make cuddrun: builds a OCaml bytecode interpreter containing the
               CUDD and CUDDAUX libraries
@@ -41,7 +43,7 @@ make rebuild: regenerate C and OCaml files from .idl files
               (require m4, sed)
 make mlcuddidl.dvi:
 
-IMPORTANT REMARK: The C compilation flags (processor, alignement)
+IMPORTANT REMARK: The C compilation flags in XCFLAGS (processor, alignement)
 should be the same than those with which CUDD and CUDDAUX are compiled.
 
 * Documentation: DVI (mlcuddidl.dvi), INFO (mlcuddidl.info), HTML (HTML/*)
