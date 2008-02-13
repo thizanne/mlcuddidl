@@ -35,11 +35,11 @@ quote(MLI,"(** Dummy value (useful in some cases) *)")
 quote(MLI,"val dummy : t")
 
 /* \section{Extractors} %==================================================== */
-quote(MLMLI,"\n")
+
+quote(MLMLI,"")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Extractors} *)")
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external manager : t -> Manager.t = \"camlidl_bdd_manager\"
@@ -54,11 +54,10 @@ int dval(idd__t no) quote(call,"_res = (int)(cuddV(no.node));");
 quote(MLMLI,"external inspect: t -> idd = \"camlidl_idd_inspect\"")
 
 /* \section{Supports} %====================================================== */
-quote(MLMLI,"\n")
+
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Supports} *)")
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external support : t -> Bdd.t = \"camlidl_bdd_support\"
@@ -70,11 +69,10 @@ external vectorsupport2 : Bdd.t array -> t array -> Bdd.t = \"camlidl_rdd_vector
 
 
 /* \section{Classical operations} */
-quote(MLMLI,"\n")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Classical operations} *)")
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"\n")
+quote(MLMLI,"")
 
 idd__t cst(manager__t man, int val)
   quote(call, "_res.man = man; _res.node = Cudd_addConst(man,(int)val);");
@@ -85,14 +83,14 @@ external compose : int -> Bdd.t -> t -> t = \"camlidl_rdd_compose\"
 external vectorcompose: Bdd.t array -> idd__t -> idd__t = \"camlidl_rdd_vectorcompose\"
 ")
 
-quote(ML,"let dummy = cst Manager.dummy (int_of_float (Manager.get_background Manager.dummy))")
+quote(ML,"
+let dummy = cst Manager.dummy (int_of_float (Manager.get_background Manager.dummy))
+")
 
 /* \section{Logical tests} %================================================= */
-quote(MLMLI,"\n")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Logical tests} *)")
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external is_equal : t -> t -> bool = \"camlidl_bdd_is_equal\"
@@ -134,11 +132,9 @@ quote(call,
 ");
 
 /* \section{Structural information} %======================================== */
-quote(MLMLI,"\n")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Structural information} *)")
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external size : t -> int = \"camlidl_bdd_size\"
@@ -150,22 +146,19 @@ external nbleaves : t -> int = \"camlidl_rdd_nbleaves\"
 ")
 
 /* \section{Variable Mapping} %============================================== */
-quote(MLMLI,"\n")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Variable mapping} *)")
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external varmap : t -> t = \"camlidl_rdd_varmap\"
-external permute : int array -> t -> t = \"camlidl_rdd_permute\"
+external permute : t -> int array -> t = \"camlidl_rdd_permute\"
 ")
+
 /* \section{Iterators} %============================================== */
-quote(MLMLI,"\n")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Iterators} *)")
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI, "
 external iter_node: (t -> unit) -> t -> unit = \"camlidl_cudd_iter_node\"
@@ -173,11 +166,9 @@ external iter_cube: (Manager.tbool array -> int -> unit) -> t -> unit = \"camlid
 ")
 
 /* \section{Leaves and guards} */
-quote(MLMLI,"\n")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Leaves and guards} *)")
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external guard_of_node : t -> t -> Bdd.t = \"camlidl_rdd_guard_of_node\"
@@ -209,11 +200,10 @@ let guardleafs rdd =
 ")
 
 /* \section{Minimizations} %============================================== */
-quote(MLMLI,"\n")
+quote(MLMLI,"")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Minimizations} *)")
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external constrain: t -> Bdd.t -> t = \"camlidl_rdd_constrain\"
@@ -221,12 +211,11 @@ external tdconstrain: t -> Bdd.t -> t = \"camlidl_rdd_tdconstrain\"
 external restrict: t -> Bdd.t -> t = \"camlidl_rdd_restrict\"
 external tdrestrict : t -> Bdd.t -> t = \"camlidl_rdd_tdrestrict\"
 ")
+
 /* \section{Conversions} %============================================== */
-quote(MLMLI,"\n")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Conversions} *)")
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external to_bdd : t -> Bdd.t = \"camlidl_rdd_to_bdd\"
@@ -234,11 +223,95 @@ external to_rdd : t -> Rdd.t = \"%identity\"
 ")
 
 /* \section{User Operations} */
-quote(MLMLI,"\n")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 User operations} *)")
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"\n")
+
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(** {3 By decomposition into guards and leafs} *)")
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(**
+Be cautious: here the background leaf is used as a special value,
+and should not be used for ordinary purpose.
+*)")
+
+quote(MLI,"
+val mapleaf1 : (Bdd.t -> int -> int) -> t -> t
+val mapleaf2 : (Bdd.t -> int -> int -> int) -> t -> t -> t
+")
+quote(ML,"
+let mapleaf1
+  (f:Bdd.t -> int -> int)
+  (idd:t)
+  :
+  t
+  =
+  let manager = manager idd in
+  let background = int_of_float (Manager.get_background manager) in
+  let leaves = leaves idd in
+  let res = ref (cst manager background) in
+  for i=0 to pred (Array.length leaves) do
+    let leaf = leaves.(i) in
+    if leaf<>background then begin
+      let guard = guard_of_leaf idd leaves.(i) in
+      let nleaf = f guard leaf in
+      res := ite guard (cst manager nleaf) !res
+    end
+  done;
+  !res
+
+let mapleaf2
+  (f:Bdd.t -> int -> int -> int)
+  (idd1:t)
+  (idd2:t)
+  :
+  t
+  =
+  let manager = manager idd1 in
+  let background = int_of_float (Manager.get_background manager) in
+  let ddbackground = cst manager background in
+  let leaves1 = leaves idd1 in
+  let res = ref ddbackground in
+  for i1=0 to pred (Array.length leaves1) do
+    let leaf1 = leaves1.(i1) in
+    if leaf1<>background then begin
+      let guard1 = guard_of_leaf idd1 leaf1 in
+      let idd2 = ite guard1 idd2 ddbackground in
+      let leaves2 = leaves idd2 in
+      for i2=0 to pred (Array.length leaves2) do
+	let leaf2 = leaves2.(i2) in
+	if leaf2<>background then begin
+	  let guard2 = guard_of_leaf idd2 leaf2 in
+	  let nleaf = f guard2 leaf1 leaf2 in
+	  res := ite guard2 (cst manager nleaf) !res
+	end
+      done
+    end
+  done;
+  !res
+")
+
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(** {3 By using CUDD local cache (efficient and flexible)} *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLI,"
+val mapunop : (int -> int) -> t -> t 
+val mapbinop : commutative:bool -> (int -> int -> int) -> t -> t -> t
+val mapterop : (int -> int -> int -> int) -> t -> t -> t -> t
+")
+quote(ML,"
+external _internal_mapunop : bool -> (int -> int) -> t -> t = \"camlidl_rddidd_mapunop\"
+external _internal_mapbinop : bool -> bool -> (int -> int -> int) -> t -> t -> t = \"camlidl_rddidd_mapbinop\"
+external _internal_mapterop : bool -> (int -> int -> int -> int) -> t -> t -> t -> t = \"camlidl_rddidd_mapterop\"
+let mapunop f t = _internal_mapunop true f t
+let mapbinop ~commutative f t1 t2 = _internal_mapbinop true commutative f t1 t2
+let mapterop f t1 t2 t3 = _internal_mapterop true f t1 t2 t3
+")
+
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(** {3 By using CUDD mechanism (more efficient, less flexible)} *)")
+quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
 external alloc_unop: (int -> int) -> id_unop = \"camlidl_idd_alloc_unop\"
@@ -251,24 +324,22 @@ external apply_combinop: id_combinop -> t -> t -> t = \"camlidl_idd_apply_combin
 quote(C,"ALLOCAPPLY_USEROP(idd,Val_int,Int_val)")
 
 /* \section{Miscellaneous} %============================================== */
-quote(MLMLI,"\n")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Miscellaneous} *)")
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external transfer : t -> Manager.t -> t = \"camlidl_rdd_transfer\"
 ")
 
 /* \section{Printing} %============================================== */
-quote(MLMLI,"\n")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Printing} *)")
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"\n")
 
-quote(MLMLI,"external _print: t -> unit = \"camlidl_cudd_print\"")
+quote(MLMLI,"
+external _print: t -> unit = \"camlidl_cudd_print\"
+")
 
 quote(MLI,"
 val print__minterm: Format.formatter -> t -> unit
