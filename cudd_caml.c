@@ -981,3 +981,152 @@ value camlidl_cudd_print(value _v_no)
   fflush(stdout);
   CAMLreturn(Val_unit);
 }
+
+/* %======================================================================== */
+/* \section{User operations, using local cache} */
+/* %======================================================================== */
+
+static int camlidl_rddidd_is_idd = 0;
+/* If false, we have RDD, if true we have IDD */
+static int camlidl_rddidd_op_commutative = 0;
+/* Is the operation commutative ? */
+static value camlidl_rddidd_op_closure = 0;
+/* Closure */
+
+static DdNode* camlidl_rddidd_mapunop_aux(DdManager* man, DdNode* f)
+{
+  value _v_f,_v_val;
+  DdNode *res;
+  double val;
+
+  if (cuddIsConstant(f)){
+    _v_f = _v_val = 0;
+    Begin_roots2(_v_f,_v_val)
+      _v_f = camlidl_rddidd_is_idd ? Val_int((int)(cuddV(f))) : copy_double(cuddV(f));
+      _v_val = callback(camlidl_rddidd_op_closure, _v_f);
+      val = camlidl_rddidd_is_idd ? (double)(Int_val(_v_val)) : Double_val(_v_val);
+      res = cuddUniqueConst(man,val);
+    End_roots()
+  }
+  else {
+    res = NULL;
+  }
+  return res;
+}
+static DdNode* camlidl_rddidd_mapbinop_aux(DdManager* man, DdNode** f, DdNode** g)
+{
+  value _v_F,_v_G,_v_val;
+  DdNode *F, *G, *res;
+  double val;
+
+  F = *f; G = *g;
+  if (camlidl_rddidd_op_commutative && F > G) {
+    *f = G;
+    *g = F;
+  }
+  if (cuddIsConstant(F) && cuddIsConstant(G)) {
+    _v_F = _v_G = _v_val = 0;
+    Begin_roots3(_v_F,_v_G,_v_val)
+    if (camlidl_rddidd_is_idd){
+      _v_F = Val_int((int)(cuddV(F)));
+      _v_G = Val_int((int)(cuddV(G)));
+    }
+    else {
+      _v_F = copy_double(cuddV(F));
+      _v_G = copy_double(cuddV(G));
+    }      
+    _v_val = callback2(camlidl_rddidd_op_closure, _v_F, _v_G);
+    val = camlidl_rddidd_is_idd ? (double)(Int_val(_v_val)) : Double_val(_v_val);
+    res = cuddUniqueConst(man,val);
+    End_roots()
+  }
+  else {
+    res = NULL;
+  }
+  return res;
+}
+static DdNode* camlidl_rddidd_mapterop_aux(DdManager* man, DdNode** f, DdNode** g, DdNode** h)
+{
+  value _v_F,_v_G,_v_H,_v_val;
+  DdNode *F, *G, *H, *res;
+  double val;
+
+  F = *f; G = *g; H = *h;
+  if (cuddIsConstant(F) && cuddIsConstant(G) && cuddIsConstant(H)) {
+    _v_F = _v_G = _v_H = _v_val = 0;
+    Begin_roots4(_v_F,_v_G,_v_H,_v_val)
+    if (camlidl_rddidd_is_idd){
+      _v_F = Val_int((int)(cuddV(F)));
+      _v_G = Val_int((int)(cuddV(G)));
+      _v_H = Val_int((int)(cuddV(H)));
+    }
+    else {
+      _v_F = copy_double(cuddV(F));
+      _v_G = copy_double(cuddV(G));
+      _v_H = copy_double(cuddV(H));
+    }      
+    _v_val = callback3(camlidl_rddidd_op_closure, _v_F, _v_G, _v_H);
+    val = camlidl_rddidd_is_idd ? (double)(Int_val(_v_val)) : Double_val(_v_val);
+    res = cuddUniqueConst(man,val);
+    End_roots()
+  }
+  else {
+    res = NULL;
+  }
+  return res;
+}
+value camlidl_cudd_rddidd_mapunop(value _v_is_idd, value _v_f, value _v_no)
+{
+  CAMLparam2(_v_f,_v_no); CAMLlocal1(_v_res);
+  node__t no,_res;
+  
+  camlidl_rddidd_is_idd = Int_val(_v_is_idd);
+  if (camlidl_rddidd_op_closure != 0){
+    failwith("RddIdd.mapunop: this family of functions cannot be called recursively !");
+  }
+  camlidl_rddidd_op_closure = _v_f;
+  camlidl_cudd_node_ml2c(_v_no,&no);
+  _res.man = no.man;
+  _res.node = Cuddaux_AddApply1(no.man, camlidl_rddidd_mapunop_aux, no.node);
+  _v_res = camlidl_cudd_node_c2ml(&_res);
+  camlidl_rddidd_op_closure = 0;
+  CAMLreturn(_v_res);
+}
+value camlidl_cudd_rddidd_mapbinop(value _v_is_idd, value _v_bool, value _v_f, value _v_no1, value _v_no2)
+{
+  CAMLparam4(_v_bool,_v_f,_v_no1,_v_no2); CAMLlocal1(_v_res);
+  node__t no1,no2,_res;
+  
+  camlidl_rddidd_is_idd = Int_val(_v_is_idd);
+  camlidl_rddidd_op_commutative = Int_val(_v_bool);
+  if (camlidl_rddidd_op_closure != 0){
+    failwith("Rdd|Idd.mapbinop: this family of functions cannot be called recursively !");
+  }
+  camlidl_rddidd_op_closure = _v_f;
+  camlidl_cudd_node_ml2c(_v_no1,&no1);
+  camlidl_cudd_node_ml2c(_v_no2,&no2);
+  _res.man = no1.man;
+  _res.node = Cuddaux_AddApply2(no1.man, camlidl_rddidd_mapbinop_aux, no1.node, no2.node);
+  _v_res = camlidl_cudd_node_c2ml(&_res);
+  camlidl_rddidd_op_closure = 0;
+  CAMLreturn(_v_res);
+}
+value camlidl_cudd_rddidd_mapterop(value _v_is_idd, value _v_bool, value _v_f, value _v_no1, value _v_no2, value _v_no3)
+{
+  CAMLparam5(_v_bool,_v_f,_v_no1,_v_no2,_v_no3); CAMLlocal1(_v_res);
+  node__t no1,no2,no3,_res;
+  
+  camlidl_rddidd_is_idd = Int_val(_v_is_idd);
+  if (camlidl_rddidd_op_closure != 0){
+    failwith("Rdd|Idd.mapterop: this family of functions cannot be called recursively !");
+  }
+  camlidl_rddidd_op_closure = _v_f;
+  camlidl_cudd_node_ml2c(_v_no1,&no1);
+  camlidl_cudd_node_ml2c(_v_no2,&no2);
+  camlidl_cudd_node_ml2c(_v_no3,&no3);
+  _res.man = no1.man;
+  _res.node = Cuddaux_AddApply3(no1.man, camlidl_rddidd_mapterop_aux, no1.node, no2.node, no3.node);
+  _v_res = camlidl_cudd_node_c2ml(&_res);
+  camlidl_rddidd_op_closure = 0;
+  CAMLreturn(_v_res);
+}
