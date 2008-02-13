@@ -133,6 +133,9 @@ module type S =
 
     (** {3 User operations} *)
 
+    val mapleaf1 : (Bdd.t -> leaf -> leaf) -> t -> t
+    val mapleaf2 : (Bdd.t -> leaf -> leaf -> leaf) -> t -> t -> t
+
     val alloc_unop: (leaf -> leaf) -> id_unop
     val alloc_binop: (leaf -> leaf -> leaf) -> id_binop
     val alloc_combinop: (leaf -> leaf -> leaf) -> id_combinop

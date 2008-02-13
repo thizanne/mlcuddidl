@@ -95,6 +95,8 @@ module type S =
     (* Conversions *)
     external to_bdd : t -> Bdd.t = "camlidl_cudd_rdd_to_bdd"
    (* User operations *)
+    val mapleaf1 : (Bdd.t -> leaf -> leaf) -> t -> t
+    val mapleaf2 : (Bdd.t -> leaf -> leaf -> leaf) -> t -> t -> t
     val alloc_unop: (leaf -> leaf) -> id_unop
     val alloc_binop: (leaf -> leaf -> leaf) -> id_binop
     val alloc_combinop: (leaf -> leaf -> leaf) -> id_combinop
@@ -233,6 +235,15 @@ module Make (Leaf : LeafType) =
     external restrict: t -> Bdd.t -> t = "camlidl_cudd_rdd_restrict"
     external tdrestrict : t -> Bdd.t -> t = "camlidl_cudd_rdd_tdrestrict"
     (* User operations *)
+    let mapleaf1 f t =
+      Idd.mapleaf1
+	(fun bdd id -> id_of_leaf (f bdd (leaf_of_id id)))
+	t
+    let mapleaf2 f t1 t2 =
+      Idd.mapleaf2
+	(fun bdd id1 id2 -> id_of_leaf (f bdd (leaf_of_id id1) (leaf_of_id id2)))
+	t1 t2
+
     let wrap_binop leaf_op =
       let id_op = 
 	fun idx idy ->
