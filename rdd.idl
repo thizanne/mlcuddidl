@@ -9,7 +9,6 @@ quote(C, "
 #include \"cudd_caml.h\"
 ")
 
-
 import "manager.idl";
 import "bdd.idl";
 
@@ -36,11 +35,10 @@ quote(MLI,"(** Dummy value (useful in some cases) *)")
 quote(MLI,"val dummy : t")
 
 /* \section{Extractors} %==================================================== */
-quote(MLMLI,"\n")
+quote(MLMLI,"")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Extractors} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external manager : t -> Manager.t = \"camlidl_bdd_manager\"
@@ -51,8 +49,8 @@ rdd__t dthen(rdd__t no) NO_OF_NO(cuddT);
 rdd__t delse(rdd__t no) NO_OF_NO(cuddE);
 double dval(rdd__t no) quote(call,"_res = cuddV(no.node);");
 void cofactors(int var, rdd__t no, [out] rdd__t noa, [out] rdd__t nob)
-  quote(call, 
-" { 
+  quote(call,
+" {
   DdNode* cof;
   noa.man = nob.man = no.man;
   Begin_roots1(_v_no);
@@ -68,11 +66,10 @@ rdd__t cofactor(rdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_Cofactor);
 quote(MLMLI,"external inspect: rdd__t -> rdd = \"camlidl_rdd_inspect\"")
 
 /* \section{Supports} %====================================================== */
-quote(MLMLI,"\n")
+quote(MLMLI,"")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Supports} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external support : t -> Bdd.t = \"camlidl_bdd_support\"
@@ -84,11 +81,10 @@ external vectorsupport2 : Bdd.t array -> t array -> Bdd.t = \"camlidl_rdd_vector
 
 
 /* \section{Classical operations} */
-quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Classical operations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
+quote(MLMLI,"")
 
 rdd__t cst(manager__t man, double val)
   quote(call, "_res.man = man; _res.node = Cudd_addConst(man,val);");
@@ -101,16 +97,17 @@ _res.man = no1.man;
 _res.node = Cuddaux_addCompose(no1.man, no2.node, no1.node, var);
 End_roots();
 ");
-quote(MLMLI,"external vectorcompose: bdd__t array -> rdd__t -> rdd__t = \"camlidl_rdd_vectorcompose\"")
+quote(MLMLI,"
+external vectorcompose: bdd__t array -> rdd__t -> rdd__t = \"camlidl_rdd_vectorcompose\"
+")
 
 quote(ML,"let dummy = cst Manager.dummy (Manager.get_background Manager.dummy)")
 
 /* \section{Variable Mapping} %============================================== */
-quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Variable mapping} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
+quote(MLMLI,"")
 
 rdd__t varmap(rdd__t no)
      quote(call, "
@@ -125,11 +122,10 @@ End_roots();
 quote(MLMLI,"external permute : t -> int array -> t = \"camlidl_rdd_permute\"")
 
 /* \section{Logical tests} %================================================= */
-quote(MLMLI,"\n")
+quote(MLMLI,"")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Logical tests} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external is_equal: t -> t -> bool = \"camlidl_bdd_is_equal\"
@@ -171,11 +167,9 @@ quote(call,
 ");
 
 /* \section{Structural information} %======================================== */
-quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Structural information} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external size :  t -> int = \"camlidl_bdd_size\"
@@ -190,19 +184,17 @@ if (_res==(double)CUDD_OUT_OF_MEM){ \
   failwith(\"Bdd.nbnonzeropaths returned CUDD_OUT_OF_MEM\"); \
 }");
 
-int nbleaves(rdd__t no) 
-quote(call, 
+int nbleaves(rdd__t no)
+quote(call,
 "_res = Cudd_CountLeaves(no.node); \
 if (_res==CUDD_OUT_OF_MEM){ \
   failwith (\"Rdd.nbleaves returned CUDD_OUT_OF_MEM\"); \
 }");
 
 /* \section{Iterators} %============================================== */
-quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Iterators} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI, "
 external iter_node: (t -> unit) -> t -> unit = \"camlidl_cudd_iter_node\"
@@ -210,11 +202,10 @@ external iter_cube: (Manager.tbool array -> float -> unit) -> t -> unit = \"caml
 ")
 
 /* \section{Leaves and guards} */
-quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Leaves and guards} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
+quote(MLMLI,"")
 
 bdd__t guard_of_node(rdd__t no1, rdd__t no2) NO_OF_MAN_NO12(Cuddaux_addGuardOfNode);
 bdd__t guard_of_nonbackground(rdd__t no)
@@ -227,7 +218,7 @@ Begin_roots1(_v_no);
   _res.node = Cuddaux_addGuardOfNode(no.man,no.node,add);
   _res.node = Cudd_Not(_res.node);
   cuddDeref(add);
-} 
+}
 End_roots();
 ");
 
@@ -258,11 +249,11 @@ let guardleafs rdd =
 ")
 
 /* \section{Minimizations} %============================================== */
-quote(MLMLI,"\n")
+quote(MLMLI,"")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Minimizations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
+quote(MLMLI,"")
 
 rdd__t constrain(rdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_addConstrain);
 rdd__t tdconstrain(rdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_addTDConstrain);
@@ -270,11 +261,10 @@ rdd__t restrict(rdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_addRestrict);
 rdd__t tdrestrict(rdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_addTDRestrict);
 
 /* \section{Conversions} %============================================== */
-quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Conversions} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
+quote(MLMLI,"")
 
 rdd__t of_bdd(bdd__t no) NO_OF_MAN_NO(Cudd_BddToAdd);
 bdd__t to_bdd(rdd__t no) NO_OF_MAN_NO(Cudd_addBddPattern);
@@ -301,13 +291,12 @@ End_roots();
 ");
 
 /* \section{Quantifications} %============================================== */
-quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Quantifications} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
+quote(MLMLI,"")
 
-rdd__t exist(bdd__t no1, rdd__t no2) 
+rdd__t exist(bdd__t no1, rdd__t no2)
      quote(call,"
 CHECK_MAN2();
 Begin_roots2(_v_no1,_v_no2);
@@ -322,7 +311,7 @@ Begin_roots2(_v_no1,_v_no2);
 }
 End_roots();
 ");
-rdd__t forall(bdd__t no1, rdd__t no2) 
+rdd__t forall(bdd__t no1, rdd__t no2)
      quote(call,"
 CHECK_MAN2();
 Begin_roots2(_v_no1,_v_no2);
@@ -339,18 +328,17 @@ End_roots();
 ");
 
 /*
-rdd__t exist(bdd__t no1, rdd__t no2)      
+rdd__t exist(bdd__t no1, rdd__t no2)
      NO_OF_MAN_NO21(Cudd_addExistAbstract);
-rdd__t forall(bdd__t no1, rdd__t no2) 
+rdd__t forall(bdd__t no1, rdd__t no2)
      NO_OF_MAN_NO21(Cudd_addUnivAbstract);
 */
 
 /* \section{Algebraic operations} */
-quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Algebraic operations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
+quote(MLMLI,"")
 
 boolean is_leq(rdd__t no1, rdd__t no2)
   quote(call, "CHECK_MAN2; _res = Cudd_addLeq(no1.man,no1.node,no2.node);");
@@ -368,11 +356,9 @@ rdd__t setNZ(rdd__t no1, rdd__t no2) APPLYBINOP(Cudd_addSetNZ);
 rdd__t log(rdd__t no) APPLYUNOP(Cudd_addLog);
 
 /* \section{Matrix Operations} */
-quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Matrix operations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
 
 quote(MLMLI,"
 external matrix_multiply : int array -> t -> t -> t = \"camlidl_rdd_matrix_multiply\"
@@ -386,11 +372,104 @@ MATMUL(camlidl_rdd_triangle,Cudd_addTriangle)
 ")
 
 /* \section{User Operations} */
-quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 User operations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
+
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(** {3 By decomposition into guards and leafs} *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLMLI,"(**
+Be cautious: here the background leaf is used as a special value,
+and should not be used for ordinary purpose.
+*)")
+
+quote(MLI,"
+val mapleaf1 : (Bdd.t -> float -> float) -> t -> t
+val mapleaf2 : (Bdd.t -> float -> float -> float) -> t -> t -> t
+")
+quote(ML,"
+let mapleaf1
+  (f:Bdd.t -> float -> float)
+  (rdd:t)
+  :
+  t
+  =
+  let manager = manager rdd in
+  let background = Manager.get_background manager in
+  let leaves = leaves rdd in
+  let res = ref (cst manager background) in
+  for i=0 to pred (Array.length leaves) do
+    let leaf = leaves.(i) in
+    if leaf<>background then begin
+      let guard = guard_of_leaf rdd leaves.(i) in
+      let nleaf = f guard leaf in
+      res := ite guard (cst manager nleaf) !res
+    end
+  done;
+  !res
+
+let mapleaf2
+  (f:Bdd.t -> float -> float -> float)
+  (rdd1:t)
+  (rdd2:t)
+  :
+  t
+  =
+  let manager = manager rdd1 in
+  let background = Manager.get_background manager in
+  let ddbackground = cst manager background in
+  let leaves1 = leaves rdd1 in
+  let res = ref ddbackground in
+  for i1=0 to pred (Array.length leaves1) do
+    let leaf1 = leaves1.(i1) in
+    if leaf1<>background then begin
+      let guard1 = guard_of_leaf rdd1 leaf1 in
+      let rdd2 = ite guard1 rdd2 ddbackground in
+      let leaves2 = leaves rdd2 in
+      for i2=0 to pred (Array.length leaves2) do
+	let leaf2 = leaves2.(i2) in
+	if leaf2<>background then begin
+	  let guard2 = guard_of_leaf rdd2 leaf2 in
+	  let nleaf = f guard2 leaf1 leaf2 in
+	  res := ite guard2 (cst manager nleaf) !res
+	end
+      done
+    end
+  done;
+  !res
+")
+
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(** {3 By using CUDD local cache (efficient and flexible)} *)")
+quote(MLMLI,"(* ====================================================== *)")
+
+quote(MLI,"
+val mapunop : (float -> float) -> t -> t 
+val mapbinop : commutative:bool -> (float -> float -> float) -> t -> t -> t
+val mapterop : (float -> float -> float -> float) -> t -> t -> t -> t
+")
+quote(ML,"
+external _internal_mapunop : bool -> (float -> float) -> t -> t = \"camlidl_rddidd_mapunop\"
+external _internal_mapbinop : bool -> bool -> (float -> float -> float) -> t -> t -> t = \"camlidl_rddidd_mapbinop\"
+external _internal_mapterop : bool -> (float -> float -> float -> float) -> t -> t -> t -> t = \"camlidl_rddidd_mapterop\"
+let mapunop f t = _internal_mapunop false f t
+let mapbinop ~commutative f t1 t2 = _internal_mapbinop false commutative f t1 t2
+let mapterop f t1 t2 t3 = _internal_mapterop false f t1 t2 t3
+")
+
+/*
+quote(MLMLI,"
+external applyunop : (t -> t option) -> t -> t = \"camlidl_rdd_applyunop\"
+external applybinop : (t -> t -> t option) -> t -> t -> t = \"camlidl_rdd_applybinop\"
+external applyterop : (t -> t -> t -> t option) -> t -> t -> t = \"camlidl_rdd_applyterop\"
+")
+*/
+
+quote(MLMLI,"(* ====================================================== *)")
+quote(MLMLI,"(** {3 By using CUDD global cache (more efficient, less flexible)} *)")
+quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
 external alloc_unop: (float -> float) -> id_unop = \"camlidl_rdd_alloc_unop\"
@@ -403,26 +482,24 @@ external apply_combinop: id_combinop -> t -> t -> t = \"camlidl_rdd_apply_combin
 quote(C,"ALLOCAPPLY_USEROP(rdd,copy_double,Double_val)")
 
 /* \section{Miscellaneous} %============================================== */
-quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Miscellaneous} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
+quote(MLMLI,"")
 
 rdd__t transfer(rdd__t no, manager__t man)
      quote(call, "
 Begin_roots1(_v_no);
-_res.man = man; 
+_res.man = man;
 _res.node = Cuddaux_addTransfer(no.man,man,no.node);
 End_roots();
 ");
 
 /* \section{Printing} %============================================== */
-quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Printing} *)")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"\n")
+quote(MLMLI,"")
 
 quote(MLMLI,"external _print: t -> unit = \"camlidl_cudd_print\"")
 
@@ -438,20 +515,20 @@ open Format
 
 let print__minterm fmt rdd =
   if is_cst rdd then pp_print_float fmt (dval rdd)
-  else 
+  else
     let nb = nbpaths rdd in
     if nb > (float_of_int !Manager.print_limit) then
       fprintf fmt \"rdd with %i nodes, %i leaves and %g paths\" (size rdd) (nbleaves rdd) nb
   else begin
     fprintf fmt \"@[<v>\";
     let first = ref true in
-    iter_cube 
+    iter_cube
       (begin fun cube leaf ->
 	if not !first then fprintf fmt \"@ \" else first := false;
 	let str = String.create (Array.length cube) in
 	Array.iteri
-	  (begin fun i elt -> 
-	    str.[i] <- 
+	  (begin fun i elt ->
+	    str.[i] <-
 	      begin match elt with
 	      | Manager.False -> '0'
 	      | Manager.True -> '1'
@@ -467,7 +544,7 @@ let print__minterm fmt rdd =
 
 let print_minterm bassoc nassoc fmt rdd =
   if is_cst rdd then pp_print_string fmt (nassoc (dval rdd))
-  else 
+  else
     let nb = nbpaths rdd in
     if nb > (float_of_int !Manager.print_limit) then
       fprintf fmt \"rdd with %i nodes, %i leaves and %g paths\" (size rdd) (nbleaves rdd) nb
@@ -490,5 +567,5 @@ let rec print bassoc nassoc formatter rdd =
   | Leaf(v) -> pp_print_string formatter (nassoc v)
   | Ite(var,alors,sinon) ->
       fprintf formatter \"ITE(@[<hv>%s;@,%a;@,%a)@]\"
-        (bassoc var) (print bassoc nassoc) alors (print bassoc nassoc) sinon
+	(bassoc var) (print bassoc nassoc) alors (print bassoc nassoc) sinon
 ")
