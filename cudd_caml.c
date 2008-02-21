@@ -31,8 +31,8 @@ value camlidl_cudd_set_gc(value _v_heap, value _v_gc, value _v_reordering)
   heap = Int_val(_v_heap);
   camlidl_cudd_heap = heap;
   if (camlidl_cudd_gc_fun == Val_unit){
-    register_global_root(&camlidl_cudd_gc_fun);
-    register_global_root(&camlidl_cudd_reordering_fun);
+    caml_register_global_root(&camlidl_cudd_gc_fun);
+    caml_register_global_root(&camlidl_cudd_reordering_fun);
   }
   camlidl_cudd_gc_fun = _v_gc;
   camlidl_cudd_reordering_fun = _v_reordering;
@@ -43,7 +43,7 @@ int camlidl_cudd_garbage(DdManager* dd, const char* s, void* data)
 {
   if (camlidl_cudd_gc_fun==Val_unit)
     camlidl_cudd_gc_fun = *(caml_named_value("gc_full_major"));
-  else 
+  else
     callback(camlidl_cudd_gc_fun,Val_unit);
   return 1;
 }
@@ -52,7 +52,7 @@ int camlidl_cudd_reordering(DdManager* dd, const char* s, void* data)
 {
   if (camlidl_cudd_reordering_fun==Val_unit)
     camlidl_cudd_reordering_fun = *(caml_named_value("gc_full_major"));
-  else 
+  else
     callback(camlidl_cudd_reordering_fun,Val_unit);
   return 1;
 }
@@ -102,6 +102,10 @@ void camlidl_custom_node_finalize(value val)
   DdNode* node = ((node__t*)(Data_custom_val(val)))->node;
   assert (Cudd_Regular(node)->ref >= 1);
   Cudd_RecursiveDeref(man,node);
+  if (Cudd_Regular(node)->ref == 0){
+    ((node__t*)(Data_custom_val(val)))->man = 0xBBBBBBBB;
+    ((node__t*)(Data_custom_val(val)))->node = 0xBBBBBBBB;
+  }
 }
 int camlidl_custom_node_compare(value val1, value val2)
 {
@@ -712,7 +716,7 @@ value camlidl_cudd_idd_iter_cube(value _v_closure, value _v_no)
     autodyn = 1;
     Cudd_AutodynDisable(no.man);
   }
-  else 
+  else
     autodyn=0;
 
   size = no.man->size;
@@ -986,26 +990,63 @@ value camlidl_cudd_print(value _v_no)
 /* \section{User operations, using local cache} */
 /* %======================================================================== */
 
+static int camlidl_op_initialized = 0;
 static int camlidl_rddidd_is_idd = 0;
 /* If false, we have RDD, if true we have IDD */
 static int camlidl_rddidd_op_commutative = 0;
 /* Is the operation commutative ? */
-static value camlidl_rddidd_op_closure = 0;
-/* Closure */
+static value camlidl_rddidd_op_closure = Val_unit;
+/* Closure for mapunop, mapbinop operations */
+static value camlidl_rddidd_op_exn = Val_unit;
+/* To keep things temporarily */
+static value camlidl_rddidd_op_val1 = Val_unit;
+static value camlidl_rddidd_op_val2 = Val_unit;
+static value camlidl_rddidd_op_val3 = Val_unit;
+/* Exception */
+
+static void camlidl_op_initialize(void)
+{
+  caml_register_global_root(&camlidl_rddidd_op_closure);
+  caml_register_global_root(&camlidl_rddidd_op_exn);
+  caml_register_global_root(&camlidl_rddidd_op_val1);
+  caml_register_global_root(&camlidl_rddidd_op_val2);
+  caml_register_global_root(&camlidl_rddidd_op_val3);
+  camlidl_op_initialized = 1;
+}
 
 static DdNode* camlidl_rddidd_mapunop_aux(DdManager* man, DdNode* f)
 {
   value _v_f,_v_val;
   DdNode *res;
   double val;
+  int exception;
 
+  assert (f->ref>=1);
   if (cuddIsConstant(f)){
+    exception = 0;
     _v_f = _v_val = 0;
     Begin_roots2(_v_f,_v_val)
-      _v_f = camlidl_rddidd_is_idd ? Val_int((int)(cuddV(f))) : copy_double(cuddV(f));
-      _v_val = callback(camlidl_rddidd_op_closure, _v_f);
-      val = camlidl_rddidd_is_idd ? (double)(Int_val(_v_val)) : Double_val(_v_val);
-      res = cuddUniqueConst(man,val);
+      if (camlidl_rddidd_is_idd){
+	_v_f = Val_int((int)(cuddV(f)));
+	_v_val = callback_exn(camlidl_rddidd_op_closure, _v_f);
+	if (Is_exception_result(_v_val)){
+	  camlidl_rddidd_op_exn = _v_val;
+	  exception=1;
+	}
+	else
+	  val = (double)(Int_val(_v_val));
+      }
+      else {
+	_v_f = copy_double(cuddV(f));
+	_v_val = callback_exn(camlidl_rddidd_op_closure, _v_f);
+	if (Is_exception_result(_v_val)){
+	  camlidl_rddidd_op_exn = _v_val;
+	  exception=1;
+	}
+	else
+	  val = Double_val(_v_val);
+      }
+      res = exception ? NULL : cuddUniqueConst(man,val);
     End_roots()
   }
   else {
@@ -1018,6 +1059,7 @@ static DdNode* camlidl_rddidd_mapbinop_aux(DdManager* man, DdNode** f, DdNode** 
   value _v_F,_v_G,_v_val;
   DdNode *F, *G, *res;
   double val;
+  int exception;
 
   F = *f; G = *g;
   if (camlidl_rddidd_op_commutative && F > G) {
@@ -1025,19 +1067,32 @@ static DdNode* camlidl_rddidd_mapbinop_aux(DdManager* man, DdNode** f, DdNode** 
     *g = F;
   }
   if (cuddIsConstant(F) && cuddIsConstant(G)) {
+    exception = 0;
     _v_F = _v_G = _v_val = 0;
     Begin_roots3(_v_F,_v_G,_v_val)
     if (camlidl_rddidd_is_idd){
       _v_F = Val_int((int)(cuddV(F)));
       _v_G = Val_int((int)(cuddV(G)));
+      _v_val = callback2_exn(camlidl_rddidd_op_closure, _v_F, _v_G);
+      if (Is_exception_result(_v_val)){
+	camlidl_rddidd_op_exn = _v_val;
+	exception=1;
+      }
+      else
+	val = (double)(Int_val(_v_val));
     }
     else {
       _v_F = copy_double(cuddV(F));
       _v_G = copy_double(cuddV(G));
-    }      
-    _v_val = callback2(camlidl_rddidd_op_closure, _v_F, _v_G);
-    val = camlidl_rddidd_is_idd ? (double)(Int_val(_v_val)) : Double_val(_v_val);
-    res = cuddUniqueConst(man,val);
+      _v_val = callback2_exn(camlidl_rddidd_op_closure, _v_F, _v_G);
+      if (Is_exception_result(_v_val)){
+	camlidl_rddidd_op_exn = _v_val;
+	exception=1;
+      }
+      else
+	val = Double_val(_v_val);
+    }
+    res = exception ? NULL : cuddUniqueConst(man,val);
     End_roots()
   }
   else {
@@ -1050,9 +1105,11 @@ static DdNode* camlidl_rddidd_mapterop_aux(DdManager* man, DdNode** f, DdNode** 
   value _v_F,_v_G,_v_H,_v_val;
   DdNode *F, *G, *H, *res;
   double val;
+  int exception;
 
   F = *f; G = *g; H = *h;
   if (cuddIsConstant(F) && cuddIsConstant(G) && cuddIsConstant(H)) {
+    exception = 0;
     _v_F = _v_G = _v_H = _v_val = 0;
     Begin_roots4(_v_F,_v_G,_v_H,_v_val)
     if (camlidl_rddidd_is_idd){
@@ -1064,10 +1121,15 @@ static DdNode* camlidl_rddidd_mapterop_aux(DdManager* man, DdNode** f, DdNode** 
       _v_F = copy_double(cuddV(F));
       _v_G = copy_double(cuddV(G));
       _v_H = copy_double(cuddV(H));
-    }      
-    _v_val = callback3(camlidl_rddidd_op_closure, _v_F, _v_G, _v_H);
-    val = camlidl_rddidd_is_idd ? (double)(Int_val(_v_val)) : Double_val(_v_val);
-    res = cuddUniqueConst(man,val);
+    }
+    _v_val = callback3_exn(camlidl_rddidd_op_closure, _v_F, _v_G, _v_H);
+    if (Is_exception_result(_v_val)){
+      camlidl_rddidd_op_exn = _v_val;
+      exception=1;
+    }
+    else
+      val = camlidl_rddidd_is_idd ? (double)(Int_val(_v_val)) : Double_val(_v_val);
+    res = exception ? NULL : cuddUniqueConst(man,val);
     End_roots()
   }
   else {
@@ -1077,56 +1139,93 @@ static DdNode* camlidl_rddidd_mapterop_aux(DdManager* man, DdNode** f, DdNode** 
 }
 value camlidl_cudd_rddidd_mapunop(value _v_is_idd, value _v_f, value _v_no)
 {
-  CAMLparam2(_v_f,_v_no); CAMLlocal1(_v_res);
+  CAMLparam3(_v_is_idd,_v_f,_v_no); CAMLlocal1(_v_res);
   node__t no,_res;
-  
+
+  if (!camlidl_op_initialized) camlidl_op_initialize();
   camlidl_rddidd_is_idd = Int_val(_v_is_idd);
-  if (camlidl_rddidd_op_closure != 0){
+  if (camlidl_rddidd_op_closure != Val_unit){
     failwith("RddIdd.mapunop: this family of functions cannot be called recursively !");
   }
   camlidl_rddidd_op_closure = _v_f;
+  camlidl_rddidd_op_exn = Val_unit;
+  camlidl_rddidd_op_val1 = _v_no;
   camlidl_cudd_node_ml2c(_v_no,&no);
   _res.man = no.man;
   _res.node = Cuddaux_AddApply1(no.man, camlidl_rddidd_mapunop_aux, no.node);
-  _v_res = camlidl_cudd_node_c2ml(&_res);
-  camlidl_rddidd_op_closure = 0;
+  camlidl_rddidd_op_closure = Val_unit;
+  camlidl_rddidd_op_val1 = Val_unit;
+  if (camlidl_rddidd_op_exn!=Val_unit){
+    assert(_res.node==NULL);
+    assert(Is_exception_result(camlidl_rddidd_op_exn));
+    caml_raise(Extract_exception(camlidl_rddidd_op_exn));
+  }
+  else 
+    _v_res = camlidl_cudd_node_c2ml(&_res);
   CAMLreturn(_v_res);
 }
 value camlidl_cudd_rddidd_mapbinop(value _v_is_idd, value _v_bool, value _v_f, value _v_no1, value _v_no2)
 {
-  CAMLparam4(_v_bool,_v_f,_v_no1,_v_no2); CAMLlocal1(_v_res);
+  CAMLparam5(_v_is_idd,_v_bool,_v_f,_v_no1,_v_no2); CAMLlocal1(_v_res);
   node__t no1,no2,_res;
-  
+
+  if (!camlidl_op_initialized) camlidl_op_initialize();
   camlidl_rddidd_is_idd = Int_val(_v_is_idd);
   camlidl_rddidd_op_commutative = Int_val(_v_bool);
-  if (camlidl_rddidd_op_closure != 0){
+  if (camlidl_rddidd_op_closure != Val_unit){
     failwith("Rdd|Idd.mapbinop: this family of functions cannot be called recursively !");
   }
   camlidl_rddidd_op_closure = _v_f;
+  camlidl_rddidd_op_exn = Val_unit;
+  camlidl_rddidd_op_val1 = _v_no1;
+  camlidl_rddidd_op_val2 = _v_no2;
   camlidl_cudd_node_ml2c(_v_no1,&no1);
   camlidl_cudd_node_ml2c(_v_no2,&no2);
   _res.man = no1.man;
   _res.node = Cuddaux_AddApply2(no1.man, camlidl_rddidd_mapbinop_aux, no1.node, no2.node);
-  _v_res = camlidl_cudd_node_c2ml(&_res);
-  camlidl_rddidd_op_closure = 0;
+  camlidl_rddidd_op_closure = Val_unit;
+  camlidl_rddidd_op_val1 = Val_unit;
+  camlidl_rddidd_op_val2 = Val_unit;
+  if (camlidl_rddidd_op_exn!=Val_unit){
+    assert(_res.node==NULL);
+    assert(Is_exception_result(camlidl_rddidd_op_exn));
+    caml_raise(Extract_exception(camlidl_rddidd_op_exn));
+  }
+  else 
+    _v_res = camlidl_cudd_node_c2ml(&_res);
   CAMLreturn(_v_res);
 }
-value camlidl_cudd_rddidd_mapterop(value _v_is_idd, value _v_bool, value _v_f, value _v_no1, value _v_no2, value _v_no3)
+value camlidl_cudd_rddidd_mapterop(value _v_is_idd, value _v_f, value _v_no1, value _v_no2, value _v_no3)
 {
-  CAMLparam5(_v_bool,_v_f,_v_no1,_v_no2,_v_no3); CAMLlocal1(_v_res);
+  CAMLparam5(_v_is_idd,_v_f,_v_no1,_v_no2,_v_no3);
+  CAMLlocal1(_v_res);
   node__t no1,no2,no3,_res;
-  
+
+  if (!camlidl_op_initialized) camlidl_op_initialize();
   camlidl_rddidd_is_idd = Int_val(_v_is_idd);
-  if (camlidl_rddidd_op_closure != 0){
+  if (camlidl_rddidd_op_closure != Val_unit){
     failwith("Rdd|Idd.mapterop: this family of functions cannot be called recursively !");
   }
   camlidl_rddidd_op_closure = _v_f;
+  camlidl_rddidd_op_exn = Val_unit;
+  camlidl_rddidd_op_val1 = _v_no1;
+  camlidl_rddidd_op_val2 = _v_no2;
+  camlidl_rddidd_op_val3 = _v_no3;
   camlidl_cudd_node_ml2c(_v_no1,&no1);
   camlidl_cudd_node_ml2c(_v_no2,&no2);
   camlidl_cudd_node_ml2c(_v_no3,&no3);
   _res.man = no1.man;
   _res.node = Cuddaux_AddApply3(no1.man, camlidl_rddidd_mapterop_aux, no1.node, no2.node, no3.node);
-  _v_res = camlidl_cudd_node_c2ml(&_res);
-  camlidl_rddidd_op_closure = 0;
+  camlidl_rddidd_op_closure = Val_unit;
+  camlidl_rddidd_op_val1 = Val_unit;
+  camlidl_rddidd_op_val2 = Val_unit;
+  camlidl_rddidd_op_val3 = Val_unit;
+  if (camlidl_rddidd_op_exn!=Val_unit){
+    assert(_res.node==NULL);
+    assert(Is_exception_result(camlidl_rddidd_op_exn));
+    caml_raise(Extract_exception(camlidl_rddidd_op_exn));
+  }
+  else 
+    _v_res = camlidl_cudd_node_c2ml(&_res);
   CAMLreturn(_v_res);
 }

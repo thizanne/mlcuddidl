@@ -50,8 +50,14 @@ external delse : t -> t = \"camlidl_rdd_delse\"
 external cofactors : int -> t ->  t*t = \"camlidl_rdd_cofactors\"
 external cofactor : t -> Bdd.t -> t = \"camlidl_rdd_cofactor\"
 ")
-int dval(idd__t no) quote(call,"_res = (int)(cuddV(no.node));");
-quote(MLMLI,"external inspect: t -> idd = \"camlidl_idd_inspect\"")
+int dval(idd__t no) quote(call,"
+if (!cuddIsConstant(no.node))
+  failwith(\"Rdd.dval: non constant RDD\")
+;
+_res = cuddV(no.node);
+");
+
+quote(MLMLI,"external inspect: idd__t -> idd = \"camlidl_idd_inspect\"")
 
 /* \section{Supports} %====================================================== */
 

@@ -45,12 +45,32 @@ external manager : t -> Manager.t = \"camlidl_bdd_manager\"
 external is_cst : t -> bool = \"camlidl_bdd_is_cst\"
 external topvar : t -> int = \"camlidl_bdd_topvar\"
 ")
-rdd__t dthen(rdd__t no) NO_OF_NO(cuddT);
-rdd__t delse(rdd__t no) NO_OF_NO(cuddE);
-double dval(rdd__t no) quote(call,"_res = cuddV(no.node);");
+rdd__t dthen(rdd__t no) quote(call, "
+if (cuddIsConstant(no.node))
+  failwith (\"Rdd.dthen: constant RDD\")
+;
+Begin_roots1(_v_no);
+_res.man = no.man;
+_res.node = cuddT(no.node);
+End_roots();
+");
+rdd__t delse(rdd__t no) quote(call, "
+if (cuddIsConstant(no.node))
+  failwith (\"Rdd.delse: constant RDD\")
+;
+Begin_roots1(_v_no);
+_res.man = no.man;
+_res.node = cuddE(no.node);
+End_roots();
+");
+double dval(rdd__t no) quote(call,"
+if (!cuddIsConstant(no.node))
+  failwith(\"Rdd.dval: non constant RDD\")
+;
+_res = cuddV(no.node);
+");
 void cofactors(int var, rdd__t no, [out] rdd__t noa, [out] rdd__t nob)
-  quote(call,
-" {
+  quote(call," {
   DdNode* cof;
   noa.man = nob.man = no.man;
   Begin_roots1(_v_no);
@@ -446,7 +466,7 @@ quote(MLMLI,"(** {3 By using CUDD local cache (efficient and flexible)} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLI,"
-val mapunop : (float -> float) -> t -> t 
+val mapunop : (float -> float) -> t -> t
 val mapbinop : commutative:bool -> (float -> float -> float) -> t -> t -> t
 val mapterop : (float -> float -> float -> float) -> t -> t -> t -> t
 ")
