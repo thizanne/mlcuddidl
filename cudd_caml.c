@@ -102,10 +102,6 @@ void camlidl_custom_node_finalize(value val)
   DdNode* node = ((node__t*)(Data_custom_val(val)))->node;
   assert (Cudd_Regular(node)->ref >= 1);
   Cudd_RecursiveDeref(man,node);
-  if (Cudd_Regular(node)->ref == 0){
-    ((node__t*)(Data_custom_val(val)))->man = 0xBBBBBBBB;
-    ((node__t*)(Data_custom_val(val)))->node = 0xBBBBBBBB;
-  }
 }
 int camlidl_custom_node_compare(value val1, value val2)
 {
@@ -444,6 +440,7 @@ value camlidl_cudd_bdd_vectorsupport(value _v_vec)
       failwith("Bdd.vectorsupport called with BDDs belonging to different managers !");
   }
   _res.node = Cudd_VectorSupport(_res.man, vec, size);
+  free(vec);
   _v_res = camlidl_cudd_bdd_c2ml(&_res);
   CAMLreturn(_v_res);
 }
@@ -485,6 +482,7 @@ value camlidl_cudd_rdd_vectorsupport2(value _v_vec1, value _v_vec2)
       failwith("Rdd.vectorsupport2 called with BDDs belonging to different managers !");
   }
   _res.node = Cudd_VectorSupport(_res.man, vec, size);
+  free(vec);
   _v_res = camlidl_cudd_bdd_c2ml(&_res);
   CAMLreturn(_v_res);
 }
@@ -920,6 +918,8 @@ value camlidl_cudd_idd_leaves(value _v_no)
   int val,i,size;
 
   camlidl_cudd_node_ml2c(_v_no,&no);
+  assert(no.node->ref>=1);
+
   list = Cuddaux_NodesBelowLevel(no.man,no.node,CUDD_MAXINDEX);
 
   /* Now, we build the array of nodes */
