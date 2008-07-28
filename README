@@ -3,9 +3,11 @@ The basic distribution contain the following files:
 	README
 	Makefile Makefile.config.model
 	Changes
-		    manager.idl    bdd.idl    rdd.idl    idd.idl 
-		    manager.mli    bdd.mli    rdd.mli    idd.mli    mtbdd.mli  
-		    manager.ml     bdd.ml     rdd.ml     idd.ml     mtbdd.ml   
+	manager.idl    bdd.idl    rdd.idl    idd.idl 
+	manager.mli    bdd.mli    rdd.mli    idd.mli    mtbdd.mli  
+	manager.ml     bdd.ml     rdd.ml     idd.ml     mtbdd.ml   
+	session.ml example.ml
+
 	cudd_caml.c manager_caml.c bdd_caml.c rdd_caml.c idd_caml.c
 	cudd_caml.h sedscript_c sedscript_caml macros.m4
 	texinfo.tex mlcuddidl.texi
@@ -27,6 +29,10 @@ library. It generates five ML modules: Manager, Bdd, Rdd, Idd, Mtbdd.
 
 * To build,
 Set Makefile.config from Makefile.config.model model.
+
+IMPORTANT REMARK: The C compilation flags in XCFLAGS (processor, alignement)
+should be the same than those with which CUDD and CUDDAUX are compiled.
+
 make rebuild: requested only if download from subvsersion directory.
 	      regenerate C and OCaml files from .idl files
               (require m4, sed)
@@ -43,7 +49,6 @@ make rebuild: regenerate C and OCaml files from .idl files
               (require m4, sed)
 make mlcuddidl.dvi:
 
-IMPORTANT REMARK: The C compilation flags in XCFLAGS (processor, alignement)
-should be the same than those with which CUDD and CUDDAUX are compiled.
+You can also look at session.ml.
 
 * Documentation: DVI (mlcuddidl.dvi), INFO (mlcuddidl.info), HTML (HTML/*)

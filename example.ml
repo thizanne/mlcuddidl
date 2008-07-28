@@ -1,3 +1,12 @@
+(*
+For interactive session:
+type on shour shell the command:
+"make cuddtop"
+and then
+"cuddtop -I installation_path_of_lib" or
+"cuddtop" if in source directory, after compilation
+*)
+
 let man = Manager.make 10 10 0 0 0;;
 
 (* Identifiers of variables printed as "x", "y,", .... *)

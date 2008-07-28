@@ -1,3 +1,10 @@
+(*
+First, "make cuddtop"
+Then, type on shour shell the command:
+"cuddtop -I installation_path_of_lib" or
+"cuddtop" if in source directory, after compilation
+*)
+
 let man = Manager.make 10 10 0 0 0;;
 #install_printer Bdd.print__minterm;;
 #install_printer Idd.print__minterm;;
