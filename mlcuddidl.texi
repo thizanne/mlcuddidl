@@ -982,6 +982,11 @@ Computes the boolean difference of the @sc{Bdd} with
 respect to x.
 @end defun
 
+@c ===================================================================
+@node Cubes, Bdd minimizations, Bdd quantifiers, Bdd
+@section Cubes
+@c ===================================================================
+
 @defun cube_of_bdd @t{: t -> t}
 @code{Cudd_FindEssential}@* 
 Returns the smallest cube (in the sens of inclusion) included in the
@@ -995,8 +1000,25 @@ Converts a minterm to a @sc{Bdd} (which is a cube).
 Converts a cube into a list of pairs of a variable and a phase.
 @end defun
 @defun cube_union @t{: t -> t -> t}
-@code{Cuddaux_bddCubeUnion}@* Computes the "union" of cubes, wich is the
+@code{Cuddaux_bddCubeUnion}@* Computes the "union" of cubes, which is the
 smallest cube containing both the argument cubes.
+@end defun
+@defun pick_minterm @t{: t -> Manager.tbool array}
+@code{Cuddaux_bddPickOneCube}@* Picks randomly a minterm in the BDD.
+@end defun
+@defun pick_cube_on_support @t{: t -> supp:t -> t}
+@code{Cuddaux_bddPickOneMinterm}@* Picks randomly a minterm/cube in the BDD,
+in which all the variables in the support have a definite value. The
+support argument should contain the support of the BDD (otherwise the
+result may be incorrect).
+@end defun
+@defun pick_cubes_on_support @t{: t -> supp:t -> int -> t array}
+@code{Cuddaux_bddPickArbitraryMinterms}@* Picks randomly the given
+number of minterms/cubes in the BDD, in which all the variables in the
+support have a definite value. The support argument should contain the
+support of the BDD (otherwise the result may be incorrect). Fails if
+the effective number of such minterms in the BDD is less than the asked
+number of minterms.
 @end defun
 
 @c ===================================================================
@@ -1021,7 +1043,7 @@ Constrain and Restrict operators as defined by P. Raymond in his PhD. thesis. Ba
 @defun minimize @t{: t -> t -> t}
 @defunx licompaction @t{: t -> t -> t}
 @code{Cudd_bddMinimize} @code{Cudd_bddLICompaction} @*
-Others generalized cofactor operators.
+Other generalized cofactor operators.
 @end defun
 
 @defun squeeze @t{: t -> t -> t}

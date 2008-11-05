@@ -1,4 +1,11 @@
 -------------
+MLCuddIDL 1.3b:
+-------------
+bdd.idl:
+  Type of is_var_essential changed.
+  New functions: pick_minterm, pick_cube(s)_on_support, 
+  
+-------------
 MLCuddIDL 1.3a:
 -------------
 Distribution slightly modified (makefile.config)

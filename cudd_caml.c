@@ -751,6 +751,9 @@ value camlidl_cudd_bdd_iter_prime(value _v_closure, value _v_lower, value _v_upp
 
   camlidl_cudd_node_ml2c(_v_lower,&lower);
   camlidl_cudd_node_ml2c(_v_upper,&upper);
+  if (lower.man!=upper.man){
+    failwith("Bdd.iter_ime called with BDDs belonging to different managers !");
+  }
   autodyn = 0;
   if (Cudd_ReorderingStatus(lower.man,&heuristic)){
     autodyn = 1;
@@ -776,7 +779,7 @@ value camlidl_cudd_bdd_iter_prime(value _v_closure, value _v_lower, value _v_upp
 }
 
 /* %======================================================================== */
-/* \section{Quantifications} */
+/* \section{Cubes} */
 /* %======================================================================== */
 
 value camlidl_cudd_cube_of_bdd(value _v_no)
@@ -864,6 +867,140 @@ value camlidl_cudd_list_of_cube(value _v_no)
   }
   CAMLreturn(res);
 }
+
+value camlidl_cudd_pick_minterm(value _v_no)
+{
+  CAMLparam1(_v_no);
+  CAMLlocal1(_v_array);
+  bdd__t no;
+  char array[1024];
+  char* string;
+  int i,size,res;
+
+  camlidl_cudd_node_ml2c(_v_no,&no);
+  size = no.man->size;
+  string = size>1024 ? (char*)malloc(size) : array;
+  if (string==NULL){
+    failwith("Bdd.pick_minterm: out of memory");
+  }
+  res = Cudd_bddPickOneCube(no.man,no.node,string);
+  if (res==0){
+    if (size>1024) free(string);
+    failwith("Bdd.pick_minterm: (probably) second argument is not a positive cube");
+  }
+  _v_array = alloc(size,0);
+  for(i=0; i<size; i++){
+    Store_field(_v_array,i,Val_int(array[i]));
+    /* Allowed according to caml/memory.h memory.c */
+  }
+  if (size>1024) free(string);
+  CAMLreturn(_v_array);
+}
+
+static int array_of_support(DdManager* man, DdNode* supp, DdNode*** pvars, int* psize)
+{
+  int i,size;
+  DdNode* zero;
+  DdNode* one;;
+  DdNode* f;
+  DdNode** vars;
+
+  f = supp;
+  one = DD_ONE(man);
+  zero = Cudd_Not(one);
+  size = 0;
+  while (! Cudd_IsConstant(f)){
+    if (Cudd_IsComplement(f) || cuddE(f)!=zero){
+      return 1;
+    }
+    f = cuddT(f);
+    size++;
+  }
+  if (size==0) return 2;
+  vars = (DdNode**)malloc(size*sizeof(DdNode*));
+  f = supp;
+  for (i=0; i<size; i++){
+    vars[i] = Cudd_ReadVars(man,f->index);
+    f = cuddT(f);
+  }
+  *pvars = vars;
+  *psize=size;
+  return 0;
+}
+
+
+value camlidl_cudd_pick_cube_on_support(value _v_no1, value _v_no2)
+{
+  CAMLparam2(_v_no1,_v_no2);
+  CAMLlocal1(_v_res);
+  bdd__t no1,no2;
+  int size,ret;
+  DdNode** vars;
+  bdd__t res;
+
+  camlidl_cudd_node_ml2c(_v_no1,&no1);
+  camlidl_cudd_node_ml2c(_v_no2,&no2);
+  if (no1.man!=no2.man){
+    failwith ("Bdd.pick_cube_on_support called with BDDs belonging to different managers !");
+  }
+  ret = array_of_support(no2.man,no2.node,&vars,&size);
+  if (ret==1){
+    failwith("Bdd.pick_cube_on_support: the second argument is not a positive cube");
+  }
+  else if (ret==2){
+    failwith("Bdd.pick_cube_on_support: empty support or out of memory");
+  }
+  res.man = no1.man;
+  res.node = Cudd_bddPickOneMinterm(no1.man,no1.node,vars,size);
+  free(vars);
+  _v_res = camlidl_cudd_bdd_c2ml(&res);
+  CAMLreturn(_v_res);
+}
+
+value camlidl_cudd_pick_cubes_on_support(value _v_no1, value _v_no2, value _v_k)
+{
+  CAMLparam3(_v_no1,_v_no2,_v_k);
+  CAMLlocal2(v,_v_res);
+  bdd__t no1,no2,no3;
+  int i,k;
+  int size,ret;
+  DdNode** vars;
+  DdNode** array;
+
+  camlidl_cudd_node_ml2c(_v_no1,&no1);
+  camlidl_cudd_node_ml2c(_v_no2,&no2);
+  k = Int_val(_v_k);
+  if (no1.man!=no2.man){
+    failwith ("Bdd.pick_cubes_on_support called with BDDs belonging to different managers !");
+  }
+  ret = array_of_support(no2.man,no2.node,&vars,&size);
+  if (ret==1){
+    failwith("Bdd.pick_cubes_on_support: the second argument is not a positive cube");
+  }
+  else if (ret==2){
+    failwith("Bdd.pick_cube_on_support: empty support or out of memory");
+  }
+  array = Cudd_bddPickArbitraryMinterms(no1.man,no1.node,vars,size,k);
+  free(vars);
+  if (array==NULL){
+    failwith("Bdd.pick_cubes_on_support: out of memory, or first argument is false, or wrong support, or number of minterms < k");
+  }
+  
+  if (k==0){
+    _v_res = Atom(0);
+  }
+  else {
+    _v_res = alloc(k,0);
+    for(i=0; i<k; i++){
+      no3.man = no1.man;
+      no3.node = array[i];
+      v = camlidl_cudd_bdd_c2ml(&no3);
+      Store_field(_v_res,i,v);
+    }
+  }
+  CAMLreturn(_v_res);
+}
+
 
 /* %======================================================================== */
 /* \section{Guards and leaves} */
@@ -1160,7 +1297,7 @@ value camlidl_cudd_rddidd_mapunop(value _v_is_idd, value _v_f, value _v_no)
     assert(Is_exception_result(camlidl_rddidd_op_exn));
     caml_raise(Extract_exception(camlidl_rddidd_op_exn));
   }
-  else 
+  else
     _v_res = camlidl_cudd_node_c2ml(&_res);
   CAMLreturn(_v_res);
 }
@@ -1191,7 +1328,7 @@ value camlidl_cudd_rddidd_mapbinop(value _v_is_idd, value _v_bool, value _v_f, v
     assert(Is_exception_result(camlidl_rddidd_op_exn));
     caml_raise(Extract_exception(camlidl_rddidd_op_exn));
   }
-  else 
+  else
     _v_res = camlidl_cudd_node_c2ml(&_res);
   CAMLreturn(_v_res);
 }
@@ -1225,7 +1362,7 @@ value camlidl_cudd_rddidd_mapterop(value _v_is_idd, value _v_f, value _v_no1, va
     assert(Is_exception_result(camlidl_rddidd_op_exn));
     caml_raise(Extract_exception(camlidl_rddidd_op_exn));
   }
-  else 
+  else
     _v_res = camlidl_cudd_node_c2ml(&_res);
   CAMLreturn(_v_res);
 }

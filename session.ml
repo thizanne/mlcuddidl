@@ -30,6 +30,8 @@ let res = Bdd.cube_union f g;;
 let res = Bdd.cube_union (Bdd.dnot f) g;;
 let z = Bdd.nxor x y;;
 let z = Bdd.xor x y;;
+Bdd.pick_cubes_on_support z (Bdd.cube_of_minterm man [|Manager.True;Manager.True;Manager.True;Manager.True|]) 9;;
+
 
 
 
