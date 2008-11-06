@@ -58,6 +58,8 @@ module type S =
     (* Classical operations *)
     val cst: Manager.t -> leaf -> t
     external ite: Bdd.t -> t -> t -> t = "camlidl_cudd_rdd_ite"
+    external ite_cst: Bdd.t -> t -> t -> t = "camlidl_cudd_rdd_ite_cst"
+    external eval_cst : t -> Bdd.t -> t option = "camlidl_cudd_rdd_eval_cst"
     external compose: int -> Bdd.t -> t -> t = "camlidl_cudd_rdd_compose"
     external vectorcompose: Bdd.t array -> t -> t = "camlidl_cudd_rdd_vectorcompose"
     (* Logical tests *)
@@ -97,6 +99,11 @@ module type S =
    (* User operations *)
     val mapleaf1 : (Bdd.t -> leaf -> leaf) -> t -> t
     val mapleaf2 : (Bdd.t -> leaf -> leaf -> leaf) -> t -> t -> t
+
+    val mapunop : (leaf -> leaf) -> t -> t
+    val mapbinop : commutative:bool -> (leaf -> leaf -> leaf) -> t -> t -> t
+    val mapterop : (leaf -> leaf -> leaf -> leaf) -> t -> t -> t -> t
+
     val alloc_unop: (leaf -> leaf) -> id_unop
     val alloc_binop: (leaf -> leaf -> leaf) -> id_binop
     val alloc_combinop: (leaf -> leaf -> leaf) -> id_combinop
@@ -192,6 +199,8 @@ module Make (Leaf : LeafType) =
     (* classical operations *)
     let cst man l = Idd.cst man (id_of_leaf l)
     external ite: Bdd.t -> t -> t -> t = "camlidl_cudd_rdd_ite"
+    external ite_cst: Bdd.t -> t -> t -> t = "camlidl_cudd_rdd_ite_cst"
+    external eval_cst : t -> Bdd.t -> t option = "camlidl_cudd_rdd_eval_cst"
     external compose: int -> Bdd.t -> t -> t = "camlidl_cudd_rdd_compose"
     external vectorcompose: Bdd.t array -> t -> t = "camlidl_cudd_rdd_vectorcompose"
     (* tests *)
@@ -250,6 +259,24 @@ module Make (Leaf : LeafType) =
 	  id_of_leaf (leaf_op (leaf_of_id idx) (leaf_of_id idy))
       in
       id_op
+
+    let mapunop lop f = 
+      let op = 
+	fun id -> 
+	  id_of_leaf (lop (leaf_of_id id))
+      in
+      Idd.mapunop op f
+
+    let mapbinop ~commutative lop f g = 
+      let op = wrap_binop lop in
+      Idd.mapbinop ~commutative op f g 
+
+    let mapterop lop f g h = 
+      let op = fun idx idy idz ->
+	  id_of_leaf (lop (leaf_of_id idx) (leaf_of_id idy) (leaf_of_id idz))
+      in
+      Idd.mapterop op f g h 
+
     let alloc_unop lop =
       let op = 
 	fun id -> 

@@ -22,7 +22,6 @@ The basic distribution contain the following files:
 - CAMLIDL 1.05 (http://caml.inria.fr/camlidl)
 
 - GREP, SED, M4 if you want to regenerate files from .idl files
-- TEXI2DVI, MAKEINFO, TEXI2HTML to rebuild the documentation
 
 * This code provides an interface to user's functions of the CUDD
 library. It generates five ML modules: Manager, Bdd, Rdd, Idd, Mtbdd.

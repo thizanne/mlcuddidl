@@ -19,7 +19,7 @@ module type LeafType =
       (** Hashing function on leaves *)
     val background: t
       (** Background leaf value 
-	(typically, dummy value not encountered for normal use *)
+	(typically, dummy value not encountered for normal use) *)
   end
 
 (*  ====================================================================== *)
@@ -82,6 +82,8 @@ module type S =
 
     val cst: Manager.t -> leaf -> t
     external ite: Bdd.t -> t -> t -> t = "camlidl_cudd_rdd_ite"
+    external ite_cst: Bdd.t -> t -> t -> t = "camlidl_cudd_rdd_ite_cst"
+    external eval_cst : t -> Bdd.t -> t option = "camlidl_cudd_rdd_eval_cst"
     external compose: int -> Bdd.t -> t -> t = "camlidl_cudd_rdd_compose"
     external vectorcompose: Bdd.t array -> t -> t = "camlidl_cudd_rdd_vectorcompose"
 
@@ -135,6 +137,10 @@ module type S =
 
     val mapleaf1 : (Bdd.t -> leaf -> leaf) -> t -> t
     val mapleaf2 : (Bdd.t -> leaf -> leaf -> leaf) -> t -> t -> t
+
+    val mapunop : (leaf -> leaf) -> t -> t
+    val mapbinop : commutative:bool -> (leaf -> leaf -> leaf) -> t -> t -> t
+    val mapterop : (leaf -> leaf -> leaf -> leaf) -> t -> t -> t -> t
 
     val alloc_unop: (leaf -> leaf) -> id_unop
     val alloc_binop: (leaf -> leaf -> leaf) -> id_binop

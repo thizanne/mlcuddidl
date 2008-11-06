@@ -96,7 +96,7 @@ Public License.
 @c *******************************************************************
 
 This library provides an @sc{OCaml} interface to
-the BDD's library @sc{C}. The reader is supposed to have first
+the BDD's library @sc{Cudd}. The reader is supposed to have first
 read the user's manual of this library.
 
 Most functions of the @sc{Cudd} library are interfaced; with the
@@ -396,8 +396,6 @@ means @code{True or False}.
 @node Manager management, Variables and Reordering and Mapping, Manager types, Manager
 @section Manager management
 @c ===================================================================
-
-
 
 @defun make @t{: numVars:int -> numVarsZ:int -> numSlots:int -> cacheSize:int -> maxMemory:int -> t}
 @code{Cudd_Init}@*

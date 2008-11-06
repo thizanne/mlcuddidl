@@ -28,6 +28,12 @@ type bdd = \n\
 quote(MLI,"(** Dummy value (useful in some cases) *)")
 quote(MLI,"val dummy : t")
 
+quote(MLI,"\n
+(** [t] is the abstract datatype for BDDs. Objects of type [t] contain both
+the top node of the BDD and the manager to whichthis node belongs. The manager
+can be retrieved with {!manager}.  These objects are automatically garbage
+collected. *)")
+
 /* ====================================================================== */
 /* Extractors */
 /* ====================================================================== */
@@ -40,16 +46,16 @@ quote(MLMLI,"\n")
 quote(MLI,"(** Returns the manager associated to the BDD *)")
 manager__t manager(bdd__t no) quote(call, "_res=no.man;");
 
-quote(MLI,"(** [Cudd_IsConstant]. Is the BDD constant ? *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_IsConstant}[Cudd_IsConstant]}. Is the BDD constant ? *)")
 boolean is_cst(bdd__t no) quote(call, "_res = Cudd_IsConstant(no.node);");
 
-quote(MLI,"(** [Cudd_IsComplement]. Is the BDD a complemented one ? *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_IsComplement}[Cudd_IsComplement]}. Is the BDD a complemented one ? *)")
 boolean is_complement(bdd__t no) quote(call, "_res = Cudd_IsComplement(no.node);");
 
-quote(MLI,"(** [Cudd_NodeReadIndex]. Returns the index of the BDD (65536 for a constant BDD) *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_NodeReadIndex}[Cudd_NodeReadIndex]}. Returns the index of the BDD (65535 for a constant BDD) *)")
 int topvar(bdd__t no) quote(call, "_res = Cudd_NodeReadIndex(no.node);");
 
-quote(MLI,"(** [Cudd_T]. Returns the positive subnode of the BDD *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_T}[Cudd_T]}. Returns the positive subnode of the BDD *)")
 bdd__t dthen(bdd__t no)
      quote(call, "
 if (Cudd_IsConstant(no.node))
@@ -60,7 +66,7 @@ _res.node = Cudd_T(no.node);
 if (Cudd_IsComplement(no.node)) _res.node = Cudd_Not(_res.node);
 ");
 
-quote(MLI,"(** [Cudd_E]. Returns the negative subnode of the BDD *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_E}[Cudd_E]}. Returns the negative subnode of the BDD *)")
 bdd__t delse(bdd__t no)
      quote(call, "
 if (Cudd_IsConstant(no.node))
@@ -85,7 +91,7 @@ void cofactors(int var, bdd__t no, [out] bdd__t noa, [out] bdd__t nob)
   }
 ");
 
-quote(MLI,"(** [Cudd_Cofactor]. [cofactor bdd cube] evaluates [bdd] on the cube [cube] *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Cofactor}[Cudd_Cofactor]}. [cofactor bdd cube] evaluates [bdd] on the cube [cube] *)")
 bdd__t cofactor(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_Cofactor);
 
 quote(MLI,"(** Decomposes the top node of the BDD *)")
@@ -100,11 +106,11 @@ quote(MLMLI,"(** {2  Supports} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
-quote(MLI,"(** [Cudd_Support]. Returns the support (positive cube) of the BDD *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Support}[Cudd_Support]}. Returns the support of the BDD *)")
 bdd__t support(bdd__t no)
      NO_OF_MAN_NO(Cudd_Support);
 
-quote(MLI,"(** [Cudd_SupportSize]. Returns the size of the support of the BDD *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SupportSize}[Cudd_SupportSize]}. Returns the size of the support of the BDD *)")
 int supportsize(bdd__t no)
      quote(call, "_res = Cudd_SupportSize(no.man,no.node);");
 
@@ -119,8 +125,7 @@ _res = Cuddaux_IsVarIn(no.man, no.node, v);
 End_roots();
 ");
 
-quote(MLI,"(** [Cudd_Cudd_VectorSupport]. Returns the support 
-of the array of the BDDs. 
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Cudd_VectorSupport}[Cudd_Cudd_VectorSupport]}. Returns the support of the array of BDDs.
 
 Raises a [Failure] exception in case where the array is of size 0 (in such
 case, the manager is unknown, and we cannot return an empty support). *)")
@@ -135,15 +140,15 @@ quote(MLMLI,"(** {2  Manipulation of supports} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
-quote(MLI,"(** [Cudd_bddLiteralSetIntersection]. Intersection of supports *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddLiteralSetIntersection}[Cudd_bddLiteralSetIntersection]}. Intersection of supports *)")
 bdd__t support_inter(bdd__t no1, bdd__t no2)
      NO_OF_MAN_NO12(Cudd_bddLiteralSetIntersection);
 
 quote(MLMLI, "
-(** [Cudd_bddAnd]. Union of supports *)
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddAnd}[Cudd_bddAnd]}. Union of supports *)
 external support_union: t -> t -> t = \"camlidl_bdd_dand\"
 
-(** [Cudd_Cofactor]. Difference of supports *)
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Cofactor}[Cudd_Cofactor]}. Difference of supports *)
 external support_diff: t -> t -> t = \"camlidl_bdd_cofactor\"
 
 (** Converts a support into a list of variables *)
@@ -159,16 +164,23 @@ quote(MLMLI,"(** {2  Constants and Variables} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
+quote(MLI,"(** Returns the true BDD *)")
 bdd__t dtrue(manager__t man)
      quote(call, "_res.man = man; _res.node = DD_ONE(man);");
+
+quote(MLI,"(** Returns the false BDD *)")
 bdd__t dfalse(manager__t man)
      quote(call, "_res.man = man; _res.node = Cudd_Not(DD_ONE(man));");
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddIthVar}[Cudd_bddIthVar]}. Returns the BDD equivalent to the variable of the given index. *)")
 bdd__t ithvar(manager__t man, int var)
      quote(call, "_res.man = man; _res.node = Cudd_bddIthVar(man,var);");
-quote(MLI,"(** [Cudd_bddNewVar]. *)")
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddNewVar}[Cudd_bddNewVar]}. Returns the BDD equivalent to the variable of the next unused index. *)")
 bdd__t newvar(manager__t man)
      quote(call, "_res.man = man; _res.node = Cudd_bddNewVar(man);");
-quote(MLI,"(** [Cudd_bddNewVarAtLevel]. *)")
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddNewVarAtLevel}[Cudd_bddNewVarAtLevel]}. Returns the BDD equivalent to the variable of the next unused index and sets its level. *)")
 bdd__t newvar_at_level(manager__t man, int level)
      quote(call, "_res.man = man; _res.node = Cudd_bddNewVarAtLevel(man,level);");
 quote(ML,"let dummy = dtrue Manager.dummy")
@@ -183,26 +195,29 @@ quote(MLMLI,"(** {2  Logical tests} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
+quote(MLI,"(** Is it a true BDD ? *)")
 boolean is_true(bdd__t no)
      quote(call, "_res = (no.node == DD_ONE(no.man));");
+quote(MLI,"(** Is it a false BDD ? *)")
 boolean is_false(bdd__t no)
      quote(call, "_res = (no.node == Cudd_Not(DD_ONE(no.man)));");
+quote(MLI,"(** Are the two BDDs equal ? *)")
 boolean is_equal(bdd__t no1, bdd__t no2)
      quote(call, "CHECK_MAN2; _res = (no1.node==no2.node);");
-quote(MLI,"(** [Cudd_bddLeq]. Does the first BDD implies the second one ? *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddLeq}[Cudd_bddLeq]}. Does the first BDD implies the second one ? *)")
 boolean is_leq(bdd__t no1, bdd__t no2)
      quote(call, "CHECK_MAN2; _res = Cudd_bddLeq(no1.man, no1.node, no2.node);");
-quote(MLI,"(** [~Cudd_bddLeq]. Is the intersection (conjunction) of the two BDDs non empty (false) ? *)")
+quote(MLI,"(** Variation of {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddLeq}[Cudd_bddLeq]}. Is the intersection (conjunction) of the two BDDs non empty (false) ? *)")
 boolean is_inter_empty(bdd__t no1, bdd__t no2)
      quote(call, "CHECK_MAN2; _res = Cudd_bddLeq(no1.man, no1.node, Cudd_Not(no2.node));");
-quote(MLI,"(** [~Cudd_EquivDC]. Are the two first BDDs equal when the third one (careset) is true ? *)")
-boolean is_equal_when(bdd__t no1, bdd__t no2,bdd__t no3)
+quote(MLI,"(** Variation of {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_EquivDC}[Cudd_EquivDC]}. Are the two first BDDs equal when the third one (careset) is true ? *)")
+boolean is_equal_when(bdd__t no1, bdd__t no2, bdd__t no3)
      quote(call,"CHECK_MAN3; _res=Cudd_EquivDC(no1.man,no1.node,no2.node,Cudd_Not(no3.node));");
-quote(MLI,"(** [~Cudd_bddLeqUnless]. Does the first BDD implies the second one when the third one (careset) is true ? *)")
+quote(MLI,"(** Variation of {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddLeqUnless}[Cudd_bddLeqUnless]}. Does the first BDD implies the second one when the third one (careset) is true ? *)")
 boolean is_leq_when(bdd__t no1, bdd__t no2,bdd__t no3)
      quote(call,"CHECK_MAN3; _res=Cudd_bddLeqUnless(no1.man,no1.node,no2.node,Cudd_Not(no3.node));");
 
-quote(MLI,"(** [Cudd_bddLeq]. Same as [is_leq] *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddLeq}[Cudd_bddLeq]}. Same as {!is_leq} *)")
 quote(MLI,"val is_included_in : t -> t -> bool")
 quote(ML,"let is_included_in = is_leq")
 
@@ -224,7 +239,7 @@ quote(call,
    }
 ");
 
-quote(MLI,"(** [Cudd_bddVarIsDependent]. Is the given variable dependent on others in the BDD ? *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddVarIsDependent}[Cudd_bddVarIsDependent]}. Is the given variable dependent on others in the BDD ? *)")
 boolean is_var_dependent(int var, bdd__t no)
      quote(call, "
 Begin_roots1(_v_no);
@@ -235,7 +250,7 @@ _res = Cudd_bddVarIsDependent(no.man, no.node, v);
 End_roots();
 ");
 
-quote(MLI,"(** [Cudd_bddIsVarEssential]. Is the given variable with the specified phase implied by the BDD ? *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddIsVarEssential}[Cudd_bddIsVarEssential]}. Is the given variable with the specified phase implied by the BDD ? *)")
 boolean is_var_essential(int index, boolean phase, bdd__t no)
      quote(call, "_res = Cudd_bddIsVarEssential(no.man,no.node,index,phase);");
 
@@ -248,10 +263,10 @@ quote(MLMLI,"(** {2  Structural information} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
-quote(MLI,"(** [Cudd_DagSize]. Size if the BDD as a graph (the number of nodes). *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_DagSize}[Cudd_DagSize]}. Size if the BDD as a graph (the number of nodes). *)")
 int size(bdd__t no) quote(call, "_res = Cudd_DagSize(no.node);");
 
-quote(MLI,"(** [Cudd_CountPath]. Number of paths in the BDD from the root to the leaf. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountPath}[Cudd_CountPath]}. Number of paths in the BDD from the root to the leaves. *)")
 double nbpaths(bdd__t no)
 quote(call,
 "_res = Cudd_CountPath(no.node); \
@@ -259,8 +274,7 @@ if (_res==(double)CUDD_OUT_OF_MEM){ \
   failwith(\"Bdd.nbpaths returned CUDD_OUT_OF_MEM\"); \
 }");
 
-quote(MLI,"(** [Cudd_CountMinterm]. Number of minterms  of the
-Bdd knowing that it depends on the given number of variables. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountMinterm}[Cudd_CountMinterm]}. Number of minterms  of the BDD assuming that it depends on the given number of variables. *)")
 double nbminterms(int nvar, bdd__t no)
 quote(call,
 "_res = Cudd_CountMinterm(no.man,no.node,nvar); \
@@ -268,9 +282,10 @@ if (_res==(double)CUDD_OUT_OF_MEM){ \
   failwith(\"Bdd.nbminterms returned CUDD_OUT_OF_MEM\"); \
 }");
 
-quote(MLI,"(** [Cudd_Density]. Density of the BDD, which is the
-ratio of the number of minterms to the number of nodes. The BDD is
-assumed to depend on [nvars] variables. *)")
+quote(MLI,"(**
+{{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Density}[Cudd_Density]}. Density
+of the BDD, which is the ratio of the number of minterms to the number of
+nodes. The BDD is assumed to depend on [nvars] variables. *)")
 double density(int nvar, bdd__t no)
 quote(call,
 "_res = Cudd_Density(no.man,no.node,nvar); \
@@ -288,35 +303,35 @@ quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
 
-quote(MLI,"(** [Cudd_Not]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Not}[Cudd_Not]}. Negation *)")
 bdd__t dnot(bdd__t no) NO_OF_NO(Cudd_Not);
 
-quote(MLI,"(** [Cudd_bddAnd]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddAnd}[Cudd_bddAnd]}. Conjunction/Intersection *)")
 bdd__t dand(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddAnd);
 
-quote(MLI,"(** [Cudd_bddOr]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddOr}[Cudd_bddOr]}. Disjunction/Union *)")
 bdd__t dor(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddOr);
 
-quote(MLI,"(** [Cudd_bddXor]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddXor}[Cudd_bddXor]}. Exclusive union *)")
 bdd__t xor(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddXor);
 
-quote(MLI,"(** [Cudd_bddNand]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddNand}[Cudd_bddNand]}. *)")
 bdd__t nand(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddNand);
 
-quote(MLI,"(** [Cudd_bddNor]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddNor}[Cudd_bddNor]}. *)")
 bdd__t nor(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddNor);
 
-quote(MLI,"(** [Cudd_bddXnor]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddXnor}[Cudd_bddXnor]}. Equality *)")
 bdd__t nxor(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddXnor);
 
-quote(MLI,"(** Same as [nxor] *)")
+quote(MLI,"(** Same as {!nxor} *)")
 quote(MLI,"val eq : t -> t -> t\n")
 quote(ML,"let eq = nxor")
 
-quote(MLI,"(** [Cudd_bddIte]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddIte}[Cudd_bddIte]}. If-then-else operation. *)")
 bdd__t ite(bdd__t no1, bdd__t no2, bdd__t no3) NO_OF_MAN_NO123(Cudd_bddIte);
 
-quote(MLI,"(** [Cudd_bddIteConstant]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddIteConstant}[Cudd_bddIteConstant]}. If-then-else operation that succeeds when the result is a node of the arguments. *)")
 [unique] bdd__t* ite_cst(bdd__t no1, bdd__t no2, bdd__t no3)
 quote(call,
 "  {
@@ -327,14 +342,14 @@ quote(call,
      if (node==DD_NON_CONSTANT)
        _res = NULL;
      else {
-       res.man = no1.man; 
+       res.man = no1.man;
        res.node = node;
        _res = &res;
      }
    }
 ");
 
-quote(MLI,"(** [Cudd_bddCompose]. [compose var f bdd] substitutes the variable [var] with the function [f] in [bdd]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddCompose}[Cudd_bddCompose]}. [compose var f bdd] substitutes the variable [var] with the function [f] in [bdd]. *)")
 bdd__t compose(int var, bdd__t no1, bdd__t no2)
      quote(call, "
 CHECK_MAN2;
@@ -344,13 +359,13 @@ _res.node = Cudd_bddCompose(no1.man, no2.node, no1.node, var);
 End_roots();
 ");
 
-quote(MLI,"(** [Cudd_bddVectorCompose]. [vectorcompose table bdd] 
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddVectorCompose}[Cudd_bddVectorCompose]}. [vectorcompose table bdd]
 performs a parallel substitution of every variable [var] present in the
 manager by [table.(var)] in [bdd]. The size of [table]
-should be at least [Manager.get_bddvar_nb]. *)")
+should be at least {!Manager.get_bddvar_nb}. *)")
 quote(MLMLI,"external vectorcompose: bdd__t array -> bdd__t -> bdd__t = \"camlidl_bdd_vectorcompose\"")
 
-quote(MLI,"\n(** [Cudd_bddIntersect]. Returns a BDD included in the intersection of the arguments. *)")
+quote(MLI,"\n(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddIntersect}[Cudd_bddIntersect]}. Returns a BDD included in the intersection of the arguments. *)")
 bdd__t intersect(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddIntersect);
 
 /* ====================================================================== */
@@ -362,7 +377,7 @@ quote(MLMLI,"(** {2  Variable mapping} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
-quote(MLI,"(** [Cudd_bddVarMap]. Permutes the variables as it has been specified with [Manager.set_varmap]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddVarMap}[Cudd_bddVarMap]}. Permutes the variables as it has been specified with {!Manager.set_varmap}. *)")
 bdd__t varmap(bdd__t no) NO_OF_MAN_NO(Cudd_bddVarMap)
      quote(call, "
 Begin_roots1(_v_no);
@@ -373,8 +388,8 @@ _res.node = Cudd_bddVarMap(no.man,no.node);
 End_roots();
 ");
 
-quote(MLI,"(** [Cudd_bddPermute]. Permutes the variables as it is specified by
-[permut] (same format as in [Manager.set_varmap]). *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddPermute}[Cudd_bddPermute]}. Permutes the variables as it is specified by
+[permut] (same format as in {!Manager.set_varmap}). *)")
 quote(MLMLI,"external permute : t -> int array -> t = \"camlidl_bdd_permute\"")
 
 /* ====================================================================== */
@@ -387,23 +402,23 @@ quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
 quote(MLMLI, "
-(** [Cudd_ForeachNode]. Apply the function [f] to each (regularized) node of the
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ForeachNode}[Cudd_ForeachNode]}. Apply the function [f] to each (regularized) node of the
  BDD. *)
 external iter_node: (t -> unit) -> t -> unit = \"camlidl_cudd_iter_node\"
 
-(** [Cudd_ForeachCube]. Apply the function [f] to each cube of the
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ForeachCube}[Cudd_ForeachCube]}. Apply the function [f] to each cube of the
  BDD. The cubes are specified as arrays of
-elements of type [Manager.tbool]. The size of the arrays is equal
-to [Manager.get_bddvar_nb], the number of variables present in
+elements of type {!Manager.tbool}. The size of the arrays is equal
+to {!Manager.get_bddvar_nb}, the number of variables present in
 the manager. *)
 external iter_cube: (Manager.tbool array -> unit) -> t -> unit = \"camlidl_bdd_iter_cube\"
 
-(** [Cudd_ForeachPrime]. Apply the function [f] to each prime 
-covering the BDD interval. The first BDD argument is the lower bound, 
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ForeachPrime}[Cudd_ForeachPrime]}. Apply the function [f] to each prime
+covering the BDD interval. The first BDD argument is the lower bound,
 the second the upper bound (which may be equal to the lower bound).
 The primes are specified as arrays of elements of type
-[Manager.tbool]. The size of the arrays is equal to
-[Manager.get_bddvar_nb], the number of variables present in the
+{!Manager.tbool}. The size of the arrays is equal to
+{!Manager.get_bddvar_nb}, the number of variables present in the
 manager. *)
 external iter_prime: (Manager.tbool array -> unit) -> t -> t -> unit = \"camlidl_bdd_iter_prime\"
 ")
@@ -417,7 +432,7 @@ quote(MLMLI,"(** {2  Quantifications} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
-quote(MLI,"(** [Cudd_bddExistAbstract]. [exist supp bdd] quantifies existentially the set of variables defined by [supp] in the BDD. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddExistAbstract}[Cudd_bddExistAbstract]}. [exist supp bdd] quantifies existentially the set of variables defined by [supp] in the BDD. *)")
 bdd__t exist(bdd__t no1, bdd__t no2)
      NO_OF_MAN_NO21(Cudd_bddExistAbstract);
 
@@ -425,15 +440,15 @@ quote(MLI,"(** [udd_bddUnivAbstract]. [forall supp bdd] quantifies universally t
 bdd__t forall(bdd__t no1, bdd__t no2)
      NO_OF_MAN_NO21(Cudd_bddUnivAbstract);
 
-quote(MLI,"(** [Cudd_bddAndAbstract]. Simultaneous existential quantification and intersection of BDDs. Logically, [existand supp x y = exist supp (dand x y)]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddAndAbstract}[Cudd_bddAndAbstract]}. Simultaneous existential quantification and intersection of BDDs. Logically, [existand supp x y = exist supp (dand x y)]. *)")
 bdd__t existand(bdd__t no1, bdd__t no2, bdd__t no3)
      NO_OF_MAN_NO231(Cudd_bddAndAbstract);
 
-quote(MLI,"(** [Cudd_bddXorExistAbstract]. Simultaneous existential quantification and exclusive or of BDDs. Logically, [existxor supp x y = exist supp (xor x y)]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddXorExistAbstract}[Cudd_bddXorExistAbstract]}. Simultaneous existential quantification and exclusive or of BDDs. Logically, [existxor supp x y = exist supp (xor x y)]. *)")
 bdd__t existxor(bdd__t no1, bdd__t no2, bdd__t no3)
      NO_OF_MAN_NO231(Cudd_bddXorExistAbstract);
 
-quote(MLI,"(** [Cudd_bddBooleanDiff]. Boolean difference of the BDD with respect to the variable. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddBooleanDiff}[Cudd_bddBooleanDiff]}. Boolean difference of the BDD with respect to the variable. *)")
 bdd__t booleandiff(bdd__t no, int index)
      quote(call, "
 Begin_roots1(_v_no);
@@ -452,12 +467,14 @@ quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
 quote(MLMLI, "
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_FindEssential}[Cudd_FindEssential]}. Returns the smallest cube (in the sens of inclusion) included in the BDD. *)
 external cube_of_bdd: t -> t = \"camlidl_cudd_cube_of_bdd\"
-  (** [Cudd_FindEssential]. Returns the smallest cube (in the sens of inclusion) included in the BDD. *)
+
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CubeArrayToBdd}[Cudd_CubeArrayToBdd]}. Converts a minterm to a BDD (which is a cube). *)
 external cube_of_minterm: Manager.t -> Manager.tbool array -> t = \"camlidl_cudd_cube_of_minterm\"
-  (** [Cudd_CubeArrayToBdd]. Converts a minterm to a BDD (which is a cube). *)
+
+(** Converts a cube into a list of pairs of a variable and a phase. *)
 external list_of_cube: t -> (int*bool) list = \"camlidl_cudd_list_of_cube\"
-  (** Converts a cube into a list of pairs of a variable and a phase. *)
 ")
 
 quote(MLI,"(** [Cuddaux_bddCubeUnion]. Computes the union of cubes, which is the smallest cube containing both the argument cubes. *)")
@@ -465,23 +482,18 @@ bdd__t cube_union(bdd__t no1, bdd__t no2)
      NO_OF_MAN_NO12(Cuddaux_bddCubeUnion);
 
 quote(MLMLI, "
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddPickOneCube}[Cudd_bddPickOneCube]}. Picks randomly a minterm in the BDD. *)
 external pick_minterm : t -> Manager.tbool array = \"camlidl_cudd_pick_minterm\"
-  (** [Cudd_bddPickOneCube]. Picks randomly a minterm in the BDD. *)
 
-external pick_cube_on_support : t -> t -> t = \"camlidl_cudd_pick_cube_on_support\"
-  (** [Cudd_bddPickOneMinterm]. [pick_cube_on_support bdd supp] picks randomly a 
-minterm/cube in the BDD, in which all the variables in the support [supp] 
-have a definite value. 
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddPickOneMinterm}[Cudd_bddPickOneMinterm]}. [pick_cube_on_support bdd supp] picks randomly a minterm/cube in the BDD, in which all the variables in the support [supp] have a definite value.
 
 The support argument should contain the support of the BDD (otherwise the result may be incorrect). *)
+external pick_cube_on_support : t -> t -> t = \"camlidl_cudd_pick_cube_on_support\"
 
-external pick_cubes_on_support : t -> t -> int -> t array = \"camlidl_cudd_pick_cubes_on_support\"
-  (** [Cudd_bddPickArbitraryMinterms]. [pick_cubes_on_support bdd supp nb] picks 
-randomly [nb] minterms/cubes in the BDD, in which all the variables in the
-support have a definite value. The support argument should contain the
-support of the BDD (otherwise the result may be incorrect). 
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddPickArbitraryMinterms}[Cudd_bddPickArbitraryMinterms]}. [pick_cubes_on_support bdd supp nb] picks  randomly [nb] minterms/cubes in the BDD, in which all the variables in the support have a definite value. The support argument should contain the support of the BDD (otherwise the result may be incorrect).
 
 Fails if the effective number of such minterms in the BDD is less than [nb]. *)
+external pick_cubes_on_support : t -> t -> int -> t array = \"camlidl_cudd_pick_cubes_on_support\"
 ")
 
 /* ====================================================================== */
@@ -493,9 +505,9 @@ quote(MLMLI,"(** {2  Minimizations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
-quote(MLI,"(** The 6 following functions are generalized cofactor operations. [gencof f c] returns a BDD that coincides with [f] whenever [c] is true. *)\n")
+quote(MLI,"(** The 6 following functions are generalized cofactor operations. [gencof f c] returns a BDD that coincides with [f] whenever [c] is true (and which is hopefully smaller). [constrain] enjoys in addition strong properties (see papers from Madre and Coudert) *)\n")
 
-quote(MLI,"(** [Cudd_bddConstrain]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddConstrain}[Cudd_bddConstrain]}. *)")
 bdd__t constrain(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddConstrain);
 
 quote(MLI,"(** [Cuddaux_bddTDConstrain]. *)")
@@ -507,13 +519,13 @@ bdd__t restrict(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_bddRestrict);
 quote(MLI,"(** [Cuddaux_bddTDRestrict]. *)")
 bdd__t tdrestrict(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_bddTDRestrict);
 
-quote(MLI,"(** [Cudd_bddMinimize]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddMinimize}[Cudd_bddMinimize]}. *)")
 bdd__t minimize(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddMinimize);
 
-quote(MLI,"(** [Cudd_bddLICompaction]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddLICompaction}[Cudd_bddLICompaction]}. *)")
 bdd__t licompaction(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddLICompaction);
 
-quote(MLI,"(** [Cudd_bddSqueeze]. [sqeeze lower upper] returns a (smaller) BDD which is in the functional interval [[lower,upper]]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddSqueeze}[Cudd_bddSqueeze]}. [sqeeze lower upper] returns a (smaller) BDD which is in the functional interval [[lower,upper]]. *)")
 bdd__t squeeze(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddSqueeze);
 
 /* ====================================================================== */
@@ -526,7 +538,8 @@ quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
 
-quote(MLI,"(** [Cudd_bddClippingAnd]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddClippingAnd}[Cudd_bddClippingAnd]}.
+[clippingand f g maxdepth direction] *)")
 bdd__t clippingand(bdd__t no1, bdd__t no2, int maxdepth, boolean direction)
      quote(call,"
 CHECK_MAN2;
@@ -536,7 +549,8 @@ _res.node = Cudd_bddClippingAnd(no1.man,no1.node,no2.node,maxdepth,direction);
 End_roots();
 ");
 
-quote(MLI,"(** [Cudd_bddClippingAndAbstract]. [clippingexistand supp bdd1 bdd2] (order of argulents changed). *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddClippingAndAbstract}[Cudd_bddClippingAndAbstract]}.
+[clippingexistand supp f g maxdepth direction] (order of argulents changed). *)")
 bdd__t clippingexistand(bdd__t no1, bdd__t no2, bdd__t no3, int maxdepth, boolean direction)
      quote(call,"
 CHECK_MAN3;
@@ -546,8 +560,9 @@ _res.node = Cudd_bddClippingAndAbstract(no1.man,no2.node,no3.node,no1.node,maxde
 End_roots();
 ");
 
-quote(MLI,"(** [Cudd_UnderApprox]. *)")
-bdd__t underapprox(int nvars, int threshold, int safe, double quality, bdd__t no)
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_UnderApprox}[Cudd_UnderApprox]}.
+[underapprox nvars threshold safe quality f] *)")
+bdd__t underapprox(int nvars, int threshold, boolean safe, double quality, bdd__t no)
      quote(call,"
 Begin_roots1(_v_no);
 _res.man=no.man;
@@ -555,8 +570,9 @@ _res.node=Cudd_UnderApprox(no.man,no.node,nvars,threshold,safe,quality);
 End_roots();
 ");
 
-quote(MLI,"(** [Cudd_OverApprox]. *)")
-bdd__t overapprox(int nvars, int threshold, int safe, double quality, bdd__t no)
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_OverApprox}[Cudd_OverApprox]}. 
+[overapprox nvars threshold safe quality f] *)")
+bdd__t overapprox(int nvars, int threshold, boolean safe, double quality, bdd__t no)
      quote(call,"
 Begin_roots1(_v_no);
 _res.man=no.man;
@@ -564,7 +580,8 @@ _res.node=Cudd_OverApprox(no.man,no.node,nvars,threshold,safe,quality);
 End_roots();
 ");
 
-quote(MLI,"(** [Cudd_RemapUnderApprox]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_RemapUnderApprox}[Cudd_RemapUnderApprox]}.
+[remapunderapprox nvars threshold quality f] *)")
 bdd__t remapunderapprox(int nvars, int threshold, double quality, bdd__t no)
      quote(call,"
 Begin_roots1(_v_no);
@@ -573,7 +590,8 @@ _res.node=Cudd_RemapUnderApprox(no.man,no.node,nvars,threshold,quality);
 End_roots();
 ");
 
-quote(MLI,"(** [Cudd_RemapOverApprox]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_RemapOverApprox}[Cudd_RemapOverApprox]}.
+[remapovererapprox nvars threshold quality f] *)")
 bdd__t remapoverapprox(int nvars, int threshold, double quality, bdd__t no)
      quote(call,"
 Begin_roots1(_v_no);
@@ -582,7 +600,8 @@ _res.node=Cudd_RemapOverApprox(no.man,no.node,nvars,threshold,quality);
 End_roots();
 ");
 
-quote(MLI,"(** [Cudd_BiasedUnderApprox]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_BiasedUnderApprox}[Cudd_BiasedUnderApprox]}.
+[biasedunderapprox nvars threshold quality1 quality0 f g] *)")
 bdd__t biasedunderapprox(int nvars, int threshold, double quality1, double quality0, bdd__t no1, bdd__t no2)
      quote(call,"
 CHECK_MAN2;
@@ -592,7 +611,8 @@ _res.node=Cudd_BiasedUnderApprox(no1.man,no1.node,no2.node,nvars,threshold,quali
 End_roots();
 ");
 
-quote(MLI,"(** [Cudd_BiasedOverApprox]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_BiasedOverApprox}[Cudd_BiasedOverApprox]}.
+[biasedovererapprox nvars threshold quality1 quality0 f g] *)")
 bdd__t biasedoverapprox(int nvars, int threshold, double quality1, double quality0, bdd__t no1, bdd__t no2)
      quote(call,"
 CHECK_MAN2;
@@ -602,23 +622,27 @@ _res.node=Cudd_BiasedOverApprox(no1.man,no1.node,no2.node,nvars,threshold,qualit
 End_roots();
 ");
 
-quote(MLI,"(** [Cudd_SubsetCompress]. *)")
+quote(MLI,"(** For the 4 next functions, the profile is [XXcompress nvars threshold f]. *)\n")
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SubsetCompress}[Cudd_SubsetCompress]}. *)")
 bdd__t subsetcompress(int nvars, int threshold, bdd__t no)
      SUBSUPERSET(Cudd_SubsetCompress);
 
-quote(MLI,"(** [Cudd_SupersetCompress]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SupersetCompress}[Cudd_SupersetCompress]}. *)")
 bdd__t supersetcompress(int nvars, int threshold, bdd__t no)
      SUBSUPERSET(Cudd_SupersetCompress);
 
-quote(MLI,"(** [Cudd_SubsetHeavyBranch]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SubsetHeavyBranch}[Cudd_SubsetHeavyBranch]}. *)")
 bdd__t subsetHB(int nvars, int threshold, bdd__t no)
      SUBSUPERSET(Cudd_SubsetHeavyBranch);
 
-quote(MLI,"(** [Cudd_SupersetHeavyBranch]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SupersetHeavyBranch}[Cudd_SupersetHeavyBranch]}. *)")
 bdd__t supersetHB(int nvars, int threshold, bdd__t no)
      SUBSUPERSET(Cudd_SupersetHeavyBranch);
 
-quote(MLI,"(** [Cudd_SubsetShortPaths]. *)")
+quote(MLI,"(** For the 2 next functions, the profile is [XXXsetSP nvars threshold hardlimit f]. *)\n")
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SubsetShortPaths}[Cudd_SubsetShortPaths]}. *)")
 bdd__t subsetSP(int nvars, int threshold, boolean hardlimit, bdd__t no)
      quote(call,"
 Begin_roots1(_v_no);
@@ -627,7 +651,7 @@ _res.node = Cudd_SubsetShortPaths(no.man,no.node,nvars,threshold,hardlimit);
 End_roots();
 ");
 
-quote(MLI,"(** [Cudd_SupersetShortPaths]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SupersetShortPaths}[Cudd_SupersetShortPaths]}. *)")
 bdd__t supersetSP(int nvars, int threshold, boolean hardlimit, bdd__t no)
      quote(call,"
 Begin_roots1(_v_no);
@@ -635,6 +659,11 @@ _res.man=no.man;
 _res.node = Cudd_SupersetShortPaths(no.man,no.node,nvars,threshold,hardlimit);
 End_roots();
 ");
+
+quote(MLI,"\n
+(** The following functions perform two-way conjunctive (disjunctive)
+decomposition of a BDD. Returns a pair if successful, [None] if no
+decomposition has been found. *)")
 
 DECOMP(approxconjdecomp, Cudd_bddApproxConjDecomp)
 DECOMP(approxdisjdecomp, Cudd_bddApproxDisjDecomp)
@@ -654,7 +683,7 @@ quote(MLMLI,"(** {2  Miscellaneous} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
-quote(MLI,"(** [Cudd_bddTransfer]. Transfers a BDD to a different manager. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddTransfer}[Cudd_bddTransfer]}. Transfers a BDD to a different manager. *)")
 bdd__t transfer(bdd__t no, manager__t man)
      quote(call, "
 Begin_roots1(_v_no);
@@ -663,11 +692,12 @@ _res.node = Cudd_bddTransfer(no.man,man,no.node);
 End_roots();
 ");
 
-quote(MLI,"(** [Cudd_bddCorrelation]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddCorrelation}[Cudd_bddCorrelation]}. Computes the correlation of f and g (if
+[f=g], their correlation is 1, if [f=not g], it is 0) *)")
 double correlation(bdd__t no1, bdd__t no2)
      quote(call, "CHECK_MAN2; _res = Cudd_bddCorrelation(no1.man,no1.node,no2.node);");
 
-quote(MLI,"(** [Cudd_bddCorrelationWeights]. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddCorrelationWeights}[Cudd_bddCorrelationWeights]}. *)")
 double correlationweights(bdd__t no1, bdd__t no2, [size_is(size)] double prob[], int size)
 quote(call, "CHECK_MAN2; _res = Cudd_bddCorrelationWeights(no1.man,no1.node,no2.node,prob);");
 
@@ -680,12 +710,21 @@ quote(MLMLI,"(** {2  Printing} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
-quote(MLMLI,"external _print: t -> unit = \"camlidl_cudd_print\"")
+quote(MLMLI,"
+(** Raw (C) printing function.  The output may mix badly with the OCAML output. *)
+external _print: t -> unit = \"camlidl_cudd_print\"")
 
 quote(MLI,"
+(** Prints the minterms of the BDD in the same way as {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Printminterm}[Cudd_Printminterm]}. *)
 val print__minterm: Format.formatter -> t -> unit
+
+(** [print_minterm bassoc fmt bdd] prints the minterms of the BDD using
+[bassoc] to convert indices of variables to names. *)
 val print_minterm: (int -> string) -> Format.formatter -> t -> unit
+
+(** Prints a BDD by recursively decomposing it as monomial followed by a tree. *)
 val print: (int -> string) -> Format.formatter -> t -> unit
+
 val print_list: (int -> string) -> Format.formatter -> (int *bool) list -> unit
 ")
 

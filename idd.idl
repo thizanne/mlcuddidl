@@ -1,5 +1,4 @@
 /* -*- mode: c -*- */
-/* $Id: idd.idl,v 1.2 2004/10/01 16:48:13 bjeannet Exp $ */
 
 /* This file is part of the MLCUDDIDL Library, released under LGPL license.
    Please read the COPYING file packaged in the distribution  */
@@ -12,7 +11,9 @@ quote(C, "
 import "manager.idl";
 import "bdd.idl";
 
-/* \section{Management of abstract datatypes} %============================== */
+/* ********************************************************************** */
+/* Management of abstract datatypes */
+/* ********************************************************************** */
 
 /* For nodes that need Garbage collection */
 typedef [abstract,c2ml(camlidl_cudd_node_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t idd__t;
@@ -34,8 +35,9 @@ type id_combinop \n\
 quote(MLI,"(** Dummy value (useful in some cases) *)")
 quote(MLI,"val dummy : t")
 
-/* \section{Extractors} %==================================================== */
-
+/* ********************************************************************** */
+/* Extractors */
+/* ********************************************************************** */
 quote(MLMLI,"")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Extractors} *)")
@@ -59,8 +61,9 @@ _res = cuddV(no.node);
 
 quote(MLMLI,"external inspect: idd__t -> idd = \"camlidl_idd_inspect\"")
 
-/* \section{Supports} %====================================================== */
-
+/* ********************************************************************** */
+/* Supports */
+/* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Supports} *)")
 quote(MLMLI,"(* ====================================================== *)")
@@ -73,8 +76,9 @@ external vectorsupport : t array -> Bdd.t = \"camlidl_bdd_vectorsupport\"
 external vectorsupport2 : Bdd.t array -> t array -> Bdd.t = \"camlidl_rdd_vectorsupport2\"
 ")
 
-
-/* \section{Classical operations} */
+/* ********************************************************************** */
+/* Classical operations */
+/* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Classical operations} *)")
 quote(MLMLI,"(* ====================================================== *)")
@@ -85,6 +89,8 @@ idd__t cst(manager__t man, int val)
 
 quote(MLMLI,"
 external ite : Bdd.t -> t -> t -> t = \"camlidl_rdd_ite\"
+external ite_cst : Bdd.t -> t -> t -> t option = \"camlidl_cudd_rdd_ite_cst\"
+external eval_cst : t -> Bdd.t -> t option = \"camlidl_cudd_rdd_eval_cst\"
 external compose : int -> Bdd.t -> t -> t = \"camlidl_rdd_compose\"
 external vectorcompose: Bdd.t array -> idd__t -> idd__t = \"camlidl_rdd_vectorcompose\"
 ")
@@ -93,7 +99,9 @@ quote(ML,"
 let dummy = cst Manager.dummy (int_of_float (Manager.get_background Manager.dummy))
 ")
 
-/* \section{Logical tests} %================================================= */
+/* ********************************************************************** */
+/* Logical tests */
+/* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Logical tests} *)")
 quote(MLMLI,"(* ====================================================== *)")
@@ -137,7 +145,9 @@ quote(call,
    }
 ");
 
-/* \section{Structural information} %======================================== */
+/* ********************************************************************** */
+/* Structural information */
+/* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Structural information} *)")
 quote(MLMLI,"(* ====================================================== *)")
@@ -151,7 +161,9 @@ external density : int -> t -> float = \"camlidl_bdd_density\"
 external nbleaves : t -> int = \"camlidl_rdd_nbleaves\"
 ")
 
-/* \section{Variable Mapping} %============================================== */
+/* ********************************************************************** */
+/* Variable Mapping */
+/* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Variable mapping} *)")
 quote(MLMLI,"(* ====================================================== *)")
@@ -161,7 +173,9 @@ external varmap : t -> t = \"camlidl_rdd_varmap\"
 external permute : t -> int array -> t = \"camlidl_rdd_permute\"
 ")
 
-/* \section{Iterators} %============================================== */
+/* ********************************************************************** */
+/* Iterators */
+/* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Iterators} *)")
 quote(MLMLI,"(* ====================================================== *)")
@@ -171,7 +185,9 @@ external iter_node: (t -> unit) -> t -> unit = \"camlidl_cudd_iter_node\"
 external iter_cube: (Manager.tbool array -> int -> unit) -> t -> unit = \"camlidl_idd_iter_cube\"
 ")
 
-/* \section{Leaves and guards} */
+/* ********************************************************************** */
+/* Leaves and guards */
+/* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Leaves and guards} *)")
 quote(MLMLI,"(* ====================================================== *)")
@@ -205,7 +221,9 @@ let guardleafs rdd =
   Array.map (fun leaf -> (guard_of_leaf rdd leaf,leaf)) tab
 ")
 
-/* \section{Minimizations} %============================================== */
+/* ********************************************************************** */
+/* Minimizations */
+/* ********************************************************************** */
 quote(MLMLI,"")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Minimizations} *)")
@@ -218,7 +236,9 @@ external restrict: t -> Bdd.t -> t = \"camlidl_rdd_restrict\"
 external tdrestrict : t -> Bdd.t -> t = \"camlidl_rdd_tdrestrict\"
 ")
 
-/* \section{Conversions} %============================================== */
+/* ********************************************************************** */
+/* Conversions */
+/* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Conversions} *)")
 quote(MLMLI,"(* ====================================================== *)")
@@ -228,7 +248,6 @@ external to_bdd : t -> Bdd.t = \"camlidl_rdd_to_bdd\"
 external to_rdd : t -> Rdd.t = \"%identity\"
 ")
 
-/* \section{User Operations} */
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 User operations} *)")
 quote(MLMLI,"(* ====================================================== *)")
@@ -302,7 +321,7 @@ quote(MLMLI,"(** {3 By using CUDD local cache (efficient and flexible)} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLI,"
-val mapunop : (int -> int) -> t -> t 
+val mapunop : (int -> int) -> t -> t
 val mapbinop : commutative:bool -> (int -> int -> int) -> t -> t -> t
 val mapterop : (int -> int -> int -> int) -> t -> t -> t -> t
 ")
@@ -329,7 +348,9 @@ external apply_combinop: id_combinop -> t -> t -> t = \"camlidl_idd_apply_combin
 ")
 quote(C,"ALLOCAPPLY_USEROP(idd,Val_int,Int_val)")
 
-/* \section{Miscellaneous} %============================================== */
+/* ********************************************************************** */
+/* Miscellaneous */
+/* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Miscellaneous} *)")
 quote(MLMLI,"(* ====================================================== *)")
@@ -338,7 +359,9 @@ quote(MLMLI,"
 external transfer : t -> Manager.t -> t = \"camlidl_rdd_transfer\"
 ")
 
-/* \section{Printing} %============================================== */
+/* ********************************************************************** */
+/* Printing */
+/* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Printing} *)")
 quote(MLMLI,"(* ====================================================== *)")

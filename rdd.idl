@@ -12,7 +12,9 @@ quote(C, "
 import "manager.idl";
 import "bdd.idl";
 
-/* \section{Management of abstract datatypes} %============================== */
+/* ====================================================================== */
+/* Management of abstract datatypes */
+/* ====================================================================== */
 
 /* For nodes that need Garbage collection */
 typedef [abstract,c2ml(camlidl_cudd_node_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t rdd__t;
@@ -34,17 +36,32 @@ type id_combinop \n\
 quote(MLI,"(** Dummy value (useful in some cases) *)")
 quote(MLI,"val dummy : t")
 
-/* \section{Extractors} %==================================================== */
+quote(MLI,"\n 
+(** [t] is the abstract type for RDDs (which corresponds to CUDD ADDs). Objects
+of this type contains both the top node of the RDD and the manager to which the
+node belongs . The manager can be retrieved with {!manager}. Objects of this
+type are automatically garbage collected. *)
+")
+
+/* ====================================================================== */
+/* Extractors */
+/* ====================================================================== */
 quote(MLMLI,"")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Extractors} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 
 quote(MLMLI,"
+(** Returns the manager associated to the RDD *)
 external manager : t -> Manager.t = \"camlidl_bdd_manager\"
+
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_IsConstant}[Cudd_IsConstant]}. Is the RDD constant ? *)
 external is_cst : t -> bool = \"camlidl_bdd_is_cst\"
-external topvar : t -> int = \"camlidl_bdd_topvar\"
+
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_NodeReadIndex}[Cudd_NodeReadIndex]}. Returns the index of the RDD (65535 for a constant RDD) *)external topvar : t -> int = \"camlidl_bdd_topvar\"
 ")
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_T}[Cudd_T]}. Returns the positive subnode of the RDD *)")
 rdd__t dthen(rdd__t no) quote(call, "
 if (cuddIsConstant(no.node))
   failwith (\"Rdd.dthen: constant RDD\")
@@ -54,6 +71,8 @@ _res.man = no.man;
 _res.node = cuddT(no.node);
 End_roots();
 ");
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_E}[Cudd_E]}. Returns the negative subnode of the RDD *)")
 rdd__t delse(rdd__t no) quote(call, "
 if (cuddIsConstant(no.node))
   failwith (\"Rdd.delse: constant RDD\")
@@ -63,12 +82,16 @@ _res.man = no.man;
 _res.node = cuddE(no.node);
 End_roots();
 ");
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_V}[Cudd_V]}. Returns the value of the assumed constant RDD *)")
 double dval(rdd__t no) quote(call,"
 if (!cuddIsConstant(no.node))
   failwith(\"Rdd.dval: non constant RDD\")
 ;
 _res = cuddV(no.node);
 ");
+
+quote(MLI,"(** Returns the positive and negative cofactor of the RDD wrt the variable *)")
 void cofactors(int var, rdd__t no, [out] rdd__t noa, [out] rdd__t nob)
   quote(call," {
   DdNode* cof;
@@ -81,34 +104,96 @@ void cofactors(int var, rdd__t no, [out] rdd__t noa, [out] rdd__t nob)
   }
 ");
 
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Cofactor}[Cudd_Cofactor]}. [cofactor rdd cube] evaluates [rdd] on the cube [cube] *)")
 rdd__t cofactor(rdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_Cofactor);
 
+quote(MLI,"(** Decomposes the top node of the RDD *)")
 quote(MLMLI,"external inspect: rdd__t -> rdd = \"camlidl_rdd_inspect\"")
 
-/* \section{Supports} %====================================================== */
+/* ====================================================================== */
+/* Supports */
+/* ====================================================================== */
 quote(MLMLI,"")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Supports} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 
 quote(MLMLI,"
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Support}[Cudd_Support]}. Returns the support (positive cube) of the RDD *)
 external support : t -> Bdd.t = \"camlidl_bdd_support\"
+
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SupportSize}[Cudd_SupportSize]}. Returns the size of the support of the RDD *)
 external supportsize : t -> int = \"camlidl_bdd_supportsize\"
+
+(** [Cuddaux_IsVarIn]. Does the given variable belong to the support of the RDD ? *)
 external is_var_in : int -> t -> bool = \"camlidl_bdd_is_var_in\"
+
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_VectorSupport}[Cudd_VectorSupport]}. Returns the support of the array of RDDs. 
+
+Raises a [Failure] exception in case where the array is of size 0 (in such
+case, the manager is unknown, and we cannot return an empty support). *)
 external vectorsupport : t array -> Bdd.t = \"camlidl_bdd_vectorsupport\"
+
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_VectorSupport}[Cudd_VectorSupport]}. Returns the support of the BDDs and RDDs arrays. 
+
+Raises a [Failure] exception when both arrays are of size 0 (in such
+case, the manager is unknown, and we cannot return an empty support). *)
 external vectorsupport2 : Bdd.t array -> t array -> Bdd.t = \"camlidl_rdd_vectorsupport2\"
 ")
 
-
-/* \section{Classical operations} */
+/* ====================================================================== */
+/* Classical operations */
+/* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Classical operations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addConst}[Cudd_addConst]}. Return a constant RDD with the given value. *)")
 rdd__t cst(manager__t man, double val)
   quote(call, "_res.man = man; _res.node = Cudd_addConst(man,val);");
+
+quote(MLI,"(** [Cuddaux_addIte]/{{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addIte}[Cudd_addIte]}. If-then-else operation, with the condition being a BDD. *)")
 rdd__t ite(bdd__t no1, rdd__t no2, rdd__t no3) NO_OF_MAN_NO123(Cuddaux_addIte);
+
+quote(MLI,"(** [Cuddaux_addIteConstant]/{{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addIteConstant}[Cudd_addIteConstant]}. If-then-else operation, which succeeds only if the resulting node belongs to one of the two RDD. *)")
+[unique] rdd__t* ite_cst(bdd__t no1, rdd__t no2, rdd__t no3)
+quote(call,
+"  {
+     static rdd__t res;
+     DdNode* node;
+     CHECK_MAN3;
+     node = Cuddaux_addIteConstant(no1.man,no1.node,no2.node,no3.node);
+     if (node==DD_NON_CONSTANT)
+       _res = NULL;
+     else {
+       res.man = no1.man; 
+       res.node = node;
+       _res = &res;
+     }
+   }
+");
+
+quote(MLI,"(** [Cuddaux_addEvalConst]/{{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addEvalConst}[Cudd_addEvalConst]}. *)")
+[unique] rdd__t * eval_cst(rdd__t no1, bdd__t no2)
+quote(call,
+"  {
+     static rdd__t res;
+     DdNode* node;
+
+     CHECK_MAN2;
+     node = Cuddaux_addEvalConst(no1.man,no2.node,no1.node);
+     if (node==DD_NON_CONSTANT)
+       _res = 0;
+     else {
+       res.man = no1.man;
+       res.node = node;
+       _res = &res;
+     }
+   }
+");
+
+quote(MLI,"(** [Cuddaux_addCompose]/{{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addCompose}[Cudd_addCompose]}. Substitutes the variable with the BDD in the RDD. *)")
 rdd__t compose(int var, bdd__t no1, rdd__t no2)
      quote(call,"
 CHECK_MAN2;
@@ -117,18 +202,23 @@ _res.man = no1.man;
 _res.node = Cuddaux_addCompose(no1.man, no2.node, no1.node, var);
 End_roots();
 ");
-quote(MLMLI,"
+
+quote(MLMLI,"\n
+(** [Cuddaux_addVectorCompose]/{{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addVectorCompose}[Cudd_addVectorCompose]}. Parallel substitution of every variable [var] present in the manager by the BDD [table.(var)] in the RDD. *)
 external vectorcompose: bdd__t array -> rdd__t -> rdd__t = \"camlidl_rdd_vectorcompose\"
 ")
 
 quote(ML,"let dummy = cst Manager.dummy (Manager.get_background Manager.dummy)")
 
-/* \section{Variable Mapping} %============================================== */
+/* ====================================================================== */
+/* Variable Mapping */
+/* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Variable mapping} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
+quote(MLI,"(** [Cuddaux_addVarMap]/{{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddVarMap}[Cudd_bddVarMap]}. Permutes the variables as it has been specified with {!Manager.set_varmap}. *)")
 rdd__t varmap(rdd__t no)
      quote(call, "
 Begin_roots1(_v_no);
@@ -139,19 +229,27 @@ _res.man = no.man;
 _res.node = Cuddaux_addVarMap(no.man,no.node);
 End_roots();
 ");
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addPermute}[Cudd_addPermute]}. Permutes the variables as it is specified by
+[permut] (same format as in {!Manager.set_varmap}). *)")
 quote(MLMLI,"external permute : t -> int array -> t = \"camlidl_rdd_permute\"")
 
-/* \section{Logical tests} %================================================= */
+/* ====================================================================== */
+/* Logical tests */
+/* ====================================================================== */
 quote(MLMLI,"")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Logical tests} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 
 quote(MLMLI,"
+(** Equality test *)
 external is_equal: t -> t -> bool = \"camlidl_bdd_is_equal\"
+(** Variation of {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_EquivDC}[Cudd_EquivDC]}. Are the two RDDs equal when the BDD (careset) is true ? *)
 external is_equal_when: t -> t -> Bdd.t -> bool = \"camlidl_bdd_is_equal_when\"
 ")
 
+quote(MLI,"(** Variation of [Cuddaux_addEvalConst]/{{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addEvalConst}[Cudd_addEvalConst]}. Is the RDD constant when the BDD (careset) is true, and in this case what is its value ? *)")
 [unique] double * is_eval_cst(rdd__t no1, bdd__t no2)
 quote(call,
 "  {
@@ -169,6 +267,7 @@ quote(call,
    }
 ");
 
+quote(MLI,"(** Is the result of [ite] constant, and if it is the case, what is its value ? *)")
 [unique] double * is_ite_cst(bdd__t no1, rdd__t no2, rdd__t no3)
 quote(call,
 "  {
@@ -186,17 +285,28 @@ quote(call,
    }
 ");
 
-/* \section{Structural information} %======================================== */
+/* ====================================================================== */
+/* Structural information */
+/* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Structural information} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 
 quote(MLMLI,"
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_DagSize}[Cudd_DagSize]}. Size if the RDD as a graph (the number of nodes). *)
 external size :  t -> int = \"camlidl_bdd_size\"
+
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountPath}[Cudd_CountPath]}. Number of paths in the RDD from the root to the leafs. *)
 external nbpaths : t -> float = \"camlidl_bdd_nbpaths\"
+
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountMinterm}[Cudd_CountMinterm]}. Number of minterms  of the RDD knowing that it depends on the given number of variables. *)
 external nbminterms : int -> t -> float = \"camlidl_bdd_nbminterms\"
+
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Density}[Cudd_Density]}. Density of the RDD, which is the ratio of the number of minterms to the number of nodes. The RDD is assumed to depend on [nvars] variables. *)
 external density : int -> t -> float = \"camlidl_bdd_density\"
 ")
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountPathsToNonZero}[Cudd_CountPathsToNonZero]}. Number of paths in the RDD from the root to non-zero leaves. *)")
 double nbnonzeropaths(rdd__t no)
 quote(call,
 "_res = Cudd_CountPathsToNonZero(no.node); \
@@ -204,6 +314,7 @@ if (_res==(double)CUDD_OUT_OF_MEM){ \
   failwith(\"Bdd.nbnonzeropaths returned CUDD_OUT_OF_MEM\"); \
 }");
 
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountLeaves}[Cudd_CountLeaves]}. Number of leaves. *)")
 int nbleaves(rdd__t no)
 quote(call,
 "_res = Cudd_CountLeaves(no.node); \
@@ -211,23 +322,32 @@ if (_res==CUDD_OUT_OF_MEM){ \
   failwith (\"Rdd.nbleaves returned CUDD_OUT_OF_MEM\"); \
 }");
 
-/* \section{Iterators} %============================================== */
+/* ====================================================================== */
+/* Iterators */
+/* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Iterators} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 
 quote(MLMLI, "
+(** Similar to {!Bdd.iter_node} *)
 external iter_node: (t -> unit) -> t -> unit = \"camlidl_cudd_iter_node\"
+
+(** Similar to {!Bdd.iter_cube} *)
 external iter_cube: (Manager.tbool array -> float -> unit) -> t -> unit = \"camlidl_rdd_iter_cube\"
 ")
 
-/* \section{Leaves and guards} */
+/* ====================================================================== */
+/* Leaves and guards */
+/* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Leaves and guards} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
+quote(MLI,"(** [Cuddaux_addGuardOfNode]. [guard_of_node f node] returns the sum of the paths leading from the root node [f] to the node [node] of [f]. *)")
 bdd__t guard_of_node(rdd__t no1, rdd__t no2) NO_OF_MAN_NO12(Cuddaux_addGuardOfNode);
+quote(MLI,"(** Guard of non background leaves *)")
 bdd__t guard_of_nonbackground(rdd__t no)
      quote(call,"
 Begin_roots1(_v_no);
@@ -242,6 +362,7 @@ Begin_roots1(_v_no);
 End_roots();
 ");
 
+quote(MLI,"(** Guard of the given leaf *)")
 bdd__t guard_of_leaf(rdd__t no, double val)
      quote(call,"
 Begin_roots1(_v_no);
@@ -255,39 +376,55 @@ cuddDeref(nval);
 End_roots();
 ");
 
-
-
 quote(MLMLI,"
+(** [Cuddaux_NodesBelowLevel]. [nodes_below_level f olevel] returns all the nodes pointed by the RDD, indexed by a variable of level greater or equal than [level], and encountered first in the top-down exploration (i.e., whenever a node is collected, its sons are not collected). If [olevel=None], then only constant nodes are collected. *)
 external nodes_below_level: t -> int option -> t array = \"camlidl_rdd_nodes_below_level\"
+
+(** Returns the set of leaf values (including the background value if adequate) *)
 external leaves: t -> float array = \"camlidl_rdd_leaves\"
 ")
-quote(MLI,"val guardleafs : t -> (Bdd.t * float) array")
+quote(MLI,"
+\n
+(** Returns the set of leaf values together with their guard in the RDD *)
+val guardleafs : t -> (Bdd.t * float) array
+")
 quote(ML,"
 let guardleafs rdd =
   let tab = leaves rdd in
   Array.map (fun leaf -> (guard_of_leaf rdd leaf,leaf)) tab
 ")
 
-/* \section{Minimizations} %============================================== */
+/* ====================================================================== */
+/* Minimizations */
+/* ====================================================================== */
 quote(MLMLI,"")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Minimizations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
+quote(MLI,"(** See {!Bdd.constrain}, {!Bdd.tdconstrain}, {!Bdd.restrict}, {!Bdd.tdrestrict} *)\n")
+
 rdd__t constrain(rdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_addConstrain);
 rdd__t tdconstrain(rdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_addTDConstrain);
 rdd__t restrict(rdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_addRestrict);
 rdd__t tdrestrict(rdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cuddaux_addTDRestrict);
 
-/* \section{Conversions} %============================================== */
+/* ====================================================================== */
+/* Conversions */
+/* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Conversions} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_BddToAdd}[Cudd_BddToAdd]}. Conversion from BDD to 0-1 RDD *)")
 rdd__t of_bdd(bdd__t no) NO_OF_MAN_NO(Cudd_BddToAdd);
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addBddPattern}[Cudd_addBddPattern]}. Conversion from RDD to BDD by replacing all leaves different from 0  by true. *)")
 bdd__t to_bdd(rdd__t no) NO_OF_MAN_NO(Cudd_addBddPattern);
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addBddThreshold}[Cudd_addBddThreshold]}. Conversion from RDD to BDD by replacing all leaves greater than or equal to the threshold by true. *)")
 rdd__t to_bdd_threshold(double val, rdd__t no)
      quote(call,"
 Begin_roots1(_v_no);
@@ -295,6 +432,8 @@ _res.man = no.man;
 _res.node = Cudd_addBddThreshold(no.man,no.node,val);
 End_roots();
 ");
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addBddStrictThreshold}[Cudd_addBddStrictThreshold]}. Conversion from RDD to BDD by replacing all leaves strictly greater than the threshold by true.*)")
 rdd__t to_bdd_strictthreshold(double val, rdd__t no)
      quote(call,"
 Begin_roots1(_v_no);
@@ -302,6 +441,8 @@ _res.man = no.man;
 _res.node = Cudd_addBddStrictThreshold(no.man,no.node,val);
 End_roots();
 ");
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addBddInterval}[Cudd_addBddInterval]}. Conversion from RDD to BDD  by replacing all leaves in the interval by true. *)")
 rdd__t to_bdd_interval(double lower, double upper, rdd__t no)
      quote(call,"
 Begin_roots1(_v_no);
@@ -310,12 +451,15 @@ _res.node = Cudd_addBddInterval(no.man,no.node,lower,upper);
 End_roots();
 ");
 
-/* \section{Quantifications} %============================================== */
+/* ====================================================================== */
+/* Quantifications */
+/* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Quantifications} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
+quote(MLI,"(** Variation of {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addExistAbstract}[Cudd_addExistAbstract]}. Abstracts all the variables in the cube from the RDD by summing over all possible values taken by those variables. *)")
 rdd__t exist(bdd__t no1, rdd__t no2)
      quote(call,"
 CHECK_MAN2();
@@ -331,6 +475,8 @@ Begin_roots2(_v_no1,_v_no2);
 }
 End_roots();
 ");
+
+quote(MLI,"(** Variation of {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addUnivAbstract}[Cudd_addUnivAbstract]}. Abstracts all the variables in the cube from the RDD by taking the product over all possible values taken by those variables. *)")
 rdd__t forall(bdd__t no1, rdd__t no2)
      quote(call,"
 CHECK_MAN2();
@@ -354,35 +500,70 @@ rdd__t forall(bdd__t no1, rdd__t no2)
      NO_OF_MAN_NO21(Cudd_addUnivAbstract);
 */
 
-/* \section{Algebraic operations} */
+/* ====================================================================== */
+/* Algebraic operations */
+/* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Algebraic operations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html# Cudd_addLeq}[ Cudd_addLeq]}. *)")
 boolean is_leq(rdd__t no1, rdd__t no2)
   quote(call, "CHECK_MAN2; _res = Cudd_addLeq(no1.man,no1.node,no2.node);");
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addPlus}[Cudd_addPlus]}. *)")
 rdd__t add(rdd__t no1, rdd__t no2) APPLYBINOP(Cudd_addPlus);
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addMinus}[Cudd_addMinus]}. *)")
 rdd__t sub(rdd__t no1, rdd__t no2) APPLYBINOP(Cudd_addMinus);
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addTimes}[Cudd_addTimes]}. *)")
 rdd__t mul(rdd__t no1, rdd__t no2) APPLYBINOP(Cudd_addTimes);
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addDivide}[Cudd_addDivide]}. *)")
 rdd__t div(rdd__t no1, rdd__t no2) APPLYBINOP(Cudd_addDivide);
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addMinimum}[Cudd_addMinimum]}. *)")
 rdd__t min(rdd__t no1, rdd__t no2) APPLYBINOP(Cudd_addMinimum);
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addMaximum}[Cudd_addMaximum]}. *)")
 rdd__t max(rdd__t no1, rdd__t no2) APPLYBINOP(Cudd_addMaximum);
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addAgreement}[Cudd_addAgreement]}. *)")
 rdd__t agreement(rdd__t no1, rdd__t no2) APPLYBINOP(Cudd_addAgreement);
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addDiff}[Cudd_addDiff]}. *)")
 rdd__t diff(rdd__t no1, rdd__t no2) APPLYBINOP(Cudd_addDiff);
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addThreshold}[Cudd_addThreshold]}. *)")
 rdd__t threshold(rdd__t no1, rdd__t no2) APPLYBINOP(Cudd_addThreshold);
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addSetNZ}[Cudd_addSetNZ]}. *)")
 rdd__t setNZ(rdd__t no1, rdd__t no2) APPLYBINOP(Cudd_addSetNZ);
 
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addLog}[Cudd_addLog]}. *)")
 rdd__t log(rdd__t no) APPLYUNOP(Cudd_addLog);
 
-/* \section{Matrix Operations} */
+/* ====================================================================== */
+/* Matrix Operations */
+/* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Matrix operations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 
 quote(MLMLI,"
+(** Variation of {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addMatrixMultiply}[Cudd_addMatrixMultiply]}.
+
+[matrix_multiply z A B] performs matrix multiplication of [A] and [B], with [z]
+being the summation variables, which means that they are used to refer columns
+of [A] and to rows of [B]. *)
 external matrix_multiply : int array -> t -> t -> t = \"camlidl_rdd_matrix_multiply\"
+
+(** Variation of {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addTimesPlus}[Cudd_addTimesPlus]}. *)
 external times_plus : int array -> t -> t -> t = \"camlidl_rdd_times_plus\"
+
+(** Variation of {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addTriangle}[Cudd_addTriangle]}. *)
 external triangle : int array -> t -> t -> t = \"camlidl_rdd_triangle\"
 ")
 quote(C,"
@@ -391,13 +572,15 @@ MATMUL(camlidl_rdd_times_plus,Cudd_addTimesPlus)
 MATMUL(camlidl_rdd_triangle,Cudd_addTriangle)
 ")
 
-/* \section{User Operations} */
+/* ====================================================================== */
+/* User Operations */
+/* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 User operations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {3 By decomposition into guards and leafs} *)")
+quote(MLMLI,"(** {3 By decomposition into guards and leaves} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"(**
@@ -491,22 +674,35 @@ quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {3 By using CUDD global cache (more efficient, less flexible)} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
+
 quote(MLMLI,"
 external alloc_unop: (float -> float) -> id_unop = \"camlidl_rdd_alloc_unop\"
 external alloc_binop: (float -> float -> float) -> id_binop = \"camlidl_rdd_alloc_binop\"
 external alloc_combinop: (float -> float -> float) -> id_combinop = \"camlidl_rdd_alloc_combinop\"
+(** Registers operations on leaves and returns their identification number
+(which is an abstract datatype). Possible types of operations are unary
+operations, binary operations and commutative binary operations. *)
+
 external apply_unop: id_binop -> t -> t = \"camlidl_rdd_apply_unop\"
 external apply_binop: id_binop -> t -> t -> t = \"camlidl_rdd_apply_binop\"
 external apply_combinop: id_combinop -> t -> t -> t = \"camlidl_rdd_apply_combinop\"
+(** Applies the given operations (initially defined on leaf values) to RDDs, by
+using
+{{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addMonadicApply}[Cudd_addMonadicApply]}
+or
+{{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addApply}[Cudd_addApply]}. *)
 ")
 quote(C,"ALLOCAPPLY_USEROP(rdd,copy_double,Double_val)")
 
-/* \section{Miscellaneous} %============================================== */
+/* ====================================================================== */
+/* Miscellaneous */
+/* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Miscellaneous} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
+quote(MLI,"(** [Cuddaux_addTransfer]/{{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddTransfer}[Cudd_bddTransfer]}. Transfers a RDD to a different manager. *)")
 rdd__t transfer(rdd__t no, manager__t man)
      quote(call, "
 Begin_roots1(_v_no);
@@ -515,17 +711,27 @@ _res.node = Cuddaux_addTransfer(no.man,man,no.node);
 End_roots();
 ");
 
-/* \section{Printing} %============================================== */
+/* ====================================================================== */
+/* Printing */
+/* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Printing} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
-quote(MLMLI,"external _print: t -> unit = \"camlidl_cudd_print\"")
+quote(MLMLI,"
+(** C printing function. The output may mix badly with the OCaml output. *)
+external _print: t -> unit = \"camlidl_cudd_print\"
+")
 
 quote(MLI,"
+(** Prints the minterms of the BDD in the same way as {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Printminterm}[Cudd_Printminterm]}. *)
 val print__minterm: Format.formatter -> t -> unit
+
+(** [print_minterm bassoc fmt bdd] prints the minterms of the BDD using [bassoc] to convert indices of variables to names qand [lassoc] to convert leaf values to strings. *)
 val print_minterm: (int -> string) -> (float -> string) -> Format.formatter -> t -> unit
+
+(** Prints a BDD by recursively decomposing it as monomial followed by a tree. *)
 val print: (int -> string) -> (float -> string) -> Format.formatter -> t -> unit
 ")
 
