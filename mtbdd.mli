@@ -3,7 +3,7 @@
 (* This file is part of the MLCUDDIDL Library, released under LGPL license.
    Please read the COPYING file packaged in the distribution. *)
 
-(** Multi-Terminal Binary Decision Diagrams *)
+(** BDDs with user-defined leaf type (functor) *)
 
 (*  ====================================================================== *)
 (** {2 Type of the parameter module} *)
@@ -18,7 +18,7 @@ module type LeafType =
     val hash: t -> int
       (** Hashing function on leaves *)
     val background: t
-      (** Background leaf value 
+      (** Background leaf value
 	(typically, dummy value not encountered for normal use) *)
   end
 
@@ -26,7 +26,7 @@ module type LeafType =
 (** {2 Type of generated module} *)
 (*  ====================================================================== *)
 
-module type S = 
+module type S =
   sig
     type leaf
       (** Type of a leaf *)
@@ -39,12 +39,12 @@ module type S =
     type id_combinop
       (** For user-defined operations *)
 
-    type mtbdd = 
+    type mtbdd =
       | Leaf of leaf
       | Ite of int * t * t
 
     val leafbackground: leaf
-	
+
     module Hash: (Hashtbl.S with type key = leaf)
     val hasht: int Hash.t
     module Assoc: (Map.S with type key = int)
@@ -98,20 +98,20 @@ module type S =
 
     external size : t -> int = "camlidl_cudd_bdd_size"
     external nbpaths : t -> float = "camlidl_cudd_bdd_nbpaths"
-    external nbnonzeropaths : t -> float = "camlidl_cudd_rdd_nbnonzeropaths"
+    external nbnonzeropaths : t -> float = "camlidl_cudd_bdd_nbtruepaths"
     external nbminterms : int -> t -> float = "camlidl_cudd_bdd_nbminterms"
     external density : int -> t -> float = "camlidl_cudd_bdd_density"
     external nbleaves : t -> int = "camlidl_cudd_rdd_nbleaves"
-      
+
     (** {3 Variable mapping} *)
 
-    external varmap : t -> t = "camlidl_cudd_rdd_varmap"  
-    external permute : int array -> t -> t = "camlidl_cudd_rdd_permute"  
+    external varmap : t -> t = "camlidl_cudd_rdd_varmap"
+    external permute : int array -> t -> t = "camlidl_cudd_rdd_permute"
 
     (** {3 Iterators} *)
 
     external iter_node: (t -> unit) -> t -> unit = "camlidl_cudd_iter_node"
-    val iter_cube: (Manager.tbool array -> leaf -> unit) -> t -> unit 
+    val iter_cube: (Manager.tbool array -> leaf -> unit) -> t -> unit
 
     (** {3 Leaves and guards} *)
 
@@ -149,7 +149,7 @@ module type S =
     external apply_binop: id_binop -> t -> t -> t = "camlidl_cudd_idd_apply_binop"
     external apply_combinop: id_combinop -> t -> t -> t = "camlidl_cudd_idd_apply_combinop"
 
-    (** {3 Miscellaneous} *) 
+    (** {3 Miscellaneous} *)
 
     external transfer : t -> Manager.t -> t = "camlidl_cudd_rdd_transfer"
 

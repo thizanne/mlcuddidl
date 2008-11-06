@@ -88,7 +88,7 @@ distclean: mostlyclean
 
 mostlyclean: clean
 	/bin/rm -f $(IDLMODULES:%=%.ml) $(IDLMODULES:%=%.mli) $(IDLMODULES:%=%_caml.c) tmp/* html/*
-	/bin/rm -f mlcuddidl.?? mlcuddidl.??? mlcuddidl.info example example.opt
+	/bin/rm -f mlcuddidl.?? mlcuddidl.??? mlcuddidl.info example example.opt *.tex *.dvi style.css ocamldoc.sty
 
 clean:
 	/bin/rm -f cuddrun cuddtop
@@ -125,14 +125,31 @@ libcudd_caml_debug.a: $(CCMODULES:%=%_debug.o)
 	$(AR) rcs $@ $^
 	$(RANLIB) $@
 
-# TEX rules
+# HTML and LATEX rules
 .PHONY: html
-mlcuddidl.pdf: mlcuddidl.texi
-	$(TEXI2DVI) $<
-mlcuddidl.info: mlcuddidl.texi
-	makeinfo --no-split $<
-html: mlcuddidl.texi
-	$(TEXI2HTML) -split=chapter -nosec_nav -subdir=html $<
+# mlcuddidl.pdf: mlcuddidl.texi
+# 	$(TEXI2DVI) $<
+# mlcuddidl.info: mlcuddidl.texi
+# 	makeinfo --no-split $<
+# html: mlcuddidl.texi
+# 	$(TEXI2HTML) -split=chapter -nosec_nav -subdir=html $<
+
+mlapronidl.pdf: mlapronidl.dvi
+	$(DVIPDF) mlapronidl.dvi
+mlcuddidl.dvi: mlcuddidl.odoc $(MLMODULES:%=%.mli)
+	$(OCAMLDOC) $(OCAMLINC) \
+-t "MLCUDDIDL: OCaml interface for CUDD library, version 1.3" \
+-latextitle 1,chapter -latextitle 2,section -latextitle 3,subsection -latextitle 4,subsubsection -latextitle 5,paragraph -latextitle 6,subparagraph \
+-latex -intro mlcuddidl.odoc -o ocamldoc.tex $(MLMODULES:%=%.mli) 
+	$(SED) -e 's/\\documentclass\[11pt\]{article}/\\documentclass[10pt,twosdie,a4paper]{book}\\usepackage{ae,fullpage,makeidx,fancyhdr}\\usepackage[ps2pdf]{hyperref}\\pagestyle{fancy}\\setlength{\\parindent}{0em}\\setlength{\\parskip}{0.5ex}\\sloppy\\makeindex\\author{Bertrand Jeannet}/' -e 's/\\end{document}/\\appendix\\printindex\\end{document}/' ocamldoc.tex >mlcuddidl.tex
+	$(LATEX) mlcuddidl
+	$(MAKEINDEX) mlcuddidl
+	$(LATEX) mlcuddidl
+	$(LATEX) mlcuddidl
+
+html: mlcuddidl.odoc $(MLMODULES:%=%.mli) 
+	mkdir -p html
+	$(OCAMLDOC) $(OCAMLINC) -html -d html -colorize-code -intro mlcuddidl.odoc $(MLMODULES:%=%.mli)
 
 #--------------------------------------------------------------
 # IMPLICIT RULES AND DEPENDENCIES

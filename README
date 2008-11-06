@@ -47,7 +47,9 @@ make mostylclean: delete also generated files (from .idl files)
 make rebuild: regenerate C and OCaml files from .idl files
               (require m4, sed)
 make mlcuddidl.dvi:
+make mlcuddidl.pdf:
+make html:
 
 You can also look at session.ml.
 
-* Documentation: DVI (mlcuddidl.dvi), INFO (mlcuddidl.info), HTML (HTML/*)
+* Documentation: DVI (mlcuddidl.dvi), HTML (html/index.html)

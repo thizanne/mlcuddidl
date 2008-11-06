@@ -3,6 +3,8 @@
 (* This file is part of the MLCUDDIDL Library, released under LGPL license.
    Please read the COPYING file packaged in the distribution. *)
 
+(** BDDs with user-defined leaf type (functor) *)
+
 open Format
 
 module type LeafType =
@@ -13,19 +15,19 @@ module type LeafType =
     val background: t
   end
 
-module type S = 
+module type S =
   sig
     type leaf
     type t
     type id_unop
     type id_binop
     type id_combinop
-    type mtbdd = 
+    type mtbdd =
       | Leaf of leaf
       | Ite of int * t * t
 
     val leafbackground: leaf
-	
+
     (* internal operations, not meant to be used by casual user *)
     module Hash: (Hashtbl.S with type key = leaf)
     val hasht: int Hash.t
@@ -70,18 +72,18 @@ module type S =
     (* Structural information *)
     external size : t -> int = "camlidl_cudd_bdd_size"
     external nbpaths : t -> float = "camlidl_cudd_bdd_nbpaths"
-    external nbnonzeropaths : t -> float = "camlidl_cudd_rdd_nbnonzeropaths"
+    external nbnonzeropaths : t -> float = "camlidl_cudd_bdd_nbtruepaths"
     external nbminterms : int -> t -> float = "camlidl_cudd_bdd_nbminterms"
     external density : int -> t -> float = "camlidl_cudd_bdd_density"
     external nbleaves : t -> int = "camlidl_cudd_rdd_nbleaves"
-      
+
     (* Variable mapping *)
-    external varmap : t -> t = "camlidl_cudd_rdd_varmap"  
-    external permute : int array -> t -> t = "camlidl_cudd_rdd_permute"  
+    external varmap : t -> t = "camlidl_cudd_rdd_varmap"
+    external permute : int array -> t -> t = "camlidl_cudd_rdd_permute"
 
     (* Iterators *)
     external iter_node: (t -> unit) -> t -> unit = "camlidl_cudd_iter_node"
-    val iter_cube: (Manager.tbool array -> leaf -> unit) -> t -> unit 
+    val iter_cube: (Manager.tbool array -> leaf -> unit) -> t -> unit
     (* Leaves and guards *)
     external guard_of_node: t -> t -> Bdd.t = "camlidl_cudd_rdd_guard_of_node"
     external guard_of_nonbackground : t -> Bdd.t = "camlidl_cudd_rdd_guard_of_nonbackground"
@@ -110,7 +112,7 @@ module type S =
     external apply_unop: id_unop -> t -> t = "camlidl_cudd_idd_apply_unop"
     external apply_binop: id_binop -> t -> t -> t = "camlidl_cudd_idd_apply_binop"
     external apply_combinop: id_combinop -> t -> t -> t = "camlidl_cudd_idd_apply_combinop"
-    (* Miscellaneous *) 
+    (* Miscellaneous *)
     external transfer : t -> Manager.t -> t = "camlidl_cudd_rdd_transfer"
     (* Printing *)
     external _print: t -> unit = "camlidl_cudd_print"
@@ -119,22 +121,22 @@ module type S =
     val print: (int -> string) -> (leaf -> string) -> Format.formatter -> t -> unit
 end
 
-module Make (Leaf : LeafType) = 
+module Make (Leaf : LeafType) =
   struct
     type leaf = Leaf.t
     type t = Idd.t
     type id_unop = Idd.id_unop
     type id_binop = Idd.id_binop
     type id_combinop = Idd.id_combinop
-    type mtbdd = 
+    type mtbdd =
       | Leaf of leaf
       | Ite of int * t * t
 
     (* Here we define the correspondance between leaves and integers,
        the inverse correspondance and the counter of registered
-       leaves. *) 
+       leaves. *)
     module Hash = Hashtbl.Make(Leaf)
-	
+
     let (hasht : int Hash.t) = Hash.create 101
     module Assoc = Map.Make(
       struct
@@ -148,12 +150,12 @@ module Make (Leaf : LeafType) =
     let _ =
       Hash.add hasht leafbackground 0;
       assoct := Assoc.add 0 leafbackground !assoct
-	
+
     let index = ref 1
-	
+
     (* We now define the conversion functions. *)
     let leaf_of_id id = (*r no catching of [Not_found] here *)
-      try 
+      try
 	Assoc.find id !assoct
       with Not_found ->
 	failwith ("module Mtbdd.Make().leaf_of_id "
@@ -186,7 +188,7 @@ module Make (Leaf : LeafType) =
     external cofactors: int -> t -> (t * t) = "camlidl_cudd_rdd_cofactors"
     external cofactor: t -> Bdd.t -> t = "camlidl_cudd_rdd_cofactor"
     let dval t = leaf_of_id (Idd.dval t)
-    let inspect t = 
+    let inspect t =
       match (Idd.inspect t) with
       | Idd.Leaf(id) -> Leaf (leaf_of_id id)
       | Idd.Ite(i,t,e) -> Ite(i,t,e)
@@ -216,14 +218,14 @@ module Make (Leaf : LeafType) =
       | Some(id) -> Some (leaf_of_id id)
     external size : t -> int = "camlidl_cudd_bdd_size"
     external nbpaths : t -> float = "camlidl_cudd_bdd_nbpaths"
-    external nbnonzeropaths : t -> float = "camlidl_cudd_rdd_nbnonzeropaths"
+    external nbnonzeropaths : t -> float = "camlidl_cudd_bdd_nbtruepaths"
     external nbminterms : int -> t -> float = "camlidl_cudd_bdd_nbminterms"
     external density : int -> t -> float = "camlidl_cudd_bdd_density"
     external nbleaves : t -> int = "camlidl_cudd_rdd_nbleaves"
-      
+
     (* variable mapping *)
-    external varmap : t -> t = "camlidl_cudd_rdd_varmap"  
-    external permute : int array -> t -> t = "camlidl_cudd_rdd_permute"  
+    external varmap : t -> t = "camlidl_cudd_rdd_varmap"
+    external permute : int array -> t -> t = "camlidl_cudd_rdd_permute"
 
     (* Iterators *)
     external iter_node: (t -> unit) -> t -> unit = "camlidl_cudd_iter_node"
@@ -254,33 +256,33 @@ module Make (Leaf : LeafType) =
 	t1 t2
 
     let wrap_binop leaf_op =
-      let id_op = 
+      let id_op =
 	fun idx idy ->
 	  id_of_leaf (leaf_op (leaf_of_id idx) (leaf_of_id idy))
       in
       id_op
 
-    let mapunop lop f = 
-      let op = 
-	fun id -> 
+    let mapunop lop f =
+      let op =
+	fun id ->
 	  id_of_leaf (lop (leaf_of_id id))
       in
       Idd.mapunop op f
 
-    let mapbinop ~commutative lop f g = 
+    let mapbinop ~commutative lop f g =
       let op = wrap_binop lop in
-      Idd.mapbinop ~commutative op f g 
+      Idd.mapbinop ~commutative op f g
 
-    let mapterop lop f g h = 
+    let mapterop lop f g h =
       let op = fun idx idy idz ->
 	  id_of_leaf (lop (leaf_of_id idx) (leaf_of_id idy) (leaf_of_id idz))
       in
-      Idd.mapterop op f g h 
+      Idd.mapterop op f g h
 
     let alloc_unop lop =
-      let op = 
-	fun id -> 
-	  id_of_leaf (lop (leaf_of_id id)) 
+      let op =
+	fun id ->
+	  id_of_leaf (lop (leaf_of_id id))
       in
       Idd.alloc_unop op
     let alloc_binop lop =
@@ -293,7 +295,7 @@ module Make (Leaf : LeafType) =
     external apply_unop: id_unop -> t -> t = "camlidl_cudd_idd_apply_unop"
     external apply_binop: id_binop -> t -> t -> t = "camlidl_cudd_idd_apply_binop"
     external apply_combinop: id_combinop -> t -> t -> t = "camlidl_cudd_idd_apply_combinop"
-    (* Miscellaneous *) 
+    (* Miscellaneous *)
     external to_bdd : t -> Bdd.t = "camlidl_cudd_rdd_to_bdd"
     external transfer : t -> Manager.t -> t = "camlidl_cudd_rdd_transfer"
 
@@ -301,17 +303,16 @@ module Make (Leaf : LeafType) =
     external _print: t -> unit = "camlidl_cudd_print"
     let print__minterm = Idd.print__minterm
     let print_minterm bassoc lassoc formatter rdd =
-      Idd.print_minterm 
+      Idd.print_minterm
 	bassoc
 	(fun id -> lassoc (leaf_of_id id))
 	formatter
 	rdd
-	
-    let print bassoc lassoc formatter rdd = 
+
+    let print bassoc lassoc formatter rdd =
       Idd.print
 	bassoc
 	(fun id -> lassoc (leaf_of_id id))
 	formatter
 	rdd
 end
-

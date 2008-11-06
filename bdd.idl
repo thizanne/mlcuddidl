@@ -274,6 +274,14 @@ if (_res==(double)CUDD_OUT_OF_MEM){ \
   failwith(\"Bdd.nbpaths returned CUDD_OUT_OF_MEM\"); \
 }");
 
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountPathsToNonZero}[Cudd_CountPathsToNonZero]}. Number of paths in the BDD from the root to the true leaf. *)")
+double nbtruepaths(bdd__t no)
+quote(call,
+"_res = Cudd_CountPathsToNonZero(no.node); \
+if (_res==(double)CUDD_OUT_OF_MEM){ \
+  failwith(\"Bdd.nbtruepaths returned CUDD_OUT_OF_MEM\"); \
+}");
+
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountMinterm}[Cudd_CountMinterm]}. Number of minterms  of the BDD assuming that it depends on the given number of variables. *)")
 double nbminterms(int nvar, bdd__t no)
 quote(call,

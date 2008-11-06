@@ -17,7 +17,7 @@ import "bdd.idl";
 
 /* For nodes that need Garbage collection */
 typedef [abstract,c2ml(camlidl_cudd_node_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t idd__t;
-quote(MLI,"(** Binary Decision Diagrams with [int] leaves *)")
+quote(MLI,"(** BDDs with [int] leaves *)")
 
 quote(MLMLI,"
 (** Public type for exploring the abstract type [t] *)\n\
@@ -34,6 +34,12 @@ type id_combinop \n\
 
 quote(MLI,"(** Dummy value (useful in some cases) *)")
 quote(MLI,"val dummy : t")
+
+quote(MLI,"\n 
+(** We refer to the module {!Rdd} for the description of the interface, as
+it is nearly identical to {!Rdd}, except that float leaves are replaced by
+integer leaves. *)
+")
 
 /* ********************************************************************** */
 /* Extractors */
@@ -155,7 +161,7 @@ quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"
 external size : t -> int = \"camlidl_bdd_size\"
 external nbpaths : t -> float = \"camlidl_bdd_nbpaths\"
-external nbnonzeropaths : t -> float = \"camlidl_rdd_nbnonzeropaths\"
+external nbnonzeropaths : t -> float = \"camlidl_bdd_nbtruepaths\"
 external nbminterms : int -> t -> float = \"camlidl_bdd_nbminterms\"
 external density : int -> t -> float = \"camlidl_bdd_density\"
 external nbleaves : t -> int = \"camlidl_rdd_nbleaves\"

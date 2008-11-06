@@ -18,7 +18,7 @@ import "bdd.idl";
 
 /* For nodes that need Garbage collection */
 typedef [abstract,c2ml(camlidl_cudd_node_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t rdd__t;
-quote(MLI,"(** Binary Decision Diagrams with [float] leaves *)")
+quote(MLI,"(** BDDs with [float] leaves *)")
 
 quote(MLMLI,"\
 (** Public type for exploring the abstract type [t] *)\n\
@@ -299,20 +299,15 @@ external size :  t -> int = \"camlidl_bdd_size\"
 (** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountPath}[Cudd_CountPath]}. Number of paths in the RDD from the root to the leafs. *)
 external nbpaths : t -> float = \"camlidl_bdd_nbpaths\"
 
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountPathsToNonZero}[Cudd_CountPathsToNonZero]}. Number of paths in the RDD from the root to non-zero leaves. *)
+external nbnonzeropaths : t -> float = \"camlidl_bdd_nbtruepaths\"
+
 (** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountMinterm}[Cudd_CountMinterm]}. Number of minterms  of the RDD knowing that it depends on the given number of variables. *)
 external nbminterms : int -> t -> float = \"camlidl_bdd_nbminterms\"
 
 (** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Density}[Cudd_Density]}. Density of the RDD, which is the ratio of the number of minterms to the number of nodes. The RDD is assumed to depend on [nvars] variables. *)
 external density : int -> t -> float = \"camlidl_bdd_density\"
 ")
-
-quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountPathsToNonZero}[Cudd_CountPathsToNonZero]}. Number of paths in the RDD from the root to non-zero leaves. *)")
-double nbnonzeropaths(rdd__t no)
-quote(call,
-"_res = Cudd_CountPathsToNonZero(no.node); \
-if (_res==(double)CUDD_OUT_OF_MEM){ \
-  failwith(\"Bdd.nbnonzeropaths returned CUDD_OUT_OF_MEM\"); \
-}");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountLeaves}[Cudd_CountLeaves]}. Number of leaves. *)")
 int nbleaves(rdd__t no)
