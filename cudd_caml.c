@@ -43,8 +43,11 @@ int camlidl_cudd_garbage(DdManager* dd, const char* s, void* data)
 {
   if (camlidl_cudd_gc_fun==Val_unit)
     camlidl_cudd_gc_fun = *(caml_named_value("gc_full_major"));
-  else
-    callback(camlidl_cudd_gc_fun,Val_unit);
+  if (camlidl_cudd_gc_fun == NULL){
+    fprintf(stderr,"mlcuddidl: cudd_caml.c: camlidl_cudd_garbage: internal error");
+    abort();
+  }
+  callback(camlidl_cudd_gc_fun,Val_unit);
   return 1;
 }
 
@@ -52,8 +55,11 @@ int camlidl_cudd_reordering(DdManager* dd, const char* s, void* data)
 {
   if (camlidl_cudd_reordering_fun==Val_unit)
     camlidl_cudd_reordering_fun = *(caml_named_value("gc_full_major"));
-  else
-    callback(camlidl_cudd_reordering_fun,Val_unit);
+  if (camlidl_cudd_reordering_fun == NULL){
+    fprintf(stderr,"mlcuddidl: cudd_caml.c: camlidl_cudd_reordering: internal error");
+    abort();
+  }
+  callback(camlidl_cudd_reordering_fun,Val_unit);
   return 1;
 }
 
