@@ -41,11 +41,13 @@ value camlidl_cudd_set_gc(value _v_heap, value _v_gc, value _v_reordering)
 
 int camlidl_cudd_garbage(DdManager* dd, const char* s, void* data)
 {
-  if (camlidl_cudd_gc_fun==Val_unit)
-    camlidl_cudd_gc_fun = *(caml_named_value("gc_full_major"));
-  if (camlidl_cudd_gc_fun == 0){
-    fprintf(stderr,"mlcuddidl: cudd_caml.c: camlidl_cudd_garbage: internal error");
-    abort();
+  if (camlidl_cudd_gc_fun==Val_unit){
+    value* p = caml_named_value("gc_full_major");
+    if (p == 0){
+      fprintf(stderr,"mlcuddidl: cudd_caml.o: internal error: the \"let _ = Callback.register ...\" line in manager.ml has not been executed\n");
+      abort();
+    }
+    camlidl_cudd_gc_fun = *p;
   }
   callback(camlidl_cudd_gc_fun,Val_unit);
   return 1;
@@ -53,11 +55,13 @@ int camlidl_cudd_garbage(DdManager* dd, const char* s, void* data)
 
 int camlidl_cudd_reordering(DdManager* dd, const char* s, void* data)
 {
-  if (camlidl_cudd_reordering_fun==Val_unit)
-    camlidl_cudd_reordering_fun = *(caml_named_value("gc_full_major"));
-  if (camlidl_cudd_reordering_fun == 0){
-    fprintf(stderr,"mlcuddidl: cudd_caml.c: camlidl_cudd_reordering: internal error");
-    abort();
+  if (camlidl_cudd_reordering_fun==Val_unit){
+     value* p = caml_named_value("gc_full_major");
+     if (p == NULL){
+      fprintf(stderr,"mlcuddidl: cudd_caml.o: internal error: the \"let _ = Callback.register ...\" line in manager.ml has not been executed\n");
+      abort();
+     }
+     camlidl_cudd_reordering_fun = *p;
   }
   callback(camlidl_cudd_reordering_fun,Val_unit);
   return 1;
@@ -991,7 +995,7 @@ value camlidl_cudd_pick_cubes_on_support(value _v_no1, value _v_no2, value _v_k)
   if (array==NULL){
     failwith("Bdd.pick_cubes_on_support: out of memory, or first argument is false, or wrong support, or number of minterms < k");
   }
-  
+
   if (k==0){
     _v_res = Atom(0);
   }

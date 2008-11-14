@@ -91,7 +91,7 @@ val dummy : t
 ")
 
 quote(MLI,"\n
-(** 
+(**
 {!t} is the abstract datatype for managers. There is no automatic garbage
 collection for this type, since BDD abstract values references
 them. They must be explicitly freed if this is necessary with the
@@ -202,6 +202,7 @@ int check_keys(manager__t man)
 /* ====================================================================== */
 /* Variables, Reordering and Mapping */
 /* ====================================================================== */
+
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"(** {2 Variables, Reordering and Mapping} *)")
@@ -255,7 +256,7 @@ quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Make
 void group(manager__t man, int low, int size, enum mtr type)
      quote(call, "Cudd_MakeTreeNode(man, low, size, type);");
 
-quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_MakeTreeNode}[Cudd_FreeTree]}. Removes all the groups in the manager. *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_FreeTree}[Cudd_FreeTree]}. Removes all the groups in the manager. *)")
 void ungroupall(manager__t man)
      quote(call, "Cudd_FreeTree(man);");
 
