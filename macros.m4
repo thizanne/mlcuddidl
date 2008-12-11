@@ -38,13 +38,13 @@ dnl
 define(`VAL_OF_MAN',
 `quote(call, "
 Begin_roots1(_v_man);
-_res = $1(man);
+_res = $1(man->man);
 End_roots();
 ")')dnl
 define(`UNIT_OF_MAN_VAL',
 `quote(call, "
 Begin_roots1(_v_man);
-$1(man,v);
+$1(man->man,v);
 End_roots();
 ")')dnl
 define(`NO_OF_NO',
@@ -58,7 +58,7 @@ define(`NO_OF_MAN_NO',
 `quote(call, "
 Begin_roots1(_v_no);
 _res.man = no.man;
-_res.node = $1(no.man,no.node);
+_res.node = $1(no.man->man,no.node);
 End_roots();
 ")')dnl
 define(`NO_OF_MAN_NO12',
@@ -66,7 +66,7 @@ define(`NO_OF_MAN_NO12',
 "CHECK_MAN2();
 Begin_roots2(_v_no1,_v_no2);
 _res.man = no1.man;
-_res.node = $1(no1.man,no1.node,no2.node);
+_res.node = $1(no1.man->man,no1.node,no2.node);
 End_roots();
 ")')dnl
 define(`NO_OF_MAN_NO21',
@@ -74,7 +74,7 @@ define(`NO_OF_MAN_NO21',
 "CHECK_MAN2();
 Begin_roots2(_v_no1,_v_no2);
 _res.man = no1.man;
-_res.node = $1(no1.man,no2.node,no1.node);
+_res.node = $1(no1.man->man,no2.node,no1.node);
 End_roots();
 ")')dnl
 define(`NO_OF_MAN_NO123',
@@ -82,7 +82,7 @@ define(`NO_OF_MAN_NO123',
 "CHECK_MAN3();
 Begin_roots3(_v_no1,_v_no2,_v_no3);
 _res.man = no1.man;
-_res.node = $1(no1.man,no1.node,no2.node,no3.node);
+_res.node = $1(no1.man->man,no1.node,no2.node,no3.node);
 End_roots();
 ")')dnl
 define(`NO_OF_MAN_NO231',
@@ -90,7 +90,7 @@ define(`NO_OF_MAN_NO231',
 "CHECK_MAN3();
 Begin_roots3(_v_no1,_v_no2,_v_no3);
 _res.man = no1.man;
-_res.node = $1(no1.man,no2.node,no3.node,no1.node);
+_res.node = $1(no1.man->man,no2.node,no3.node,no1.node);
 End_roots();
 ")')dnl
 dnl
@@ -101,7 +101,7 @@ dnl
 define(`SUBSUPERSET',
 `quote(call,"
 Begin_roots1(_v_no);
-_res.man=no.man; _res.node = $1(no.man,no.node,nvars,threshold);
+_res.man=no.man; _res.node = $1(no.man->man,no.node,nvars,threshold);
 End_roots();
 ")')dnl
 dnl
@@ -123,7 +123,7 @@ value camlidl_bdd_$1(value _v_no)
   bdd__t b;
 
   camlidl_cudd_node_ml2c(_v_no,&no);
-  res = $2(no.man,no.node,&tab);
+  res = $2(no.man->man,no.node,&tab);
   switch(res){
   case 0:
     failwith(\"Bdd.$1: decomposition function failed (probably CUDD_OUT_OF_MEM)\");
@@ -161,14 +161,14 @@ define(`APPLYBINOP',`quote(call,
 "CHECK_MAN2();
 Begin_roots2(_v_no1,_v_no2);
 _res.man = no1.man;
-_res.node = Cudd_addApply(no1.man,$1,no1.node,no2.node);
+_res.node = Cudd_addApply(no1.man->man,$1,no1.node,no2.node);
 End_roots();
 ")')dnl
 dnl
 define(`APPLYUNOP',`quote(call,"
 Begin_roots1(_v_no);
 _res.man = no.man;
-_res.node = Cudd_addMonadicApply(no.man,$1,no.node);
+_res.node = Cudd_addMonadicApply(no.man->man,$1,no.node);
 End_roots();
 ")')dnl
 dnl
@@ -347,7 +347,7 @@ value camlidl_$1_apply_unop(value _v_id, value _v_no)
   camlidl_cudd_node_ml2c(_v_no,&no);
 
   _res.man = no.man;
-  _res.node = Cudd_addMonadicApply(no.man,camlidl_$1_unops[id], no.node);
+  _res.node = Cudd_addMonadicApply(no.man->man,camlidl_$1_unops[id], no.node);
   _v_res = camlidl_cudd_node_c2ml(&_res);
   CAMLreturn(_v_res);
 }
@@ -362,7 +362,7 @@ value camlidl_$1_apply_binop(value _v_id, value _v_no1, value _v_no2)
   camlidl_cudd_node_ml2c(_v_no2,&no2);
   CHECK_MAN2;
   _res.man = no1.man;
-  _res.node = Cudd_addApply(no1.man,camlidl_$1_binops[id], no1.node, no2.node);
+  _res.node = Cudd_addApply(no1.man->man,camlidl_$1_binops[id], no1.node, no2.node);
   _v_res = camlidl_cudd_node_c2ml(&_res);
   CAMLreturn(_v_res);
 }
@@ -377,7 +377,7 @@ value camlidl_$1_apply_combinop(value _v_id, value _v_no1, value _v_no2)
   camlidl_cudd_node_ml2c(_v_no2,&no2);
   CHECK_MAN2;
   _res.man = no1.man;
-  _res.node = Cudd_addApply(no1.man,camlidl_$1_combinops[Int_val(_v_id)],no1.node,no2.node);
+  _res.node = Cudd_addApply(no1.man->man,camlidl_$1_combinops[Int_val(_v_id)],no1.node,no2.node);
   _v_res = camlidl_cudd_node_c2ml(&_res);
   CAMLreturn(_v_res);
 }')dnl
@@ -402,10 +402,10 @@ value $1(value _v_array, value _v_no1, value _v_no2)
   for (i=0; i<size; i++){
     value _v_index = Field(_v_array,i);
     int index = Int_val(_v_index);
-    array[i] = Cudd_bddIthVar(no1.man, index);
+    array[i] = Cudd_bddIthVar(no1.man->man, index);
   }
   no.man = no1.man;
-  no.node = $2(no1.man,no1.node,no2.node,array,size);
+  no.node = $2(no1.man->man,no1.node,no2.node,array,size);
   _v_res = camlidl_cudd_node_c2ml(&no);
   free(array);
   CAMLreturn(_v_res);

@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdint.h>
 #include "caml/fail.h"
 #include "caml/alloc.h"
 #include "caml/custom.h"
@@ -30,10 +31,10 @@ value camlidl_cudd_set_gc(value _v_heap, value _v_gc, value _v_reordering)
 
   heap = Int_val(_v_heap);
   camlidl_cudd_heap = heap;
-  if (camlidl_cudd_gc_fun == Val_unit){
+  if (camlidl_cudd_gc_fun == Val_unit)
     caml_register_global_root(&camlidl_cudd_gc_fun);
+  if (camlidl_cudd_reordering_fun == Val_unit)
     caml_register_global_root(&camlidl_cudd_reordering_fun);
-  }
   camlidl_cudd_gc_fun = _v_gc;
   camlidl_cudd_reordering_fun = _v_reordering;
   CAMLreturn(Val_unit);
@@ -48,6 +49,7 @@ int camlidl_cudd_garbage(DdManager* dd, const char* s, void* data)
       abort();
     }
     camlidl_cudd_gc_fun = *p;
+    caml_register_global_root(&camlidl_cudd_gc_fun);
   }
   callback(camlidl_cudd_gc_fun,Val_unit);
   return 1;
@@ -62,6 +64,7 @@ int camlidl_cudd_reordering(DdManager* dd, const char* s, void* data)
       abort();
      }
      camlidl_cudd_reordering_fun = *p;
+     caml_register_global_root(&camlidl_cudd_reordering_fun);
   }
   callback(camlidl_cudd_reordering_fun,Val_unit);
   return 1;
@@ -78,26 +81,43 @@ int camlidl_cudd_reordering(DdManager* dd, const char* s, void* data)
 
 /* \subsubsection{Managers} */
 
+void manager_free(struct manager__t* man)
+{
+  assert(man->count>=1);
+  if (man->count<=1){
+    assert(Cudd_CheckZeroRef(man->man)==0);
+    Cudd_Quit(man->man);
+    free(man);
+  }
+  else if (man->count != SIZE_MAX)
+    man->count--;
+}
+
+void camlidl_custom_manager_finalize(value val)
+{
+  struct manager__t* man = manager_of_vmanager(val);
+  manager_free(man);
+}
 int camlidl_custom_manager_compare(value val1, value val2)
 {
   CAMLparam2(val1,val2);
   int res;
-  DdManager* man1 = *(manager__t*)(Data_custom_val(val1));
-  DdManager* man2 = *(manager__t*)(Data_custom_val(val2));
+  DdManager* man1 = DdManager_of_vmanager(val1);
+  DdManager* man2 = DdManager_of_vmanager(val2);
   res = (long)man1==(long)man2 ? 0 : (long)man1<(long)man2 ? -1 : 1;
   CAMLreturn(res);
 }
 long camlidl_custom_manager_hash(value val)
 {
   CAMLparam1(val);
-  DdManager* man1 = *(manager__t*)(Data_custom_val(val));
-  long hash = (long)man1;
+  DdManager* man = DdManager_of_vmanager(val);
+  long hash = (long)man;
   CAMLreturn(hash);
 }
 
 struct custom_operations camlidl_custom_manager = {
   "camlidl_cudd_custom_node",
-  custom_finalize_default,
+  &camlidl_custom_manager_finalize,
   &camlidl_custom_manager_compare,
   &camlidl_custom_manager_hash,
   custom_serialize_default,
@@ -108,19 +128,20 @@ struct custom_operations camlidl_custom_manager = {
 
 void camlidl_custom_node_finalize(value val)
 {
-  DdManager* man = ((node__t*)(Data_custom_val(val)))->man;
-  DdNode* node = ((node__t*)(Data_custom_val(val)))->node;
+  node__t* no = node_of_vnode(val);
+  DdNode* node = no->node;
   assert (Cudd_Regular(node)->ref >= 1);
-  Cudd_RecursiveDeref(man,node);
+  Cudd_RecursiveDeref(no->man->man,node);
+  manager_free(no->man);
 }
 int camlidl_custom_node_compare(value val1, value val2)
 {
   CAMLparam2(val1,val2);
   int res;
-  DdManager* man1 = ((node__t*)(Data_custom_val(val1)))->man;
-  DdNode* node1 = ((node__t*)(Data_custom_val(val1)))->node;
-  DdManager* man2 = ((node__t*)(Data_custom_val(val2)))->man;
-  DdNode* node2 = ((node__t*)(Data_custom_val(val2)))->node;
+  DdManager* man1 = DdManager_of_vnode(val1);
+  DdNode* node1 = DdNode_of_vnode(val1);
+  DdManager* man2 = DdManager_of_vnode(val2);
+  DdNode* node2 = DdNode_of_vnode(val2);
 
   res = (long)man1==(long)man2 ? 0 : ( (long)man1<(long)man2 ? -1 : 1);
   if (res==0)
@@ -130,7 +151,7 @@ int camlidl_custom_node_compare(value val1, value val2)
 long camlidl_custom_node_hash(value val)
 {
   CAMLparam1(val);
-  DdNode* node = ((node__t*)(Data_custom_val(val)))->node;
+  DdNode* node = DdNode_of_vnode(val);
   long hash = (long)node;
   CAMLreturn(hash);
 }
@@ -148,14 +169,11 @@ struct custom_operations camlidl_custom_node = {
 
 void camlidl_custom_bdd_finalize(value val)
 {
-  node__t* no;
-  DdManager* man;
-  DdNode* node;
-  no = (node__t*)(Data_custom_val(val));
-  man = no->man;
-  node = no->node;
+  node__t* no = node_of_vnode(val);
+  DdNode* node = no->node;
   assert((Cudd_Regular(node))->ref >= 1);
-  Cudd_IterDerefBdd(man,node);
+  Cudd_IterDerefBdd(no->man->man,node);
+  manager_free(no->man);
 }
 
 struct custom_operations camlidl_custom_bdd = {
@@ -175,11 +193,11 @@ struct custom_operations camlidl_custom_bdd = {
 value camlidl_cudd_manager_c2ml(manager__t* man)
 {
   value val;
-
-  if(*man==NULL)
+  if((*man)->man==NULL)
     failwith("Cudd: a function returned a null manager");
-  val = alloc_custom(&camlidl_custom_manager, sizeof(manager__t), 0, 1);
+  val = alloc_custom(&camlidl_custom_manager, sizeof(manager__t*), 0, 1);
   *((manager__t*)(Data_custom_val(val))) = *man;
+  managerRef(*man);
   return val;
 }
 void camlidl_cudd_manager_ml2c(value val, manager__t* man)
@@ -197,13 +215,12 @@ int bdd_compteur=0;
 #define FREQ_node 500
 #define FREQ_bdd 5000
 #endif
-
 value camlidl_cudd_node_c2ml(struct node__t* no)
 {
   value val;
 
   if(no->node==0){
-    Cudd_ErrorType err = Cudd_ReadErrorCode(no->man);
+    Cudd_ErrorType err = Cudd_ReadErrorCode(no->man->man);
     char *s;
     switch(err){
     case CUDD_NO_ERROR: s = "CUDD_NO_ERROR"; break;
@@ -220,7 +237,7 @@ value camlidl_cudd_node_c2ml(struct node__t* no)
     failwith(camlidl_cudd_msg);
   }
   cuddRef(no->node);
-
+  managerRef(no->man);
   /*
 #ifndef NDEBUG
   node_compteur++;
@@ -258,7 +275,7 @@ value camlidl_cudd_bdd_c2ml(struct node__t* bdd)
   value val;
 
   if(bdd->node==0){
-    Cudd_ErrorType err = Cudd_ReadErrorCode(bdd->man);
+    Cudd_ErrorType err = Cudd_ReadErrorCode(bdd->man->man);
     char *s;
     switch(err){
     case CUDD_NO_ERROR: s = "CUDD_NO_ERROR"; break;
@@ -276,7 +293,7 @@ value camlidl_cudd_bdd_c2ml(struct node__t* bdd)
   }
 
   cuddRef(bdd->node);
-
+  managerRef(bdd->man);
   /*
 #ifndef NDEBUG
   bdd_compteur++;
@@ -316,7 +333,7 @@ value camlidl_cudd_bdd_inspect(value vno)
   N = Cudd_Regular(no.node);
   if (cuddIsConstant(N)){
    vres = alloc_small(1,0);
-   if (no.node == DD_ONE(no.man))
+   if (no.node == DD_ONE(no.man->man))
      Field(vres,0) = Val_true;
    else
      Field(vres,0) = Val_false;
@@ -449,7 +466,7 @@ value camlidl_cudd_bdd_vectorsupport(value _v_vec)
     if (_no.man != _res.man)
       failwith("Bdd.vectorsupport called with BDDs belonging to different managers !");
   }
-  _res.node = Cudd_VectorSupport(_res.man, vec, size);
+  _res.node = Cudd_VectorSupport(_res.man->man, vec, size);
   free(vec);
   _v_res = camlidl_cudd_bdd_c2ml(&_res);
   CAMLreturn(_v_res);
@@ -491,7 +508,7 @@ value camlidl_cudd_rdd_vectorsupport2(value _v_vec1, value _v_vec2)
     if (_no.man != _res.man)
       failwith("Rdd.vectorsupport2 called with BDDs belonging to different managers !");
   }
-  _res.node = Cudd_VectorSupport(_res.man, vec, size);
+  _res.node = Cudd_VectorSupport(_res.man->man, vec, size);
   free(vec);
   _v_res = camlidl_cudd_bdd_c2ml(&_res);
   CAMLreturn(_v_res);
@@ -523,7 +540,7 @@ value camlidl_cudd_bdd_vectorcompose(value _v_vec, value _v_no)
     vec[i] = _no.node;
   }
   _res.man = no.man;
-  _res.node = Cudd_bddVectorCompose(no.man, no.node, vec);
+  _res.node = Cudd_bddVectorCompose(no.man->man, no.node, vec);
   _vres = camlidl_cudd_bdd_c2ml(&_res);
   free(vec);
   CAMLreturn(_vres);
@@ -550,7 +567,7 @@ value camlidl_cudd_rdd_vectorcompose(value _v_vec, value _v_no)
     vec[i] = _no.node;
   }
   _res.man = no.man;
-  _res.node = Cuddaux_addVectorCompose(no.man, no.node, vec);
+  _res.node = Cuddaux_addVectorCompose(no.man->man, no.node, vec);
   _vres = camlidl_cudd_node_c2ml(&_res);
   free(vec);
   CAMLreturn(_vres);
@@ -576,7 +593,7 @@ value camlidl_cudd_bdd_permute(value _v_no, value _v_permut)
     permut[i] = Int_val(v);
   }
   _res.man = no.man;
-  _res.node = Cudd_bddPermute(no.man,no.node,permut);
+  _res.node = Cudd_bddPermute(no.man->man,no.node,permut);
   _vres = camlidl_cudd_bdd_c2ml(&_res);
   free(permut);
   CAMLreturn(_vres);
@@ -598,7 +615,7 @@ value camlidl_cudd_rdd_permute(value _v_no, value _v_permut)
     permut[i] = Int_val(v);
   }
   _res.man = no.man;
-  _res.node = Cudd_addPermute(no.man,no.node,permut);
+  _res.node = Cudd_addPermute(no.man->man,no.node,permut);
   _vres = camlidl_cudd_node_c2ml(&_res);
   free(permut);
   CAMLreturn(_vres);
@@ -620,17 +637,17 @@ value camlidl_cudd_iter_node(value _v_closure, value _v_no)
 
   camlidl_cudd_node_ml2c(_v_no,&no);
   autodyn = 0;
-  if (Cudd_ReorderingStatus(no.man,&heuristic)){
+  if (Cudd_ReorderingStatus(no.man->man,&heuristic)){
     autodyn = 1;
-    Cudd_AutodynDisable(no.man);
+    Cudd_AutodynDisable(no.man->man);
   }
   snode.man = no.man;
-  Cudd_ForeachNode(no.man,no.node,gen,snode.node)
+  Cudd_ForeachNode(no.man->man,no.node,gen,snode.node)
     {
       _v_snode = camlidl_cudd_node_c2ml(&snode);
       callback(_v_closure,_v_snode);
     }
-  if (autodyn) Cudd_AutodynEnable(no.man,CUDD_REORDER_SAME);
+  if (autodyn) Cudd_AutodynEnable(no.man->man,CUDD_REORDER_SAME);
   CAMLreturn(Val_unit);
 }
 
@@ -647,18 +664,18 @@ value camlidl_cudd_bdd_iter_cube(value _v_closure, value _v_no)
 
   camlidl_cudd_node_ml2c(_v_no,&no);
   autodyn = 0;
-  if (Cudd_ReorderingStatus(no.man,&heuristic)){
+  if (Cudd_ReorderingStatus(no.man->man,&heuristic)){
     autodyn = 1;
-    Cudd_AutodynDisable(no.man);
+    Cudd_AutodynDisable(no.man->man);
   }
-  size = no.man->size;
-  Cudd_ForeachCube(no.man,no.node,gen,array,val)
+  size = no.man->man->size;
+  Cudd_ForeachCube(no.man->man,no.node,gen,array,val)
     {
       if (size==0) {
 	_v_array = Atom(0);
       }
       else {
-	_v_array = alloc(size,0);
+	_v_array = caml_alloc(size,0);
 	for(i=0; i<size; i++){
 	  Store_field(_v_array,i,Val_int(array[i]));
 	  /* Allowed according to caml/memory.h memory.c */
@@ -666,7 +683,7 @@ value camlidl_cudd_bdd_iter_cube(value _v_closure, value _v_no)
       }
       callback(_v_closure,_v_array);
     }
-  if (autodyn) Cudd_AutodynEnable(no.man,CUDD_REORDER_SAME);
+  if (autodyn) Cudd_AutodynEnable(no.man->man,CUDD_REORDER_SAME);
   CAMLreturn(Val_unit);
 }
 
@@ -683,18 +700,18 @@ value camlidl_cudd_rdd_iter_cube(value _v_closure, value _v_no)
 
   camlidl_cudd_node_ml2c(_v_no,&no);
   autodyn = 0;
-  if (Cudd_ReorderingStatus(no.man,&heuristic)){
+  if (Cudd_ReorderingStatus(no.man->man,&heuristic)){
     autodyn = 1;
-    Cudd_AutodynDisable(no.man);
+    Cudd_AutodynDisable(no.man->man);
   }
-  size = no.man->size;
-  Cudd_ForeachCube(no.man,no.node,gen,array,val)
+  size = no.man->man->size;
+  Cudd_ForeachCube(no.man->man,no.node,gen,array,val)
     {
       if (size==0) {
 	_v_array = Atom(0);
       }
       else {
-	_v_array = alloc(size,0);
+	_v_array = caml_alloc(size,0);
 	for(i=0; i<size; i++){
 	Store_field(_v_array,i,Val_int(array[i]));
 	/* Allowed according to caml/memory.h memory.c */
@@ -703,7 +720,7 @@ value camlidl_cudd_rdd_iter_cube(value _v_closure, value _v_no)
       _v_val = copy_double(val);
       callback2(_v_closure,_v_array,_v_val);
     }
-  if (autodyn) Cudd_AutodynEnable(no.man,CUDD_REORDER_SAME);
+  if (autodyn) Cudd_AutodynEnable(no.man->man,CUDD_REORDER_SAME);
   CAMLreturn(Val_unit);
 }
 
@@ -720,21 +737,21 @@ value camlidl_cudd_idd_iter_cube(value _v_closure, value _v_no)
   Cudd_ReorderingType heuristic;
 
   camlidl_cudd_node_ml2c(_v_no,&no);
-  if (Cudd_ReorderingStatus(no.man,&heuristic)){
+  if (Cudd_ReorderingStatus(no.man->man,&heuristic)){
     autodyn = 1;
-    Cudd_AutodynDisable(no.man);
+    Cudd_AutodynDisable(no.man->man);
   }
   else
     autodyn=0;
 
-  size = no.man->size;
-  Cudd_ForeachCube(no.man,no.node,gen,array,val)
+  size = no.man->man->size;
+  Cudd_ForeachCube(no.man->man,no.node,gen,array,val)
     {
       if (size==0) {
 	_v_array = Atom(0);
       }
       else {
-	_v_array = alloc(size,0);
+	_v_array = caml_alloc(size,0);
 	for(i=0; i<size; i++){
 	  Store_field(_v_array,i,Val_int(array[i]));
 	  /* Allowed according to caml/memory.h memory.c */
@@ -744,7 +761,7 @@ value camlidl_cudd_idd_iter_cube(value _v_closure, value _v_no)
       _v_val = Val_int(ival);
       callback2(_v_closure,_v_array,_v_val);
     }
-  if (autodyn) Cudd_AutodynEnable(no.man,CUDD_REORDER_SAME);
+  if (autodyn) Cudd_AutodynEnable(no.man->man,CUDD_REORDER_SAME);
   CAMLreturn(Val_unit);
 }
 
@@ -762,21 +779,21 @@ value camlidl_cudd_bdd_iter_prime(value _v_closure, value _v_lower, value _v_upp
   camlidl_cudd_node_ml2c(_v_lower,&lower);
   camlidl_cudd_node_ml2c(_v_upper,&upper);
   if (lower.man!=upper.man){
-    failwith("Bdd.iter_ime called with BDDs belonging to different managers !");
+    failwith("Bdd.iter_prime called with BDDs belonging to different managers !");
   }
   autodyn = 0;
-  if (Cudd_ReorderingStatus(lower.man,&heuristic)){
+  if (Cudd_ReorderingStatus(lower.man->man,&heuristic)){
     autodyn = 1;
-    Cudd_AutodynDisable(lower.man);
+    Cudd_AutodynDisable(lower.man->man);
   }
-  size = lower.man->size;
-  Cudd_ForeachPrime(lower.man,lower.node,upper.node,gen,array)
+  size = lower.man->man->size;
+  Cudd_ForeachPrime(lower.man->man,lower.node,upper.node,gen,array)
     {
       if (size==0) {
 	_v_array = Atom(0);
       }
       else {
-	_v_array = alloc(size,0);
+	_v_array = caml_alloc(size,0);
 	for(i=0; i<size; i++){
 	  Store_field(_v_array,i,Val_int(array[i]));
 	  /* Allowed according to caml/memory.h memory.c */
@@ -784,7 +801,7 @@ value camlidl_cudd_bdd_iter_prime(value _v_closure, value _v_lower, value _v_upp
       }
       callback(_v_closure,_v_array);
     }
-  if (autodyn) Cudd_AutodynEnable(lower.man,CUDD_REORDER_SAME);
+  if (autodyn) Cudd_AutodynEnable(lower.man->man,CUDD_REORDER_SAME);
   CAMLreturn(Val_unit);
 }
 
@@ -799,7 +816,7 @@ value camlidl_cudd_cube_of_bdd(value _v_no)
   bdd__t _res;
   camlidl_cudd_node_ml2c(_v_no,&no);
   _res.man = no.man;
-  _res.node = Cudd_FindEssential(no.man,no.node);
+  _res.node = Cudd_FindEssential(no.man->man,no.node);
   _v_res = camlidl_cudd_bdd_c2ml(&_res);
   CAMLreturn(_v_res);
 }
@@ -814,7 +831,7 @@ value camlidl_cudd_cube_of_minterm(value _v_man, value _v_array)
 
   camlidl_cudd_manager_ml2c(_v_man, &man);
   size = Wosize_val(_v_array);
-  maxsize = Cudd_ReadSize(man);
+  maxsize = Cudd_ReadSize(man->man);
   if (size>maxsize){
     caml_failwith("Bdd.cube_of_minterm: array of size greater than the number of variables in manager");
   }
@@ -826,7 +843,7 @@ value camlidl_cudd_cube_of_minterm(value _v_man, value _v_array)
     array[i] = 2;
   }
   _res.man = man;
-  _res.node = Cudd_CubeArrayToBdd(man,array);
+  _res.node = Cudd_CubeArrayToBdd(man->man,array);
   free(array);
   _v_res = camlidl_cudd_bdd_c2ml(&_res);
   CAMLreturn(_v_res);
@@ -842,7 +859,7 @@ value camlidl_cudd_list_of_cube(value _v_no)
   camlidl_cudd_node_ml2c(_v_no,&node);
   f = node.node;
 
-  zero = Cudd_Not(DD_ONE(node.man));
+  zero = Cudd_Not(DD_ONE(node.man->man));
   res = Val_int(0);
   if (f==zero)
     failwith("Bdd.list_of_cube called on a false bdd\n");
@@ -888,17 +905,17 @@ value camlidl_cudd_pick_minterm(value _v_no)
   int i,size,res;
 
   camlidl_cudd_node_ml2c(_v_no,&no);
-  size = no.man->size;
+  size = no.man->man->size;
   string = size>1024 ? (char*)malloc(size) : array;
   if (string==NULL){
     failwith("Bdd.pick_minterm: out of memory");
   }
-  res = Cudd_bddPickOneCube(no.man,no.node,string);
+  res = Cudd_bddPickOneCube(no.man->man,no.node,string);
   if (res==0){
     if (size>1024) free(string);
     failwith("Bdd.pick_minterm: (probably) second argument is not a positive cube");
   }
-  _v_array = alloc(size,0);
+  _v_array = caml_alloc(size,0);
   for(i=0; i<size; i++){
     Store_field(_v_array,i,Val_int(array[i]));
     /* Allowed according to caml/memory.h memory.c */
@@ -953,7 +970,7 @@ value camlidl_cudd_pick_cube_on_support(value _v_no1, value _v_no2)
   if (no1.man!=no2.man){
     failwith ("Bdd.pick_cube_on_support called with BDDs belonging to different managers !");
   }
-  ret = array_of_support(no2.man,no2.node,&vars,&size);
+  ret = array_of_support(no2.man->man,no2.node,&vars,&size);
   if (ret==1){
     failwith("Bdd.pick_cube_on_support: the second argument is not a positive cube");
   }
@@ -961,7 +978,7 @@ value camlidl_cudd_pick_cube_on_support(value _v_no1, value _v_no2)
     failwith("Bdd.pick_cube_on_support: empty support or out of memory");
   }
   res.man = no1.man;
-  res.node = Cudd_bddPickOneMinterm(no1.man,no1.node,vars,size);
+  res.node = Cudd_bddPickOneMinterm(no1.man->man,no1.node,vars,size);
   free(vars);
   _v_res = camlidl_cudd_bdd_c2ml(&res);
   CAMLreturn(_v_res);
@@ -983,14 +1000,14 @@ value camlidl_cudd_pick_cubes_on_support(value _v_no1, value _v_no2, value _v_k)
   if (no1.man!=no2.man){
     failwith ("Bdd.pick_cubes_on_support called with BDDs belonging to different managers !");
   }
-  ret = array_of_support(no2.man,no2.node,&vars,&size);
+  ret = array_of_support(no2.man->man,no2.node,&vars,&size);
   if (ret==1){
     failwith("Bdd.pick_cubes_on_support: the second argument is not a positive cube");
   }
   else if (ret==2){
     failwith("Bdd.pick_cube_on_support: empty support or out of memory");
   }
-  array = Cudd_bddPickArbitraryMinterms(no1.man,no1.node,vars,size,k);
+  array = Cudd_bddPickArbitraryMinterms(no1.man->man,no1.node,vars,size,k);
   free(vars);
   if (array==NULL){
     failwith("Bdd.pick_cubes_on_support: out of memory, or first argument is false, or wrong support, or number of minterms < k");
@@ -1000,7 +1017,7 @@ value camlidl_cudd_pick_cubes_on_support(value _v_no1, value _v_no2, value _v_k)
     _v_res = Atom(0);
   }
   else {
-    _v_res = alloc(k,0);
+    _v_res = caml_alloc(k,0);
     for(i=0; i<k; i++){
       no3.man = no1.man;
       no3.node = array[i];
@@ -1033,7 +1050,7 @@ value camlidl_cudd_rdd_nodes_below_level(value _v_no, value _v_olevel)
     level = Int_val(_v_level);
   }
 
-  list = Cuddaux_NodesBelowLevel(no.man,no.node,level);
+  list = Cuddaux_NodesBelowLevel(no.man->man,no.node,level);
 
   /* Now, we build the array of nodes */
   /* First, count the elements */
@@ -1044,7 +1061,7 @@ value camlidl_cudd_rdd_nodes_below_level(value _v_no, value _v_olevel)
     res = Atom(0);
   }
   else {
-    res = alloc(size,0);
+    res = caml_alloc(size,0);
     for(p=list, i=0; p!=NULL; p=p->next,i++){
       assert(p->node->ref>=1);
       no.node = p->node;
@@ -1067,7 +1084,7 @@ value camlidl_cudd_idd_leaves(value _v_no)
   camlidl_cudd_node_ml2c(_v_no,&no);
   assert(no.node->ref>=1);
 
-  list = Cuddaux_NodesBelowLevel(no.man,no.node,CUDD_MAXINDEX);
+  list = Cuddaux_NodesBelowLevel(no.man->man,no.node,CUDD_MAXINDEX);
 
   /* Now, we build the array of nodes */
   /* First, count the elements */
@@ -1078,7 +1095,7 @@ value camlidl_cudd_idd_leaves(value _v_no)
     res = Atom(0);
   }
   else {
-    res = alloc(size,0);
+    res = caml_alloc(size,0);
     for(p=list,i=0; p!=NULL; p=p->next,i++){
       assert(p->node->ref>=1);
       val = (int)(cuddV(p->node));
@@ -1099,7 +1116,7 @@ value camlidl_cudd_rdd_leaves(value _v_no)
   double val;
 
   camlidl_cudd_node_ml2c(_v_no,&no);
-  list = Cuddaux_NodesBelowLevel(no.man,no.node,CUDD_MAXINDEX);
+  list = Cuddaux_NodesBelowLevel(no.man->man,no.node,CUDD_MAXINDEX);
 
   /* Now, we build the array of nodes */
   /* First, count the elements */
@@ -1110,7 +1127,7 @@ value camlidl_cudd_rdd_leaves(value _v_no)
     res = Atom(Double_array_tag);
   }
   else {
-    res = alloc(size * Double_wosize,Double_array_tag);
+    res = caml_alloc(size * Double_wosize,Double_array_tag);
     for(p=list,i=0; p!=NULL; p=p->next,i++){
       assert(p->node->ref>=1);
       val = cuddV(p->node);
@@ -1128,7 +1145,7 @@ value camlidl_cudd_print(value _v_no)
 
   camlidl_cudd_node_ml2c(_v_no,&no);
   fflush(stdout);
-  Cudd_PrintMinterm(no.man,no.node);
+  Cudd_PrintMinterm(no.man->man,no.node);
   fflush(stdout);
   CAMLreturn(Val_unit);
 }
@@ -1171,7 +1188,7 @@ static DdNode* camlidl_rddidd_mapunop_aux(DdManager* man, DdNode* f)
   assert (f->ref>=1);
   if (cuddIsConstant(f)){
     exception = 0;
-    _v_f = _v_val = 0;
+    _v_f = _v_val = Val_unit;
     Begin_roots2(_v_f,_v_val)
       if (camlidl_rddidd_is_idd){
 	_v_f = Val_int((int)(cuddV(f)));
@@ -1215,7 +1232,7 @@ static DdNode* camlidl_rddidd_mapbinop_aux(DdManager* man, DdNode** f, DdNode** 
   }
   if (cuddIsConstant(F) && cuddIsConstant(G)) {
     exception = 0;
-    _v_F = _v_G = _v_val = 0;
+    _v_F = _v_G = _v_val = Val_unit;
     Begin_roots3(_v_F,_v_G,_v_val)
     if (camlidl_rddidd_is_idd){
       _v_F = Val_int((int)(cuddV(F)));
@@ -1257,7 +1274,7 @@ static DdNode* camlidl_rddidd_mapterop_aux(DdManager* man, DdNode** f, DdNode** 
   F = *f; G = *g; H = *h;
   if (cuddIsConstant(F) && cuddIsConstant(G) && cuddIsConstant(H)) {
     exception = 0;
-    _v_F = _v_G = _v_H = _v_val = 0;
+    _v_F = _v_G = _v_H = _v_val = Val_unit;
     Begin_roots4(_v_F,_v_G,_v_H,_v_val)
     if (camlidl_rddidd_is_idd){
       _v_F = Val_int((int)(cuddV(F)));
@@ -1299,7 +1316,7 @@ value camlidl_cudd_rddidd_mapunop(value _v_is_idd, value _v_f, value _v_no)
   camlidl_rddidd_op_val1 = _v_no;
   camlidl_cudd_node_ml2c(_v_no,&no);
   _res.man = no.man;
-  _res.node = Cuddaux_AddApply1(no.man, camlidl_rddidd_mapunop_aux, no.node);
+  _res.node = Cuddaux_AddApply1(no.man->man, camlidl_rddidd_mapunop_aux, no.node);
   camlidl_rddidd_op_closure = Val_unit;
   camlidl_rddidd_op_val1 = Val_unit;
   if (camlidl_rddidd_op_exn!=Val_unit){
@@ -1329,7 +1346,7 @@ value camlidl_cudd_rddidd_mapbinop(value _v_is_idd, value _v_bool, value _v_f, v
   camlidl_cudd_node_ml2c(_v_no1,&no1);
   camlidl_cudd_node_ml2c(_v_no2,&no2);
   _res.man = no1.man;
-  _res.node = Cuddaux_AddApply2(no1.man, camlidl_rddidd_mapbinop_aux, no1.node, no2.node);
+  _res.node = Cuddaux_AddApply2(no1.man->man, camlidl_rddidd_mapbinop_aux, no1.node, no2.node);
   camlidl_rddidd_op_closure = Val_unit;
   camlidl_rddidd_op_val1 = Val_unit;
   camlidl_rddidd_op_val2 = Val_unit;
@@ -1362,7 +1379,7 @@ value camlidl_cudd_rddidd_mapterop(value _v_is_idd, value _v_f, value _v_no1, va
   camlidl_cudd_node_ml2c(_v_no2,&no2);
   camlidl_cudd_node_ml2c(_v_no3,&no3);
   _res.man = no1.man;
-  _res.node = Cuddaux_AddApply3(no1.man, camlidl_rddidd_mapterop_aux, no1.node, no2.node, no3.node);
+  _res.node = Cuddaux_AddApply3(no1.man->man, camlidl_rddidd_mapterop_aux, no1.node, no2.node, no3.node);
   camlidl_rddidd_op_closure = Val_unit;
   camlidl_rddidd_op_val1 = Val_unit;
   camlidl_rddidd_op_val2 = Val_unit;

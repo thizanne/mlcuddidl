@@ -91,7 +91,8 @@ quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"")
 
 idd__t cst(manager__t man, int val)
-  quote(call, "_res.man = man; _res.node = Cudd_addConst(man,(int)val);");
+  quote(call, "Begin_roots1(_v_man); _res.man = man; _res.node = Cudd_addConst(man->man,(int)val);")
+     quote(dealloc,"End_roots();");
 
 quote(MLMLI,"
 external ite : Bdd.t -> t -> t -> t = \"camlidl_rdd_ite\"
@@ -124,7 +125,7 @@ quote(call,
      DdNode* node;
 
      CHECK_MAN2;
-     node = Cuddaux_addEvalConst(no1.man,no2.node,no1.node);
+     node = Cuddaux_addEvalConst(no1.man->man,no2.node,no1.node);
      if (node==DD_NON_CONSTANT || ! cuddIsConstant(node))
        _res = 0;
      else {
@@ -141,7 +142,7 @@ quote(call,
 
      DdNode* node;
      CHECK_MAN3;
-     node = Cuddaux_addIteConstant(no1.man,no1.node,no2.node,no3.node);
+     node = Cuddaux_addIteConstant(no1.man->man,no1.node,no2.node,no3.node);
      if (node==DD_NON_CONSTANT || ! cuddIsConstant(node))
        _res = 0;
      else {
@@ -209,12 +210,12 @@ bdd__t guard_of_leaf(idd__t no, int val)
      quote(call,"
 Begin_roots1(_v_no);
 {
-DdNode* nval = Cudd_addConst(no.man, (double)val);
+DdNode* nval = Cudd_addConst(no.man->man, (double)val);
 cuddRef(nval);
 _res.man = no.man;
-_res.node = Cuddaux_addGuardOfNode(no.man,no.node,nval);
+_res.node = Cuddaux_addGuardOfNode(no.man->man,no.node,nval);
 cuddRef(_res.node);
-Cudd_RecursiveDeref(no.man,nval);
+Cudd_RecursiveDeref(no.man->man,nval);
 cuddDeref(_res.node);
 }
 End_roots();

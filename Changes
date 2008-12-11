@@ -1,4 +1,14 @@
 -------------
+MLCuddIDL 1.4:
+-------------
+General:
+  New management of objects of type Manager.t, which are automatically (and
+  safely) garbage collected.
+
+cudd_caml.c:
+  Bugs related to (unsufficient) memory protection corrected.
+
+-------------
 MLCuddIDL 1.3b:
 -------------
 bdd.idl:

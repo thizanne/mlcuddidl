@@ -13,7 +13,7 @@ quote(C, "
 /* Datatypes */
 /* ====================================================================== */
 
-typedef [abstract,c2ml(camlidl_cudd_manager_c2ml),ml2c(camlidl_cudd_manager_ml2c)] struct DdManager* manager__t;
+typedef [abstract,c2ml(camlidl_cudd_manager_c2ml),ml2c(camlidl_cudd_manager_ml2c)] struct manager_t* manager__t;
 quote(MLI,"(** CUDD Manager *)")
 
 enum reorder {
@@ -161,43 +161,38 @@ hook function to be called whenever a CUDD reordering occurs. The defaults
 can be modified with {!set_gc}. *)")
 manager__t make(unsigned int numVars, unsigned int numVarsZ, unsigned int numSlots, unsigned int cacheSize, unsigned long maxMemory)
   quote(call,
-"  if (numSlots==0) numSlots = CUDD_UNIQUE_SLOTS;
+"  
+{  int res;
+
+   if (numSlots==0) numSlots = CUDD_UNIQUE_SLOTS;
    if (cacheSize==0) cacheSize = CUDD_CACHE_SLOTS;
-   _res = Cudd_Init(numVars, numVarsZ, numSlots, cacheSize, maxMemory);
-   {
-     int res;
-     res = Cudd_AddHook(_res,camlidl_cudd_garbage,CUDD_PRE_GC_HOOK);
-     if (res!=1)
-      failwith(\"Manager.make: unable to add the garbage collection hook\");
-     res = Cudd_AddHook(_res,camlidl_cudd_reordering,CUDD_PRE_REORDERING_HOOK);
-     if (res!=1)
-      failwith(\"Manager.make: unable to add the reordering hook\");
+   _res = (manager__t)malloc(sizeof(struct manager__t));
+   _res->man = Cudd_Init(numVars, numVarsZ, numSlots, cacheSize, maxMemory);
+
+   res = Cudd_AddHook(_res->man,camlidl_cudd_garbage,CUDD_PRE_GC_HOOK);
+   if (res!=1)
+     failwith(\"Manager.make: unable to add the garbage collection hook\");
+     res = Cudd_AddHook(_res->man,camlidl_cudd_reordering,CUDD_PRE_REORDERING_HOOK);
+   if (res!=1)
+     failwith(\"Manager.make: unable to add the reordering hook\");
+   _res->count = 0;
 }
 ");
-
-quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Quit}[Cudd_Quit]}. Frees the manager [man].
-
-DANGEROUS AND UNSAFE OPERATION: you need to be sure that there is no BDDs/ADDs
-any more that refers to this manager and that haven't been yet reclaimed by the
-garbage collector. Be sure that there is no BDDs left in your reachable data,
-and call first [Gc.full_major()]. *)")
-void free(manager__t man)
-     quote(call, "Cudd_Quit(man);");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_DebugCheck}[Cudd_DebugCheck]}.
 Returns [false] if it is OK, [true] if there is a problem, and throw
 a [Failure] exception in case of [CUDD_OUT_OF_MEM]. *) ")
 boolean debugcheck(manager__t man)
      quote(call,
-"_res = Cudd_DebugCheck(man);
- fflush(man->err);
+"_res = Cudd_DebugCheck(man->man);
+ fflush(man->man->err);
  if (_res == CUDD_OUT_OF_MEM)
    failwith(\"Dd.debugcheck returned CUDD_OUT_OF_MEM\");
 ");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CheckKeys}[Cudd_CheckKeys]}. *)")
 int check_keys(manager__t man)
-     quote(call, "_res = Cudd_CheckKeys(man);");
+     quote(call, "_res = Cudd_CheckKeys(man->man);");
 
 /* ====================================================================== */
 /* Variables, Reordering and Mapping */
@@ -211,17 +206,17 @@ quote(MLMLI,"\n")
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ReadPerm}[Cudd_ReadPerm]}. Returns the level of the variable (its order in the BDD) *)")
 int level_of_var(manager__t man, int var)
-     quote(call, "_res = Cudd_ReadPerm(man,var);");
+     quote(call, "_res = Cudd_ReadPerm(man->man,var);");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ReadInvPerm}[Cudd_ReadInvPerm]}. Returns the variable associated to the given level. *)")
 int var_of_level(manager__t man, int level)
-     quote(call, "_res = Cudd_ReadInvPerm(man,level);");
+     quote(call, "_res = Cudd_ReadInvPerm(man->man,level);");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ReduceHeap}[Cudd_ReduceHeap]}. Main reordering function, that applies the given heuristic. The provided integer is a bound below which no reordering takes place. *)")
 void reduce_heap(manager__t man, enum reorder heuristic, int minsize)
      quote(call,
 "{
-  int ok = Cudd_ReduceHeap(man,heuristic,minsize);
+  int ok = Cudd_ReduceHeap(man->man,heuristic,minsize);
   if (ok==0) failwith(\"Manager.reduce_heap failed\");
 }");
 
@@ -229,24 +224,24 @@ quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Shuf
 void shuffle_heap(manager__t man, int permut[])
      quote(call,
 "{
-  int ok = Cudd_ShuffleHeap(man,permut);
+  int ok = Cudd_ShuffleHeap(man->man,permut);
   if (ok==0) failwith(\"Manager.shuffle_heap failed\");
 }");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_AutodynEnable}[Cudd_AutodynEnable]}. Enables dynamic reordering with the given heuristics. *)")
 void enable_autodyn(manager__t man, enum reorder heuristic)
-     quote(call, "Cudd_AutodynEnable(man,heuristic);");
+     quote(call, "Cudd_AutodynEnable(man->man,heuristic);");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_AutodynDisable}[Cudd_AutodynDisable]}. Disables dynamic reordering. *)")
 void disable_autodyn(manager__t man)
-     quote(call, "Cudd_AutodynDisable(man);");
+     quote(call, "Cudd_AutodynDisable(man->man);");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ReorderingStatus}[Cudd_ReorderingStatus]}. Returns [None] if dynamic reordering is disables, [Some(heuristic)] otherwise. *)")
 void autodyn_status(manager__t man, [out,unique] enum reorder * heuristic)
      quote(call,"
 {
   int b;
-  b = Cudd_ReorderingStatus(man,(Cudd_ReorderingType*)heuristic);
+  b = Cudd_ReorderingStatus(man->man,(Cudd_ReorderingType*)heuristic);
   if (!b) heuristic = NULL;
 }
 ");
@@ -254,17 +249,17 @@ void autodyn_status(manager__t man, [out,unique] enum reorder * heuristic)
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_MakeTreeNode}[Cudd_MakeTreeNode]}.
 [group man low size typ] creates a new variable group, ranging from index [low] to index [low+size-1], in which [typ] specifies if reordering is allowed inside the group. *)")
 void group(manager__t man, int low, int size, enum mtr type)
-     quote(call, "Cudd_MakeTreeNode(man, low, size, type);");
+     quote(call, "Cudd_MakeTreeNode(man->man, low, size, type);");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_FreeTree}[Cudd_FreeTree]}. Removes all the groups in the manager. *)")
 void ungroupall(manager__t man)
-     quote(call, "Cudd_FreeTree(man);");
+     quote(call, "Cudd_FreeTree(man->man);");
 
 quote(MLI,"(** [Cuddaux_SetVarMap]/{{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SetVarMap}[Cudd_SetVarMap]}. Initializes the global mapping table, used by functions {!Bdd.varmap}, {!Rdd.varmap}, {!Idd.varmap}, ...  Convenient when the same mapping is applied several times, because the the different calls reuse the same cache. *)")
 void set_varmap(manager__t man, [size_is(size)] int permut[], int size)
      quote(call,
 "{
-  int ok = Cuddaux_SetVarMap(man,permut);
+  int ok = Cuddaux_SetVarMap(man->man,permut);
   if (ok==0) failwith(\"Manager.set_varmap failed\");
 }");
 
@@ -287,7 +282,7 @@ quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Read
 double get_background(manager__t man)
      quote(call,
 "{
-  DdNode* add = Cudd_ReadBackground(man);
+  DdNode* add = Cudd_ReadBackground(man->man);
   _res = cuddV(add);
 }");
 
@@ -295,9 +290,9 @@ quote(MLI,"(** Variation of {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.h
 void   set_background(manager__t man, double v)
      quote(call,
 "{
-  DdNode* add = Cudd_addConst(man,v);
+  DdNode* add = Cudd_addConst(man->man,v);
   cuddRef(add);
-  Cudd_SetBackground(man,add);
+  Cudd_SetBackground(man->man,add);
 }");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ReadEpsilon}[Cudd_ReadEpsilon]}. *)")
@@ -471,7 +466,7 @@ int    get_keys(manager__t man) VAL_OF_MAN(Cudd_ReadKeys);
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ReadLinear}[Cudd_ReadLinear]}. *)")
 int    get_linear(manager__t man, int x, int y)
-     quote(call, "_res = Cudd_ReadLinear(man,x,y);");
+     quote(call, "_res = Cudd_ReadLinear(man->man,x,y);");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ReadMaxCache}[Cudd_ReadMaxCache]}. *)")
 int    get_max_cache(manager__t man) VAL_OF_MAN(Cudd_ReadMaxCache);
@@ -510,7 +505,7 @@ quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Prin
 void print_info(manager__t man)
   quote(call,
 "  fflush(stdout);
-   Cudd_PrintInfo(man,stdout);
+   Cudd_PrintInfo(man->man,stdout);
    fflush(stdout);
 ");
 

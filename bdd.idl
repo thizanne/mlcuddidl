@@ -44,7 +44,9 @@ quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
 quote(MLI,"(** Returns the manager associated to the BDD *)")
-manager__t manager(bdd__t no) quote(call, "_res=no.man;");
+manager__t manager(bdd__t no) 
+  quote(call, "Begin_roots1(_v_no); _res=no.man;")
+     quote(dealloc, "End_roots();");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_IsConstant}[Cudd_IsConstant]}. Is the BDD constant ? *)")
 boolean is_cst(bdd__t no) quote(call, "_res = Cudd_IsConstant(no.node);");
@@ -84,9 +86,9 @@ void cofactors(int var, bdd__t no, [out] bdd__t noa, [out] bdd__t nob)
   DdNode* cof;
   noa.man = nob.man = no.man;
   Begin_roots1(_v_no);
-  cof = Cudd_bddIthVar(no.man, var);
-  noa.node = Cudd_Cofactor(no.man,no.node,cof);
-  nob.node = Cudd_Cofactor(no.man,no.node,Cudd_Not(cof));
+  cof = Cudd_bddIthVar(no.man->man, var);
+  noa.node = Cudd_Cofactor(no.man->man,no.node,cof);
+  nob.node = Cudd_Cofactor(no.man->man,no.node,Cudd_Not(cof));
   End_roots();
   }
 ");
@@ -112,15 +114,15 @@ bdd__t support(bdd__t no)
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SupportSize}[Cudd_SupportSize]}. Returns the size of the support of the BDD *)")
 int supportsize(bdd__t no)
-     quote(call, "_res = Cudd_SupportSize(no.man,no.node);");
+     quote(call, "_res = Cudd_SupportSize(no.man->man,no.node);");
 
 quote(MLI,"(** [Cuddaux_IsVarIn]. Does the given variable belong the support of the BDD ? *)")
 boolean is_var_in(int var, bdd__t no)
      quote(call, "
 Begin_roots1(_v_no);
 {
-DdNode* v = Cudd_bddIthVar(no.man,var);
-_res = Cuddaux_IsVarIn(no.man, no.node, v);
+DdNode* v = Cudd_bddIthVar(no.man->man,var);
+_res = Cuddaux_IsVarIn(no.man->man, no.node, v);
 }
 End_roots();
 ");
@@ -166,23 +168,23 @@ quote(MLMLI,"\n")
 
 quote(MLI,"(** Returns the true BDD *)")
 bdd__t dtrue(manager__t man)
-     quote(call, "_res.man = man; _res.node = DD_ONE(man);");
+     quote(call, "_res.man = man; _res.node = DD_ONE(man->man);");
 
 quote(MLI,"(** Returns the false BDD *)")
 bdd__t dfalse(manager__t man)
-     quote(call, "_res.man = man; _res.node = Cudd_Not(DD_ONE(man));");
+     quote(call, "_res.man = man; _res.node = Cudd_Not(DD_ONE(man->man));");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddIthVar}[Cudd_bddIthVar]}. Returns the BDD equivalent to the variable of the given index. *)")
 bdd__t ithvar(manager__t man, int var)
-     quote(call, "_res.man = man; _res.node = Cudd_bddIthVar(man,var);");
+     quote(call, "Begin_roots1(_v_man); _res.man = man; _res.node = Cudd_bddIthVar(man->man,var); End_roots();");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddNewVar}[Cudd_bddNewVar]}. Returns the BDD equivalent to the variable of the next unused index. *)")
 bdd__t newvar(manager__t man)
-     quote(call, "_res.man = man; _res.node = Cudd_bddNewVar(man);");
+     quote(call, "Begin_roots1(_v_man); _res.man = man; _res.node = Cudd_bddNewVar(man->man); End_roots();");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddNewVarAtLevel}[Cudd_bddNewVarAtLevel]}. Returns the BDD equivalent to the variable of the next unused index and sets its level. *)")
 bdd__t newvar_at_level(manager__t man, int level)
-     quote(call, "_res.man = man; _res.node = Cudd_bddNewVarAtLevel(man,level);");
+     quote(call, "Begin_roots1(_v_man); _res.man = man; _res.node = Cudd_bddNewVarAtLevel(man->man,level); End_roots();");
 quote(ML,"let dummy = dtrue Manager.dummy")
 
 
@@ -197,25 +199,25 @@ quote(MLMLI,"\n")
 
 quote(MLI,"(** Is it a true BDD ? *)")
 boolean is_true(bdd__t no)
-     quote(call, "_res = (no.node == DD_ONE(no.man));");
+     quote(call, "_res = (no.node == DD_ONE(no.man->man));");
 quote(MLI,"(** Is it a false BDD ? *)")
 boolean is_false(bdd__t no)
-     quote(call, "_res = (no.node == Cudd_Not(DD_ONE(no.man)));");
+     quote(call, "_res = (no.node == Cudd_Not(DD_ONE(no.man->man)));");
 quote(MLI,"(** Are the two BDDs equal ? *)")
 boolean is_equal(bdd__t no1, bdd__t no2)
      quote(call, "CHECK_MAN2; _res = (no1.node==no2.node);");
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddLeq}[Cudd_bddLeq]}. Does the first BDD implies the second one ? *)")
 boolean is_leq(bdd__t no1, bdd__t no2)
-     quote(call, "CHECK_MAN2; _res = Cudd_bddLeq(no1.man, no1.node, no2.node);");
+     quote(call, "CHECK_MAN2; _res = Cudd_bddLeq(no1.man->man, no1.node, no2.node);");
 quote(MLI,"(** Variation of {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddLeq}[Cudd_bddLeq]}. Is the intersection (conjunction) of the two BDDs non empty (false) ? *)")
 boolean is_inter_empty(bdd__t no1, bdd__t no2)
-     quote(call, "CHECK_MAN2; _res = Cudd_bddLeq(no1.man, no1.node, Cudd_Not(no2.node));");
+     quote(call, "CHECK_MAN2; _res = Cudd_bddLeq(no1.man->man, no1.node, Cudd_Not(no2.node));");
 quote(MLI,"(** Variation of {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_EquivDC}[Cudd_EquivDC]}. Are the two first BDDs equal when the third one (careset) is true ? *)")
 boolean is_equal_when(bdd__t no1, bdd__t no2, bdd__t no3)
-     quote(call,"CHECK_MAN3; _res=Cudd_EquivDC(no1.man,no1.node,no2.node,Cudd_Not(no3.node));");
+     quote(call,"CHECK_MAN3; _res=Cudd_EquivDC(no1.man->man,no1.node,no2.node,Cudd_Not(no3.node));");
 quote(MLI,"(** Variation of {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddLeqUnless}[Cudd_bddLeqUnless]}. Does the first BDD implies the second one when the third one (careset) is true ? *)")
 boolean is_leq_when(bdd__t no1, bdd__t no2,bdd__t no3)
-     quote(call,"CHECK_MAN3; _res=Cudd_bddLeqUnless(no1.man,no1.node,no2.node,Cudd_Not(no3.node));");
+     quote(call,"CHECK_MAN3; _res=Cudd_bddLeqUnless(no1.man->man,no1.node,no2.node,Cudd_Not(no3.node));");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddLeq}[Cudd_bddLeq]}. Same as {!is_leq} *)")
 quote(MLI,"val is_included_in : t -> t -> bool")
@@ -229,11 +231,11 @@ quote(call,
 
      DdNode* node;
      CHECK_MAN3;
-     node = Cudd_bddIteConstant(no1.man,no1.node,no2.node,no3.node);
-     if (node==DD_NON_CONSTANT || Cudd_Regular(node)!=DD_ONE(no1.man))
+     node = Cudd_bddIteConstant(no1.man->man,no1.node,no2.node,no3.node);
+     if (node==DD_NON_CONSTANT || Cudd_Regular(node)!=DD_ONE(no1.man->man))
        _res = 0;
      else {
-       storage = (node==DD_ONE(no1.man));
+       storage = (node==DD_ONE(no1.man->man));
        _res = &storage;
      }
    }
@@ -244,15 +246,15 @@ boolean is_var_dependent(int var, bdd__t no)
      quote(call, "
 Begin_roots1(_v_no);
 {
-DdNode* v = Cudd_bddIthVar(no.man,var);
-_res = Cudd_bddVarIsDependent(no.man, no.node, v);
+DdNode* v = Cudd_bddIthVar(no.man->man,var);
+_res = Cudd_bddVarIsDependent(no.man->man, no.node, v);
 }
 End_roots();
 ");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddIsVarEssential}[Cudd_bddIsVarEssential]}. Is the given variable with the specified phase implied by the BDD ? *)")
 boolean is_var_essential(int index, boolean phase, bdd__t no)
-     quote(call, "_res = Cudd_bddIsVarEssential(no.man,no.node,index,phase);");
+     quote(call, "_res = Cudd_bddIsVarEssential(no.man->man,no.node,index,phase);");
 
 /* ====================================================================== */
 /* Structural information */
@@ -285,7 +287,7 @@ if (_res==(double)CUDD_OUT_OF_MEM){ \
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountMinterm}[Cudd_CountMinterm]}. Number of minterms  of the BDD assuming that it depends on the given number of variables. *)")
 double nbminterms(int nvar, bdd__t no)
 quote(call,
-"_res = Cudd_CountMinterm(no.man,no.node,nvar); \
+"_res = Cudd_CountMinterm(no.man->man,no.node,nvar); \
 if (_res==(double)CUDD_OUT_OF_MEM){ \
   failwith(\"Bdd.nbminterms returned CUDD_OUT_OF_MEM\"); \
 }");
@@ -296,7 +298,7 @@ of the BDD, which is the ratio of the number of minterms to the number of
 nodes. The BDD is assumed to depend on [nvars] variables. *)")
 double density(int nvar, bdd__t no)
 quote(call,
-"_res = Cudd_Density(no.man,no.node,nvar); \
+"_res = Cudd_Density(no.man->man,no.node,nvar); \
 if (_res==(double)CUDD_OUT_OF_MEM){ \
   failwith(\"Bdd.density returned CUDD_OUT_OF_MEM\"); \
 }");
@@ -346,7 +348,7 @@ quote(call,
      static bdd__t res;
      DdNode* node;
      CHECK_MAN3;
-     node = Cudd_bddIteConstant(no1.man,no1.node,no2.node,no3.node);
+     node = Cudd_bddIteConstant(no1.man->man,no1.node,no2.node,no3.node);
      if (node==DD_NON_CONSTANT)
        _res = NULL;
      else {
@@ -363,7 +365,7 @@ bdd__t compose(int var, bdd__t no1, bdd__t no2)
 CHECK_MAN2;
 Begin_roots2(_v_no1,_v_no2);
 _res.man = no1.man;
-_res.node = Cudd_bddCompose(no1.man, no2.node, no1.node, var);
+_res.node = Cudd_bddCompose(no1.man->man, no2.node, no1.node, var);
 End_roots();
 ");
 
@@ -389,10 +391,10 @@ quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddV
 bdd__t varmap(bdd__t no) NO_OF_MAN_NO(Cudd_bddVarMap)
      quote(call, "
 Begin_roots1(_v_no);
-if (no.man->map == NULL){
+if (no.man->man->map == NULL){
   failwith(\"Bdd.varmap: empty table, Manager.set_varmap has not been called !\");
 _res.man = no.man;
-_res.node = Cudd_bddVarMap(no.man,no.node);
+_res.node = Cudd_bddVarMap(no.man->man,no.node);
 End_roots();
 ");
 
@@ -461,7 +463,7 @@ bdd__t booleandiff(bdd__t no, int index)
      quote(call, "
 Begin_roots1(_v_no);
 _res.man = no.man;
-_res.node = Cudd_bddBooleanDiff(no.man,no.node,index);
+_res.node = Cudd_bddBooleanDiff(no.man->man,no.node,index);
 End_roots();
 ");
 
@@ -553,7 +555,7 @@ bdd__t clippingand(bdd__t no1, bdd__t no2, int maxdepth, boolean direction)
 CHECK_MAN2;
 Begin_roots2(_v_no1,_v_no2);
 _res.man=no1.man;
-_res.node = Cudd_bddClippingAnd(no1.man,no1.node,no2.node,maxdepth,direction);
+_res.node = Cudd_bddClippingAnd(no1.man->man,no1.node,no2.node,maxdepth,direction);
 End_roots();
 ");
 
@@ -564,7 +566,7 @@ bdd__t clippingexistand(bdd__t no1, bdd__t no2, bdd__t no3, int maxdepth, boolea
 CHECK_MAN3;
 Begin_roots3(_v_no1,_v_no2,_v_no3);
 _res.man=no1.man;
-_res.node = Cudd_bddClippingAndAbstract(no1.man,no2.node,no3.node,no1.node,maxdepth,direction);
+_res.node = Cudd_bddClippingAndAbstract(no1.man->man,no2.node,no3.node,no1.node,maxdepth,direction);
 End_roots();
 ");
 
@@ -574,17 +576,17 @@ bdd__t underapprox(int nvars, int threshold, boolean safe, double quality, bdd__
      quote(call,"
 Begin_roots1(_v_no);
 _res.man=no.man;
-_res.node=Cudd_UnderApprox(no.man,no.node,nvars,threshold,safe,quality);
+_res.node=Cudd_UnderApprox(no.man->man,no.node,nvars,threshold,safe,quality);
 End_roots();
 ");
 
-quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_OverApprox}[Cudd_OverApprox]}. 
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_OverApprox}[Cudd_OverApprox]}.
 [overapprox nvars threshold safe quality f] *)")
 bdd__t overapprox(int nvars, int threshold, boolean safe, double quality, bdd__t no)
      quote(call,"
 Begin_roots1(_v_no);
 _res.man=no.man;
-_res.node=Cudd_OverApprox(no.man,no.node,nvars,threshold,safe,quality);
+_res.node=Cudd_OverApprox(no.man->man,no.node,nvars,threshold,safe,quality);
 End_roots();
 ");
 
@@ -594,7 +596,7 @@ bdd__t remapunderapprox(int nvars, int threshold, double quality, bdd__t no)
      quote(call,"
 Begin_roots1(_v_no);
 _res.man=no.man;
-_res.node=Cudd_RemapUnderApprox(no.man,no.node,nvars,threshold,quality);
+_res.node=Cudd_RemapUnderApprox(no.man->man,no.node,nvars,threshold,quality);
 End_roots();
 ");
 
@@ -604,7 +606,7 @@ bdd__t remapoverapprox(int nvars, int threshold, double quality, bdd__t no)
      quote(call,"
 Begin_roots1(_v_no);
 _res.man=no.man;
-_res.node=Cudd_RemapOverApprox(no.man,no.node,nvars,threshold,quality);
+_res.node=Cudd_RemapOverApprox(no.man->man,no.node,nvars,threshold,quality);
 End_roots();
 ");
 
@@ -615,7 +617,7 @@ bdd__t biasedunderapprox(int nvars, int threshold, double quality1, double quali
 CHECK_MAN2;
 Begin_roots2(_v_no1,_v_no2);
 _res.man=no1.man;
-_res.node=Cudd_BiasedUnderApprox(no1.man,no1.node,no2.node,nvars,threshold,quality1,quality0);
+_res.node=Cudd_BiasedUnderApprox(no1.man->man,no1.node,no2.node,nvars,threshold,quality1,quality0);
 End_roots();
 ");
 
@@ -626,7 +628,7 @@ bdd__t biasedoverapprox(int nvars, int threshold, double quality1, double qualit
 CHECK_MAN2;
 Begin_roots2(_v_no1,_v_no2);
 _res.man=no1.man;
-_res.node=Cudd_BiasedOverApprox(no1.man,no1.node,no2.node,nvars,threshold,quality1,quality0);
+_res.node=Cudd_BiasedOverApprox(no1.man->man,no1.node,no2.node,nvars,threshold,quality1,quality0);
 End_roots();
 ");
 
@@ -655,7 +657,7 @@ bdd__t subsetSP(int nvars, int threshold, boolean hardlimit, bdd__t no)
      quote(call,"
 Begin_roots1(_v_no);
 _res.man=no.man;
-_res.node = Cudd_SubsetShortPaths(no.man,no.node,nvars,threshold,hardlimit);
+_res.node = Cudd_SubsetShortPaths(no.man->man,no.node,nvars,threshold,hardlimit);
 End_roots();
 ");
 
@@ -664,7 +666,7 @@ bdd__t supersetSP(int nvars, int threshold, boolean hardlimit, bdd__t no)
      quote(call,"
 Begin_roots1(_v_no);
 _res.man=no.man;
-_res.node = Cudd_SupersetShortPaths(no.man,no.node,nvars,threshold,hardlimit);
+_res.node = Cudd_SupersetShortPaths(no.man->man,no.node,nvars,threshold,hardlimit);
 End_roots();
 ");
 
@@ -696,18 +698,18 @@ bdd__t transfer(bdd__t no, manager__t man)
      quote(call, "
 Begin_roots1(_v_no);
 _res.man = man;
-_res.node = Cudd_bddTransfer(no.man,man,no.node);
+_res.node = Cudd_bddTransfer(no.man->man,man->man,no.node);
 End_roots();
 ");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddCorrelation}[Cudd_bddCorrelation]}. Computes the correlation of f and g (if
 [f=g], their correlation is 1, if [f=not g], it is 0) *)")
 double correlation(bdd__t no1, bdd__t no2)
-     quote(call, "CHECK_MAN2; _res = Cudd_bddCorrelation(no1.man,no1.node,no2.node);");
+     quote(call, "CHECK_MAN2; _res = Cudd_bddCorrelation(no1.man->man,no1.node,no2.node);");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddCorrelationWeights}[Cudd_bddCorrelationWeights]}. *)")
 double correlationweights(bdd__t no1, bdd__t no2, [size_is(size)] double prob[], int size)
-quote(call, "CHECK_MAN2; _res = Cudd_bddCorrelationWeights(no1.man,no1.node,no2.node,prob);");
+quote(call, "CHECK_MAN2; _res = Cudd_bddCorrelationWeights(no1.man->man,no1.node,no2.node,prob);");
 
 /* ====================================================================== */
 /* Printing */
