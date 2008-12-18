@@ -36,7 +36,7 @@ type id_combinop \n\
 quote(MLI,"(** Dummy value (useful in some cases) *)")
 quote(MLI,"val dummy : t")
 
-quote(MLI,"\n 
+quote(MLI,"\n
 (** [t] is the abstract type for RDDs (which corresponds to CUDD ADDs). Objects
 of this type contains both the top node of the RDD and the manager to which the
 node belongs . The manager can be retrieved with {!manager}. Objects of this
@@ -124,13 +124,13 @@ external supportsize : t -> int = \"camlidl_bdd_supportsize\"
 (** [Cuddaux_IsVarIn]. Does the given variable belong to the support of the RDD ? *)
 external is_var_in : int -> t -> bool = \"camlidl_bdd_is_var_in\"
 
-(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_VectorSupport}[Cudd_VectorSupport]}. Returns the support of the array of RDDs. 
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_VectorSupport}[Cudd_VectorSupport]}. Returns the support of the array of RDDs.
 
 Raises a [Failure] exception in case where the array is of size 0 (in such
 case, the manager is unknown, and we cannot return an empty support). *)
 external vectorsupport : t array -> Bdd.t = \"camlidl_bdd_vectorsupport\"
 
-(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_VectorSupport}[Cudd_VectorSupport]}. Returns the support of the BDDs and RDDs arrays. 
+(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_VectorSupport}[Cudd_VectorSupport]}. Returns the support of the BDDs and RDDs arrays.
 
 Raises a [Failure] exception when both arrays are of size 0 (in such
 case, the manager is unknown, and we cannot return an empty support). *)
@@ -164,7 +164,7 @@ quote(call,
      if (node==DD_NON_CONSTANT)
        _res = NULL;
      else {
-       res.man = no1.man; 
+       res.man = no1.man;
        res.node = node;
        _res = &res;
      }
@@ -369,11 +369,14 @@ End_roots();
 ");
 
 quote(MLMLI,"
-(** [Cuddaux_NodesBelowLevel]. [nodes_below_level f olevel] returns all the nodes pointed by the RDD, indexed by a variable of level greater or equal than [level], and encountered first in the top-down exploration (i.e., whenever a node is collected, its sons are not collected). If [olevel=None], then only constant nodes are collected. *)
-external nodes_below_level: t -> int option -> t array = \"camlidl_rdd_nodes_below_level\"
+(** [Cuddaux_NodesBelowLevel]. [nodes_below_level f olevel max] returns all (if [max<=0]), otherwise at most [max] nodes pointed by the RDD, indexed by a variable of level greater or equal than [level], and encountered first in the top-down exploration (i.e., whenever a node is collected, its sons are not collected). If [olevel=None], then only constant nodes are collected. *)
+external nodes_below_level: t -> int option -> int -> t array = \"camlidl_rdd_nodes_below_level\"
 
-(** Returns the set of leaf values (including the background value if adequate) *)
+(** Returns the set of leaf values (excluding the background value) *)
 external leaves: t -> float array = \"camlidl_rdd_leaves\"
+
+(** Picks (but not randomly) a non background leaf. Return [None] if the only leaf is the background leaf. *)
+external pick_leaf : t -> float option = \"camlidl_rdd_pick_leaf\"
 ")
 quote(MLI,"
 \n
@@ -642,16 +645,35 @@ quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLI,"
 val mapunop : (float -> float) -> t -> t
-val mapbinop : commutative:bool -> (float -> float -> float) -> t -> t -> t
+val mapbinop : ?commutative:bool -> ?idempotent:bool -> ?absorbant:(float*float*float*float) -> ?neutral:(float*float) -> (float -> float -> float) -> t -> t -> t
 val mapterop : (float -> float -> float -> float) -> t -> t -> t -> t
+val mapcmpop : ?bottom:float -> ?top:float -> (float -> float -> bool) -> t -> t -> bool
+val mapexistop : absorbant:float -> (float -> float -> float) -> Bdd.t -> t -> t
+val mapexistandop : absorbant:float -> (float -> float -> float) -> Bdd.t -> Bdd.t -> t -> t
+val mapexistandapplyop : absorbant:float -> (float -> float) -> (float -> float -> float) -> Bdd.t -> Bdd.t -> t -> t
 ")
 quote(ML,"
 external _internal_mapunop : bool -> (float -> float) -> t -> t = \"camlidl_rddidd_mapunop\"
-external _internal_mapbinop : bool -> bool -> (float -> float -> float) -> t -> t -> t = \"camlidl_rddidd_mapbinop\"
+
+external _internal_mapbinop : bool -> bool -> bool -> (float*float*float*float) option -> (float*float) option -> (float -> float -> float) -> t -> t -> t = \"camlidl_rddidd_mapbinop_byte\" \"camlidl_rddidd_mapbinop\"
+
 external _internal_mapterop : bool -> (float -> float -> float -> float) -> t -> t -> t -> t = \"camlidl_rddidd_mapterop\"
+
+external _internal_mapcmpop : bool -> float option -> float option -> (float -> float -> bool) -> t -> t -> bool = \"camlidl_rddidd_mapcmpop_byte\" \"camlidl_rddidd_mapcmpop\"
+
+external _internal_mapexistop : bool -> float -> (float -> float -> float) -> Bdd.t -> t -> t = \"camlidl_rddidd_mapexistop\"
+
+external _internal_mapexistandop : bool -> float -> (float -> float -> float) -> Bdd.t -> Bdd.t -> t -> t =  \"camlidl_rddidd_mapexistandop_byte\" \"camlidl_rddidd_mapexistandop\"
+
+external _internal_mapexistandapplyop : bool -> float -> (float -> float) -> (float -> float -> float) -> Bdd.t -> Bdd.t -> t -> t =  \"camlidl_rddidd_mapexistandop_byte\" \"camlidl_rddidd_mapexistandop\"
+
 let mapunop f t = _internal_mapunop false f t
-let mapbinop ~commutative f t1 t2 = _internal_mapbinop false commutative f t1 t2
+let mapbinop ?(commutative=false) ?(idempotent=false) ?absorbant ?neutral f t1 t2 = _internal_mapbinop false commutative idempotent absorbant neutral f t1 t2
 let mapterop f t1 t2 t3 = _internal_mapterop false f t1 t2 t3
+let mapcmpop ?bottom ?top cmpop t1 t2 = _internal_mapcmpop false bottom top cmpop t1 t2
+let mapexistop ~absorbant op cube t = _internal_mapexistop false absorbant op cube t
+let mapexistandop ~absorbant op cube bdd t = _internal_mapexistandop false absorbant op cube bdd t
+let mapexistandapplyop ~absorbant op existop cube bdd t = _internal_mapexistandapplyop false absorbant op existop cube bdd t
 ")
 
 /*

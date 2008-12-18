@@ -1,3 +1,10 @@
+
+
+Rdd/Idd/Mtbdd:
+API extended: nodes_below_level, mapbinop
+New functions: pick_leaf, mapcmpop, mapexistop, mapexistandop,
+               mapexistandapplyop
+
 -------------
 MLCuddIDL 1.4:
 -------------

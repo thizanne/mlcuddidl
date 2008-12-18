@@ -48,12 +48,12 @@ CCINC_TOINSTALL = cudd_caml.h
 #---------------------------------------
 
 # Global rules
-all: $(MLINT) $(MLOBJ) $(MLOBJx) cudd.cma cudd.cmxa libcudd_caml.a libcudd_caml_debug.a 
+all: $(MLINT) $(MLOBJ) $(MLOBJx) cudd.cma cudd.cmxa libcudd_caml.a libcudd_caml_debug.a
 
 cuddrun: cudd.cma libcudd_caml.a
 	$(OCAMLC) $(OCAMLFLAGS) -o $@ -make-runtime -cc "$(CC)" -ccopt -L. cudd.cma
 cuddtop: cudd.cma libcudd_caml.a
-	ocamlmktop $(OCAMLFLAGS) -o $@ -custom -cc "$(CC)" -ccopt -L. cudd.cma
+	ocamlmktop $(OCAMLFLAGS) -o $@ -custom -cc "$(CC) -g" -ccopt -L. cudd.cma
 
 # Example of compilation command
 # If the library is installed somewhere, add a -I $(PATH) option
@@ -136,11 +136,11 @@ libcudd_caml_debug.a: $(CCMODULES:%=%_debug.o)
 # HTML and LATEX rules
 .PHONY: html
 # mlcuddidl.pdf: mlcuddidl.texi
-# 	$(TEXI2DVI) $<
+#	$(TEXI2DVI) $<
 # mlcuddidl.info: mlcuddidl.texi
-# 	makeinfo --no-split $<
+#	makeinfo --no-split $<
 # html: mlcuddidl.texi
-# 	$(TEXI2HTML) -split=chapter -nosec_nav -subdir=html $<
+#	$(TEXI2HTML) -split=chapter -nosec_nav -subdir=html $<
 
 mlapronidl.pdf: mlapronidl.dvi
 	$(DVIPDF) mlapronidl.dvi
@@ -148,14 +148,14 @@ mlcuddidl.dvi: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 	$(OCAMLDOC) $(OCAMLINC) \
 -t "MLCUDDIDL: OCaml interface for CUDD library, version 1.3" \
 -latextitle 1,chapter -latextitle 2,section -latextitle 3,subsection -latextitle 4,subsubsection -latextitle 5,paragraph -latextitle 6,subparagraph \
--latex -intro mlcuddidl.odoc -o ocamldoc.tex $(MLMODULES:%=%.mli) 
+-latex -intro mlcuddidl.odoc -o ocamldoc.tex $(MLMODULES:%=%.mli)
 	$(SED) -e 's/\\documentclass\[11pt\]{article}/\\documentclass[10pt,twosdie,a4paper]{book}\\usepackage{ae,fullpage,makeidx,fancyhdr}\\usepackage[ps2pdf]{hyperref}\\pagestyle{fancy}\\setlength{\\parindent}{0em}\\setlength{\\parskip}{0.5ex}\\sloppy\\makeindex\\author{Bertrand Jeannet}/' -e 's/\\end{document}/\\appendix\\printindex\\end{document}/' ocamldoc.tex >mlcuddidl.tex
 	$(LATEX) mlcuddidl
 	$(MAKEINDEX) mlcuddidl
 	$(LATEX) mlcuddidl
 	$(LATEX) mlcuddidl
 
-html: mlcuddidl.odoc $(MLMODULES:%=%.mli) 
+html: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 	mkdir -p html
 	$(OCAMLDOC) $(OCAMLINC) -html -d html -colorize-code -intro mlcuddidl.odoc $(MLMODULES:%=%.mli)
 

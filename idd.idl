@@ -202,8 +202,9 @@ quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"
 external guard_of_node : t -> t -> Bdd.t = \"camlidl_rdd_guard_of_node\"
 external guard_of_nonbackground : t -> Bdd.t = \"camlidl_rdd_guard_of_nonbackground\"
-external nodes_below_level: t -> int option -> t array = \"camlidl_rdd_nodes_below_level\"
+external nodes_below_level: t -> int option -> int -> t array = \"camlidl_rdd_nodes_below_level\"
 external leaves: t -> int array = \"camlidl_idd_leaves\"
+external pick_leaf: t -> int option = \"camlidl_idd_pick_leaf\"
 ")
 
 bdd__t guard_of_leaf(idd__t no, int val)
@@ -329,16 +330,28 @@ quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLI,"
 val mapunop : (int -> int) -> t -> t
-val mapbinop : commutative:bool -> (int -> int -> int) -> t -> t -> t
+val mapbinop : ?commutative:bool -> ?idempotent:bool -> ?absorbant:(int*int*int*int) -> ?neutral:(int*int) -> (int -> int -> int) -> t -> t -> t
 val mapterop : (int -> int -> int -> int) -> t -> t -> t -> t
+val mapcmpop : ?bottom:int -> ?top:int -> (int -> int -> bool) -> t -> t -> bool
+val mapexistop : absorbant:int -> (int -> int -> int) -> Bdd.t -> t -> t
+val mapexistandop : absorbant:int -> (int -> int -> int) -> Bdd.t -> Bdd.t -> t -> t
+val mapexistandapplyop : absorbant:int -> (int -> int) -> (int -> int -> int) -> Bdd.t -> Bdd.t -> t -> t
 ")
 quote(ML,"
 external _internal_mapunop : bool -> (int -> int) -> t -> t = \"camlidl_rddidd_mapunop\"
-external _internal_mapbinop : bool -> bool -> (int -> int -> int) -> t -> t -> t = \"camlidl_rddidd_mapbinop\"
+external _internal_mapbinop : bool -> bool -> bool -> (int*int*int*int) option -> (int*int) option -> (int -> int -> int) -> t -> t -> t = \"camlidl_rddidd_mapbinop_byte\" \"camlidl_rddidd_mapbinop\"
 external _internal_mapterop : bool -> (int -> int -> int -> int) -> t -> t -> t -> t = \"camlidl_rddidd_mapterop\"
+external _internal_mapcmpop : bool -> int option -> int option -> (int -> int -> bool) -> t -> t -> bool = \"camlidl_rddidd_mapcmpop_byte\" \"camlidl_rddidd_mapcmpop\"
+external _internal_mapexistop : bool -> int -> (int -> int -> int) -> Bdd.t -> t -> t = \"camlidl_cudd_rddidd_mapexistop\"
+external _internal_mapexistandop : bool -> int -> (int -> int -> int) -> Bdd.t -> Bdd.t -> t -> t = \"camlidl_cudd_rddidd_mapexistandop_byte\" \"camlidl_cudd_rddidd_mapexistandop\"
+external _internal_mapexistandapplyop : bool -> int -> (int -> int) -> (int -> int -> int) -> Bdd.t -> Bdd.t -> t -> t =  \"camlidl_rddidd_mapexistandop_byte\" \"camlidl_rddidd_mapexistandop\"
 let mapunop f t = _internal_mapunop true f t
-let mapbinop ~commutative f t1 t2 = _internal_mapbinop true commutative f t1 t2
+let mapbinop ?(commutative=false) ?(idempotent=false) ?absorbant ?neutral f t1 t2 = _internal_mapbinop true commutative idempotent absorbant neutral f t1 t2
 let mapterop f t1 t2 t3 = _internal_mapterop true f t1 t2 t3
+let mapcmpop ?bottom ?top cmpop t1 t2 = _internal_mapcmpop true bottom top cmpop t1 t2
+let mapexistop ~absorbant op cube t = _internal_mapexistop true absorbant op cube t
+let mapexistandop ~absorbant op cube bdd t = _internal_mapexistandop true absorbant op cube bdd t
+let mapexistandapplyop ~absorbant op existop cube bdd t = _internal_mapexistandapplyop true absorbant op existop cube bdd t
 ")
 
 quote(MLMLI,"(* ====================================================== *)")

@@ -119,6 +119,7 @@ module type S =
     external guard_of_nonbackground : t -> Bdd.t = "camlidl_cudd_rdd_guard_of_nonbackground"
     external nodes_below_level: t -> int option -> t array = "camlidl_cudd_rdd_nodes_below_level"
     val leaves: t -> leaf array
+    val pick_leaf: t -> leaf option
     val guard_of_leaf: t -> leaf -> Bdd.t
     val guardleafs: t -> (Bdd.t * leaf) array
 
@@ -139,8 +140,12 @@ module type S =
     val mapleaf2 : (Bdd.t -> leaf -> leaf -> leaf) -> t -> t -> t
 
     val mapunop : (leaf -> leaf) -> t -> t
-    val mapbinop : commutative:bool -> (leaf -> leaf -> leaf) -> t -> t -> t
+    val mapbinop : ?commutative:bool -> ?idempotent:bool -> ?absorbant:leaf -> ?neutral:leaf -> (leaf -> leaf -> leaf) -> t -> t -> t
     val mapterop : (leaf -> leaf -> leaf -> leaf) -> t -> t -> t -> t
+    val mapcmpop : ?bottom:leaf -> ?top:leaf -> (leaf -> leaf -> bool) -> t -> t -> bool
+    val mapexistop : absorbant:leaf -> (leaf -> leaf -> leaf) -> Bdd.t -> t -> t
+    val mapexistandop : absorbant:leaf -> (leaf -> leaf -> leaf) -> Bdd.t -> Bdd.t -> t -> t
+    val mapexistandapplyop : absorbant:leaf -> (leaf -> leaf) -> (leaf -> leaf -> leaf) -> Bdd.t -> Bdd.t -> t -> t
 
     val alloc_unop: (leaf -> leaf) -> id_unop
     val alloc_binop: (leaf -> leaf -> leaf) -> id_binop

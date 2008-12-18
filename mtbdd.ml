@@ -89,6 +89,7 @@ module type S =
     external guard_of_nonbackground : t -> Bdd.t = "camlidl_cudd_rdd_guard_of_nonbackground"
     external nodes_below_level: t -> int option -> t array = "camlidl_cudd_rdd_nodes_below_level"
     val leaves: t -> leaf array
+    val pick_leaf: t -> leaf option
     val guard_of_leaf: t -> leaf -> Bdd.t
     val guardleafs: t -> (Bdd.t * leaf) array
     (* Minimizations *)
@@ -103,8 +104,12 @@ module type S =
     val mapleaf2 : (Bdd.t -> leaf -> leaf -> leaf) -> t -> t -> t
 
     val mapunop : (leaf -> leaf) -> t -> t
-    val mapbinop : commutative:bool -> (leaf -> leaf -> leaf) -> t -> t -> t
+    val mapbinop : ?commutative:bool -> ?idempotent:bool -> ?absorbant:leaf -> ?neutral:leaf -> (leaf -> leaf -> leaf) -> t -> t -> t
     val mapterop : (leaf -> leaf -> leaf -> leaf) -> t -> t -> t -> t
+    val mapcmpop : ?bottom:leaf -> ?top:leaf -> (leaf -> leaf -> bool) -> t -> t -> bool
+    val mapexistop : absorbant:leaf -> (leaf -> leaf -> leaf) -> Bdd.t -> t -> t
+    val mapexistandop : absorbant:leaf -> (leaf -> leaf -> leaf) -> Bdd.t -> Bdd.t -> t -> t
+    val mapexistandapplyop : absorbant:leaf -> (leaf -> leaf) -> (leaf -> leaf -> leaf) -> Bdd.t -> Bdd.t -> t -> t
 
     val alloc_unop: (leaf -> leaf) -> id_unop
     val alloc_binop: (leaf -> leaf -> leaf) -> id_binop
@@ -236,6 +241,9 @@ module Make (Leaf : LeafType) =
     external guard_of_nonbackground : t -> Bdd.t = "camlidl_cudd_rdd_guard_of_nonbackground"
     external nodes_below_level: t -> int option -> t array = "camlidl_cudd_rdd_nodes_below_level"
     let leaves t = Array.map leaf_of_id (Idd.leaves t)
+    let pick_leaf t = match Idd.pick_leaf t with
+      | Some l -> Some(leaf_of_id l)
+      | None -> None
     let guard_of_leaf t l = Idd.guard_of_leaf t (id_of_leaf l)
     let guardleafs rdd =
       let tab = Idd.leaves rdd in
@@ -255,6 +263,13 @@ module Make (Leaf : LeafType) =
 	(fun bdd id1 id2 -> id_of_leaf (f bdd (leaf_of_id id1) (leaf_of_id id2)))
 	t1 t2
 
+    let wrap_unop leaf_op =
+      let id_op =
+	fun idx ->
+	  id_of_leaf (leaf_op (leaf_of_id idx))
+      in
+      id_op
+
     let wrap_binop leaf_op =
       let id_op =
 	fun idx idy ->
@@ -263,21 +278,63 @@ module Make (Leaf : LeafType) =
       id_op
 
     let mapunop lop f =
-      let op =
-	fun id ->
-	  id_of_leaf (lop (leaf_of_id id))
-      in
+      let op = wrap_unop lop in
       Idd.mapunop op f
 
-    let mapbinop ~commutative lop f g =
+    let oapply f = function None -> None | Some x -> Some(f x)
+
+    let mapbinop ?commutative ?idempotent ?absorbant ?neutral lop f g =
       let op = wrap_binop lop in
-      Idd.mapbinop ~commutative op f g
+      Idd.mapbinop ?commutative ?idempotent 
+	?absorbant:(begin match absorbant with
+	| Some(leaf) -> let id = id_of_leaf leaf in Some(id,id,id,id)
+	| None -> None
+	end)
+	?neutral:(begin match neutral with
+	| Some(leaf) -> let id = id_of_leaf leaf in Some(id,id)
+	| None -> None
+	end)
+	op f g
 
     let mapterop lop f g h =
       let op = fun idx idy idz ->
 	  id_of_leaf (lop (leaf_of_id idx) (leaf_of_id idy) (leaf_of_id idz))
       in
       Idd.mapterop op f g h
+
+    let mapcmpop ?bottom ?top lop f g =
+      let op = fun idx idy ->
+	  lop (leaf_of_id idx) (leaf_of_id idy)
+      in
+      Idd.mapcmpop 
+	?bottom:(begin match bottom with
+	| Some(leaf) -> Some(id_of_leaf leaf)
+	| None -> None
+	end)
+	?top:(begin match top with
+	| Some(leaf) -> Some(id_of_leaf leaf)
+	| None -> None
+	end)
+	op f g
+
+    let mapexistop ~absorbant lop cube f =
+      let op = wrap_binop lop in
+      Idd.mapexistop
+	~absorbant:(id_of_leaf absorbant)
+	op cube f
+
+    let mapexistandop ~absorbant lop cube bdd f =
+      let op = wrap_binop lop in
+      Idd.mapexistandop
+	~absorbant:(id_of_leaf absorbant)
+	op cube bdd f
+
+    let mapexistandapplyop ~absorbant lop lexistop cube bdd f =
+      let op = wrap_unop lop in
+      let existop = wrap_binop lexistop in
+      Idd.mapexistandapplyop
+	~absorbant:(id_of_leaf absorbant)
+	op existop cube bdd f
 
     let alloc_unop lop =
       let op =
