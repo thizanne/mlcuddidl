@@ -1819,3 +1819,46 @@ value camlidl_cudd_rddidd_mapexistandapplyop_byte(value * argv, int argn)
   return camlidl_cudd_rddidd_mapexistandapplyop(argv[0],argv[1],argv[2],argv[3],
 					   argv[4],argv[5],argv[6]);
 }
+value camlidl_cudd_rddidd_mapvectorcomposeapply(value _v_vec, value _v_op, value _v_no)
+{
+  CAMLparam3(_v_vec,_v_op,_v_no); CAMLlocal2(_v,_vres);
+  DdNode **vec; /*in*/
+  int size; /*in*/
+  bdd__t no; /*in*/
+  bdd__t _res;
+  int i;
+
+  if (!camlidl_op_initialized) camlidl_op_initialize();
+  if (camlidl_rddidd_op_closure != Val_unit || 
+      camlidl_rddidd_unop_closure != Val_unit){
+    failwith("Rdd|Idd.mapbinop: this family of functions cannot be called recursively !");
+  }
+  camlidl_rddidd_unop_closure = _v_op;
+  camlidl_rddidd_op_exn = Val_unit;
+  camlidl_rddidd_op_val1 = _v_no;
+
+  camlidl_cudd_node_ml2c(_v_no, &no);
+  size = Wosize_val(_v_vec);
+  vec = (DdNode**)malloc(size * sizeof(DdNode*));
+  for (i = 0; i<size; i++) {
+    bdd__t _no;
+    _v = Field(_v_vec, i);
+    camlidl_cudd_node_ml2c(_v, &_no);
+    if (_no.man != no.man)
+      failwith("Rdd.mapvectorcomposeapply called with BDDs belonging to different managers !");
+    vec[i] = _no.node;
+  }
+  _res.man = no.man;
+  _res.node = Cuddaux_addApplyVectorCompose(no.man->man, camlidl_rddidd_mapunop_aux, no.node, vec);
+  camlidl_rddidd_unop_closure = Val_unit;
+  camlidl_rddidd_op_val1 = Val_unit;
+  free(vec);
+  if (camlidl_rddidd_op_exn!=Val_unit){
+    assert(_res.node==NULL);
+    assert(Is_exception_result(camlidl_rddidd_op_exn));
+    caml_raise(Extract_exception(camlidl_rddidd_op_exn));
+  }
+  else
+    _v_res = camlidl_cudd_node_c2ml(&_res);
+  CAMLreturn(_v_res);
+}
