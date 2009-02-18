@@ -1821,7 +1821,7 @@ value camlidl_cudd_rddidd_mapexistandapplyop_byte(value * argv, int argn)
 }
 value camlidl_cudd_rddidd_mapvectorcomposeapply(value _v_vec, value _v_op, value _v_no)
 {
-  CAMLparam3(_v_vec,_v_op,_v_no); CAMLlocal2(_v,_vres);
+  CAMLparam3(_v_vec,_v_op,_v_no); CAMLlocal2(_v,_v_res);
   DdNode **vec; /*in*/
   int size; /*in*/
   bdd__t no; /*in*/
