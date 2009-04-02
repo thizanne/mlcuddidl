@@ -1,173 +1,364 @@
-(*i $Id: mtbdd.mli,v 1.2 2004/10/01 16:53:37 bjeannet Exp $ i*)
-
 (* This file is part of the MLCUDDIDL Library, released under LGPL license.
-   Please read the COPYING file packaged in the distribution. *)
+   Please read the COPYING file packaged in the distribution  *)
 
-(** BDDs with user-defined leaf type (functor) *)
+(** MTBDDs using a weak hashtable for unique constants *)
 
-(*  ====================================================================== *)
-(** {2 Type of the parameter module} *)
-(*  ====================================================================== *)
+type 'a unique
+  (** Type of "unique" MTBDD leaves *)
 
-module type LeafType =
-  sig
-    type t
-      (** Type of a leaf *)
-    val equal: t -> t -> bool
-      (** Equality function on leaves *)
-    val hash: t -> int
-      (** Hashing function on leaves *)
-    val background: t
-      (** Background leaf value
-	(typically, dummy value not encountered for normal use) *)
-  end
+type 'a t = 'a unique Vdd.t
+  (** Type of MTBDDs *)
 
-(*  ====================================================================== *)
-(** {2 Type of generated module} *)
-(*  ====================================================================== *)
+type 'a table = 'a Weakke.Custom.t
+  (** Hashtable to manage unique constants *)
 
-module type S =
-  sig
-    type leaf
-      (** Type of a leaf *)
+val print_table :
+  ?first:(unit, Format.formatter, unit) format ->
+  ?sep:(unit, Format.formatter, unit) format ->
+  ?last:(unit, Format.formatter, unit) format ->
+  (Format.formatter -> 'a -> unit) ->
+  Format.formatter -> 'a table -> unit
 
-    type t
-      (** Type of MTBDD with leaves of type [leaf] *)
+val make_table : hash:('a -> int) -> equal:('a -> 'a -> bool) -> 'a table
+  (** Building a table *)
 
-    type id_unop
-    type id_binop
-    type id_combinop
-      (** For user-defined operations *)
+val unique : 'a table -> 'a -> 'a unique
+  (** Building a unique constant *)
+val get : 'a unique -> 'a 
+  (** Type conversion (no computation) *)
 
-    type mtbdd =
-      | Leaf of leaf
-      | Ite of int * t * t
+type 'a mtbdd = 
+  'a Vdd.vdd =
+  | Leaf of 'a
+  | Ite of int * 'a Vdd.t * 'a Vdd.t
 
-    val leafbackground: leaf
+(* ====================================================== *)
+(** {2 Extractors} *)
+(* ====================================================== *)
 
-    module Hash: (Hashtbl.S with type key = leaf)
-    val hasht: int Hash.t
-    module Assoc: (Map.S with type key = int)
-    val assoct: (leaf Assoc.t) ref
-      (** Internal, not meant to be used by casual user *)
+external manager : 'a t -> Man.v Man.t = "camlidl_cudd_bdd_manager"
+external is_cst : 'a t -> bool = "camlidl_cudd_bdd_is_cst"
+external topvar : 'a t -> int = "camlidl_cudd_bdd_topvar"
+external dthen : 'a t -> 'a t = "camlidl_cudd_rdd_dthen"
+external delse : 'a t -> 'a t = "camlidl_cudd_rdd_delse"
+external cofactors : int -> 'a t -> 'a t * 'a t = "camlidl_cudd_rdd_cofactors"
+external cofactor : 'a t -> Man.v Bdd.t -> 'a t = "camlidl_cudd_rdd_cofactor"
 
-    val leaf_of_id: int -> leaf
-    val id_of_leaf: leaf -> int
-    val remove_leaf: leaf -> unit
-    val iter_leaf : (int -> leaf -> unit) -> unit
-    external to_idd: t -> Idd.t = "%identity"
-    external of_idd: Idd.t -> t = "%identity"
+val dval_u : 'a t -> 'a unique
+val dval : 'a t -> 'a
+val inspect_u : 'a t -> 'a unique mtbdd
+val inspect : 'a t -> 'a unique mtbdd
 
-    (** {3 Extractors} *)
+(* ====================================================== *)
+(** {2 Supports} *)
+(* ====================================================== *)
 
-    external manager : t -> Manager.t = "camlidl_cudd_bdd_manager"
-    external is_cst: t -> bool = "camlidl_cudd_bdd_is_cst"
-    external topvar: t -> int = "camlidl_cudd_bdd_topvar"
-    external dthen: t -> t = "camlidl_cudd_rdd_dthen"
-    external delse: t -> t = "camlidl_cudd_rdd_delse"
-    external cofactors: int -> t -> (t * t) = "camlidl_cudd_rdd_cofactors"
-    external cofactor: t -> Bdd.t -> t = "camlidl_cudd_rdd_cofactor"
-    val dval: t -> leaf
-    val inspect: t -> mtbdd
+external support : 'a t -> Man.v Bdd.t = "camlidl_cudd_bdd_support"
+external supportsize : 'a t -> int = "camlidl_cudd_bdd_supportsize"
+external is_var_in : int -> 'a t -> bool = "camlidl_cudd_bdd_is_var_in"
+external vectorsupport : 'a t array -> Man.v Bdd.t = "camlidl_cudd_bdd_vectorsupport"
+external vectorsupport2 : Man.v Bdd.t array -> 'a t array -> Man.v Bdd.t = "camlidl_cudd_rdd_vectorsupport2"
 
-    (** {3 Supports} *)
+(* ====================================================== *)
+(** {2 Classical operations} *)
+(* ====================================================== *)
 
-    external support: t -> Bdd.t = "camlidl_cudd_bdd_support"
-    external supportsize: t -> int = "camlidl_cudd_bdd_supportsize"
-    external is_var_in: int -> t -> bool = "camlidl_cudd_bdd_is_var_in"
-    external vectorsupport : t array -> Bdd.t = "camlidl_cudd_bdd_vectorsupport"
-    external vectorsupport2 : Bdd.t array -> t array -> Bdd.t = "camlidl_cudd_rdd_vectorsupport2"
+val cst_u : Man.v Man.t -> 'a unique -> 'a t
+val cst : Man.v Man.t -> 'a table -> 'a -> 'a t
 
-    (** {3 Classical operations} *)
+external ite : Man.v Bdd.t -> 'a t -> 'a t -> 'a t = "camlidl_cudd_rdd_ite"
+external ite_cst : Man.v Bdd.t -> 'a t -> 'a t -> 'a t option = "camlidl_cudd_rdd_ite_cst"
+external eval_cst : 'a t -> Man.v Bdd.t -> 'a t option = "camlidl_cudd_rdd_eval_cst"
+external compose : int -> Man.v Bdd.t -> 'a t -> 'a t = "camlidl_cudd_rdd_compose"
+external vectorcompose: Man.v Bdd.t array -> 'a t -> 'a t = "camlidl_cudd_rdd_vectorcompose"
 
-    val cst: Manager.t -> leaf -> t
-    external ite: Bdd.t -> t -> t -> t = "camlidl_cudd_rdd_ite"
-    external ite_cst: Bdd.t -> t -> t -> t = "camlidl_cudd_rdd_ite_cst"
-    external eval_cst : t -> Bdd.t -> t option = "camlidl_cudd_rdd_eval_cst"
-    external compose: int -> Bdd.t -> t -> t = "camlidl_cudd_rdd_compose"
-    external vectorcompose: Bdd.t array -> t -> t = "camlidl_cudd_rdd_vectorcompose"
+(* ====================================================== *)
+(** {2 Logical tests} *)
+(* ====================================================== *)
 
-    (** {3 Logical tests} *)
+external is_equal : 'a t -> 'a t -> bool = "camlidl_cudd_bdd_is_equal"
+external is_equal_when : 'a t -> 'a t -> Man.v Bdd.t -> bool = "camlidl_cudd_bdd_is_equal_when"
 
-    external is_equal : t -> t -> bool = "camlidl_cudd_bdd_is_equal"
-    external is_equal_when: t -> t -> Bdd.t -> bool = "camlidl_cudd_bdd_is_equal_when"
-    val is_eval_cst: t -> Bdd.t -> leaf option
-    val is_ite_cst: Bdd.t -> t -> t -> leaf option
 
-    (** {3 Structural information} *)
+val is_eval_cst_u : 'a t -> Man.v Bdd.t -> 'a unique option
+val is_ite_cst_u : Man.v Bdd.t -> 'a t -> 'a t -> 'a unique option
+val is_eval_cst : 'a t -> Man.v Bdd.t -> 'a option
+val is_ite_cst : Man.v Bdd.t -> 'a t -> 'a t -> 'a option
 
-    external size : t -> int = "camlidl_cudd_bdd_size"
-    external nbpaths : t -> float = "camlidl_cudd_bdd_nbpaths"
-    external nbnonzeropaths : t -> float = "camlidl_cudd_bdd_nbtruepaths"
-    external nbminterms : int -> t -> float = "camlidl_cudd_bdd_nbminterms"
-    external density : int -> t -> float = "camlidl_cudd_bdd_density"
-    external nbleaves : t -> int = "camlidl_cudd_rdd_nbleaves"
+(* ====================================================== *)
+(** {2 Structural information} *)
+(* ====================================================== *)
 
-    (** {3 Variable mapping} *)
+external size : 'a t -> int = "camlidl_cudd_bdd_size"
+external nbpaths : 'a t -> float = "camlidl_cudd_bdd_nbpaths"
+external nbnonzeropaths : 'a t -> float = "camlidl_cudd_bdd_nbtruepaths"
+external nbminterms : int -> 'a t -> float = "camlidl_cudd_bdd_nbminterms"
+external density : int -> 'a t -> float = "camlidl_cudd_bdd_density"
+external nbleaves : 'a t -> int = "camlidl_cudd_rdd_nbleaves"
 
-    external varmap : t -> t = "camlidl_cudd_rdd_varmap"
-    external permute : int array -> t -> t = "camlidl_cudd_rdd_permute"
+(* ====================================================== *)
+(** {2 Variable mapping} *)
+(* ====================================================== *)
 
-    (** {3 Iterators} *)
+external varmap : 'a t -> 'a t = "camlidl_cudd_rdd_varmap"
+external permute : 'a t -> int array -> 'a t = "camlidl_cudd_rdd_permute"
 
-    external iter_node: (t -> unit) -> t -> unit = "camlidl_cudd_iter_node"
-    val iter_cube: (Manager.tbool array -> leaf -> unit) -> t -> unit
+(* ====================================================== *)
+(** {2 Iterators} *)
+(* ====================================================== *)
 
-    (** {3 Leaves and guards} *)
+val iter_cube_u : (Man.tbool array -> 'a unique -> unit) -> 'a t -> unit
+val iter_cube : (Man.tbool array -> 'a -> unit) -> 'a t -> unit
 
-    external guard_of_node: t -> t -> Bdd.t = "camlidl_cudd_rdd_guard_of_node"
-    external guard_of_nonbackground : t -> Bdd.t = "camlidl_cudd_rdd_guard_of_nonbackground"
-    external nodes_below_level: t -> int option -> t array = "camlidl_cudd_rdd_nodes_below_level"
-    val leaves: t -> leaf array
-    val pick_leaf: t -> leaf option
-    val guard_of_leaf: t -> leaf -> Bdd.t
-    val guardleafs: t -> (Bdd.t * leaf) array
 
-    (** {3 Minimizations} *)
+external iter_node: ('a t -> unit) -> 'a t -> unit = "camlidl_cudd_iter_node"
 
-    external constrain: t -> Bdd.t -> t = "camlidl_cudd_rdd_constrain"
-    external tdconstrain: t -> Bdd.t -> t = "camlidl_cudd_rdd_tdconstrain"
-    external restrict: t -> Bdd.t -> t = "camlidl_cudd_rdd_restrict"
-    external tdrestrict : t -> Bdd.t -> t = "camlidl_cudd_rdd_tdrestrict"
+(* ====================================================== *)
+(** {2 Leaves and guards} *)
+(* ====================================================== *)
 
-    (** {3 Conversions} *)
+external guard_of_node : 'a t -> 'a t -> Man.v Bdd.t = "camlidl_cudd_rdd_guard_of_node"
+external guard_of_nonbackground : 'a t -> Man.v Bdd.t = "camlidl_cudd_rdd_guard_of_nonbackground"
+val nodes_below_level: ?max:int -> 'a t -> int option -> 'a t array 
 
-    external to_bdd : t -> Bdd.t = "camlidl_cudd_rdd_to_bdd"
+(** Guard of the given leaf *)
+val guard_of_leaf_u : 'a t -> 'a unique -> Man.v Bdd.t
+val guard_of_leaf : 'a table -> 'a t -> 'a -> Man.v Bdd.t
 
-    (** {3 User operations} *)
+(** Returns the set of leaf values (excluding the background value) *)
+val leaves_u: 'a t -> 'a unique array
+val leaves: 'a t -> 'a array
 
-    val mapleaf1 : (Bdd.t -> leaf -> leaf) -> t -> t
-    val mapleaf2 : (Bdd.t -> leaf -> leaf -> leaf) -> t -> t -> t
+(** Picks (but not randomly) a non background leaf. Return [None] if the only leaf is the background leaf. *)
+val pick_leaf_u : 'a t -> 'a unique
+val pick_leaf : 'a t -> 'a
 
-    val mapunop : (leaf -> leaf) -> t -> t
-    val mapbinop : ?commutative:bool -> ?idempotent:bool -> ?absorbant:leaf -> ?neutral:leaf -> (leaf -> leaf -> leaf) -> t -> t -> t
-    val mapterop : (leaf -> leaf -> leaf -> leaf) -> t -> t -> t -> t
-    val mapcmpop : ?bottom:leaf -> ?top:leaf -> (leaf -> leaf -> bool) -> t -> t -> bool
-    val mapexistop : absorbant:leaf -> (leaf -> leaf -> leaf) -> Bdd.t -> t -> t
-    val mapexistandop : absorbant:leaf -> (leaf -> leaf -> leaf) -> Bdd.t -> Bdd.t -> t -> t
-    val mapexistandapplyop : absorbant:leaf -> (leaf -> leaf) -> (leaf -> leaf -> leaf) -> Bdd.t -> Bdd.t -> t -> t
+(** Returns the set of leaf values together with their guard in the RDD *)
+val guardleafs_u : 'a t -> (Man.v Bdd.t * 'a unique) array
+val guardleafs : 'a t -> (Man.v Bdd.t * 'a) array
 
-    val alloc_unop: (leaf -> leaf) -> id_unop
-    val alloc_binop: (leaf -> leaf -> leaf) -> id_binop
-    val alloc_combinop: (leaf -> leaf -> leaf) -> id_combinop
-    external apply_unop: id_unop -> t -> t = "camlidl_cudd_idd_apply_unop"
-    external apply_binop: id_binop -> t -> t -> t = "camlidl_cudd_idd_apply_binop"
-    external apply_combinop: id_combinop -> t -> t -> t = "camlidl_cudd_idd_apply_combinop"
+(* ====================================================== *)
+(** {2 Minimizations} *)
+(* ====================================================== *)
 
-    (** {3 Miscellaneous} *)
+external constrain: 'a t -> Man.v Bdd.t -> 'a t = "camlidl_cudd_rdd_constrain"
+external tdconstrain: 'a t -> Man.v Bdd.t -> 'a t = "camlidl_cudd_rdd_tdconstrain"
+external restrict: 'a t -> Man.v Bdd.t -> 'a t = "camlidl_cudd_rdd_restrict"
+external tdrestrict : 'a t -> Man.v Bdd.t -> 'a t = "camlidl_cudd_rdd_tdrestrict"
 
-    external transfer : t -> Manager.t -> t = "camlidl_cudd_rdd_transfer"
+(* ====================================================== *)
+(** {2 Conversions} *)
+(* ====================================================== *)
+(* ====================================================== *)
+(** {2 User operations} *)
+(* ====================================================== *)
+(* ====================================================== *)
+(** {3 By decomposition into guards and leafs} *)
+(* ====================================================== *)
+(**
+   Be cautious: here the background leaf is used as a special value,
+   and should not be used for ordinary purpose.
+*)
 
-    (** {3 Printing} *)
+val combineretractive : Man.v Bdd.t * 'a unique -> 'a t -> 'a t
+val combineexpansive :
+  default:'a t ->
+  merge:('a t -> 'b t -> 'c t) -> Man.v Bdd.t * 'a unique -> 'b t -> 'c t
+val combineleaf1 :
+  default:'a t ->
+  combine:(Man.v Bdd.t * 'c -> 'a t -> 'a t) ->
+  (Man.v Bdd.t -> 'b unique -> Man.v Bdd.t * 'c) -> 'b t -> 'a t
+val retractivemapleaf1 :
+  default:'a t ->
+  (Man.v Bdd.t -> 'b unique -> Man.v Bdd.t * 'a unique) -> 'b t -> 'a t
+val expansivemapleaf1 :
+  default:'a t ->
+  merge:('a t -> 'a t -> 'a t) ->
+  (Man.v Bdd.t -> 'b unique -> Man.v Bdd.t * 'a unique) -> 'b t -> 'a t
+val mapleaf1 : ('a unique -> 'b unique) -> 'a t -> 'b t
+val combineleaf2 :
+  default:'a t ->
+  combine:(Man.v Bdd.t * 'd -> 'a t -> 'a t) ->
+  (Man.v Bdd.t -> 'b unique -> 'c unique -> Man.v Bdd.t * 'd) ->
+  'b t -> 'c t -> 'a t
+val retractivemapleaf2 :
+  default:'a t ->
+  (Man.v Bdd.t -> 'b unique -> 'c unique -> Man.v Bdd.t * 'a unique) ->
+  'b t -> 'c t -> 'a t
+val expansivemapleaf2 :
+  default:'a t ->
+  merge:('a t -> 'a t -> 'a t) ->
+  (Man.v Bdd.t -> 'b unique -> 'c unique -> Man.v Bdd.t * 'a unique) ->
+  'b t -> 'c t -> 'a t
+val mapleaf2 : ('a unique -> 'b unique -> 'c unique) -> 'a t -> 'b t -> 'c t
+val combineleaf_array :
+  default:'a t ->
+  combine:(Man.v Bdd.t * 'c -> 'a t -> 'a t) ->
+  tabsorbant:('b -> bool) option array ->
+  (Man.v Bdd.t -> 'b unique array -> Man.v Bdd.t * 'c) -> 'b t array -> 'a t
+val combineleaf1_array :
+  default:'a t ->
+  combine:(Man.v Bdd.t * 'd -> 'a t -> 'a t) ->
+  ?absorbant:('b -> bool) ->
+  tabsorbant:('c -> bool) option array ->
+  (Man.v Bdd.t -> 'b unique -> 'c unique array -> Man.v Bdd.t * 'd) ->
+  'b t -> 'c t array -> 'a t
+val combineleaf2_array :
+  default:'a t ->
+  combine:(Man.v Bdd.t * 'e -> 'a t -> 'a t) ->
+  ?absorbant1:('b -> bool) ->
+  ?absorbant2:('c -> bool) ->
+  tabsorbant:('d -> bool) option array ->
+  (Man.v Bdd.t -> 'b unique -> 'c unique -> 'd unique array -> Man.v Bdd.t * 'e) ->
+  'b t -> 'c t -> 'd t array -> 'a t
 
-    external _print: t -> unit = "camlidl_cudd_print"
-    val print__minterm: Format.formatter -> t -> unit
-    val print_minterm: (int -> string) -> (leaf -> string) -> Format.formatter -> t -> unit
-    val print: (int -> string) -> (leaf -> string) -> Format.formatter -> t -> unit
-  end
+(* ====================================================== *)
+(** {3 By using CUDD cache} *)
+(* ====================================================== *)
 
-(*  ====================================================================== *)
-(** {2 Functor} *)
-(*  ====================================================================== *)
+(** {4 Types} *)
 
-module Make : functor (Leaf: LeafType) -> (S with type leaf = Leaf.t)
+type ('a, 'b) op1 = ('a unique, 'b unique) Vdd.op1
+type ('a, 'b, 'c) op2 = ('a unique, 'b unique, 'c unique) Vdd.op2
+type ('a, 'b) test2 = ('a unique, 'b unique) Vdd.test2
+type ('a, 'b, 'c, 'd) op3 = ('a unique, 'b unique, 'c unique, 'd unique) Vdd.op3
+type ('a, 'b) exist = ('a unique, 'b) Vdd.exist
+type ('a, 'b, 'c, 'd) existop1 = ('a unique, 'b unique, 'c, 'd) Vdd.existop1
+type ('a, 'b) existand = ('a unique, 'b) Vdd.existand
+type ('a, 'b, 'c, 'd) existandop1 = ('a unique, 'b unique, 'c, 'd) Vdd.existandop1
+type ('a, 'b) vectorcomposeop1 = ('a unique, 'b) Vdd.vectorcomposeop1
+type auto = Vdd.auto
+type user = Vdd.user
+type 'a local = 'a Vdd.local
+type global = Vdd.global
+type 'a cache = 'a Vdd.cache
+type ('a, 'b) op = ('a, 'b) Vdd.op
+type ('a, 'b) mexist =
+    [ `Fun of ('a t -> 'a t -> 'a t option) option * ('a unique -> 'a unique -> 'a unique)
+    | `Op of (('a, 'a, 'a) op2, 'b) op ]
+type ('a, 'b, 'c) mop1 = [ `Fun of 'a unique -> 'b unique | `Op of (('a, 'b) op1, 'c) op ]
+val global : global cache
+val auto : auto local cache
+val user : user local cache
+
+(** {4 Registering operations} *)
+
+val register_op1 :
+  cachetyp:'c cache -> ('a unique -> 'b unique) -> (('a,'b) op1, 'c) op
+val register_op2 :
+  cachetyp:'d cache ->
+  ?commutative:bool ->
+  ?idempotent:bool ->
+  ?special:('a t -> 'b t -> 'c t option) ->
+  ('a unique -> 'b unique -> 'c unique) -> (('a,'b,'c) op2, 'd) op
+val register_test2 :
+  cachetyp:'c cache ->
+  ?commutative:bool ->
+  ?reflexive:bool ->
+  ?special:('a t -> 'b t -> bool option) ->
+ ('a unique -> 'b unique -> bool) -> (('a,'b) test2, 'c) op
+val register_op3 :
+  cachetyp:'e  local cache ->
+  ?special:('a t -> 'b t -> 'c t -> 'd t option) ->
+  ('a unique -> 'b unique -> 'c unique -> 'd unique) -> (('a,'b,'c,'d) op3, 'e local) op
+val register_exist :
+  cachetyp:'c cache -> (('a,'a,'a) op2,'b) op -> (('a,'b) exist, 'c) op
+val register_existop1 :
+  cachetyp:'e cache ->
+  (('a, 'b) op1, 'd) op ->
+  (('b, 'b, 'b) op2, 'c) op ->
+  (('a,'b,'d,'c) existop1, 'e) op
+val register_existand :
+  cachetyp:'c local cache ->
+  bottom:'a unique ->
+  (('a, 'a, 'a) op2, 'b) op -> (('a,'b) existand, 'c local) op
+val register_existandop1 :
+  cachetyp:'e local cache ->
+  bottom:'b unique ->
+  (('a, 'b) op1, 'd) op ->
+  (('b, 'b, 'b) op2, 'c) op ->
+  (('a,'b,'d,'c) existandop1, 'e local) op
+
+(** {4 Flushing cache} *)
+
+val op2_of_exist : (('a,'b) exist, 'c) op -> (('a,'a,'a) op2, 'b) op
+val op2_of_existop1 : (('a,'b,'c,'d) existop1, 'e) op -> (('b,'b,'b) op2, 'd) op
+val op2_of_existand : (('a,'b) existand, 'c local) op -> (('a,'a,'a) op2, 'b) op
+val op2_of_existandop1 : (('a,'b,'c,'d) existandop1, 'e local) op -> (('b,'b,'b) op2, 'd) op
+val op1_of_existop1 : (('a,'b,'c,'d) existop1, 'e) op -> (('a,'b) op1, 'c) op
+val op1_of_existandop1 : (('a,'b,'c,'d) existandop1, 'e local) op -> (('a,'b) op1, 'c) op
+
+val flush_op : ('a, user local) op -> unit
+val flush_allop : unit -> unit
+
+(** {4 Applying operations} *)
+
+val apply_op1 : (('a,'b) op1, 'c) op -> 'a t -> 'b t
+val apply_op2 : (('a,'b,'c) op2, 'd) op -> 'a t -> 'b t -> 'c t
+val apply_test2 : (('a,'b) test2, 'c) op -> 'a t -> 'b t -> bool
+val apply_op3 :
+  (('a,'b,'c,'d) op3, 'e local) op ->
+  'a t -> 'b t -> 'c t -> 'd t
+val apply_exist : (('a,'b) exist, 'c) op -> supp:(Man.v Bdd.t) -> 'a t -> 'a t
+val apply_existop1 : (('a,'b,'c,'d) existop1, 'e) op -> supp:(Man.v Bdd.t) -> 'a t -> 'b t
+val apply_existand : (('a,'b) existand, 'c local) op -> supp:(Man.v Bdd.t) -> Man.v Bdd.t -> 'a t -> 'a t
+val apply_existandop1 : (('a,'b,'c,'d) existandop1, 'e local) op -> supp:(Man.v Bdd.t) -> Man.v Bdd.t -> 'a t -> 'b t
+
+(** {4 Map functions (based on automatic user caches)} *)
+
+val map_op1 :
+  ('a unique -> 'b unique) -> 'a t -> 'b t
+val map_op2 :
+  ?commutative:bool ->
+  ?idempotent:bool ->
+  ?special:('a t -> 'b t -> 'c t option) ->
+  ('a unique -> 'b unique -> 'c unique) ->
+  'a t -> 'b t -> 'c t
+val map_test2 :
+  ?commutative:bool ->
+  ?reflexive:bool ->
+  ?special:('a t -> 'b t -> bool option) ->
+  ('a unique -> 'b unique -> bool) ->
+  'a t -> 'b t -> bool
+val map_op3 :
+  ?special:('a t -> 'b t -> 'c t -> 'd t option) ->
+  ('a unique -> 'b unique -> 'c unique -> 'd unique) ->
+  'a t -> 'b t -> 'c t -> 'd t
+
+val map_exist :
+  ('a, 'b) mexist ->
+  supp:(Man.v Bdd.t) -> 'a t -> 'a t
+val map_existop1 :
+  ('a,'b,'c) mop1 -> ('b,'d) mexist ->
+  supp:(Man.v Bdd.t) -> 'a t -> 'b t
+val map_existand :
+  bottom:'a unique ->
+  ('a, 'b) mexist ->
+  supp:(Man.v Bdd.t) -> Man.v Bdd.t -> 'a t -> 'a t
+val map_existandop1 :
+  bottom:'b unique ->
+  ('a,'b,'c) mop1 -> ('b,'d) mexist ->
+  supp:(Man.v Bdd.t) -> Man.v Bdd.t -> 'a t -> 'b t
+
+(* ====================================================== *)
+(** {2 Miscellaneous} *)
+(* ====================================================== *)
+
+external transfer : 'a t -> Man.v Man.t -> 'a t = "camlidl_cudd_rdd_transfer"
+
+(* ====================================================== *)
+(** {2 Printing} *)
+(* ====================================================== *)
+
+val print__minterm:
+  (Format.formatter -> 'a -> unit) ->
+  Format.formatter -> 'a t -> unit
+val print_minterm:
+  (Format.formatter -> int -> unit) ->
+  (Format.formatter -> 'a -> unit) ->
+  Format.formatter -> 'a t -> unit
+val print:
+  (Format.formatter -> Man.v Bdd.t -> unit) ->
+  (Format.formatter -> 'a -> unit) ->
+  Format.formatter -> 'a t -> unit
+

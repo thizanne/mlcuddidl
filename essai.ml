@@ -1,97 +1,65 @@
 open Format;;
+
+let man = Manager.make_d ~numVars:10 ();;
+
+let var = Array.init 9 (fun i -> Bdd.ithvar man i);;
+let cst = Array.init 30 (fun i -> Rdd.cst man (float_of_int i));;
+
+let f = Array.init 7 (fun i -> Bdd.ite var.(i) var.(i+1) var.(i+2));;
+
 (*
-#install_printer Idd.print__minterm;;
-*)
-let man = Manager.make 4 4 0 0 0;;
-
-let var = Array.init 4 (fun i -> Bdd.ithvar man i);;
-let cst = Array.init 6 (fun i -> Idd.cst man i);;
-
-let exprim1 () =
-  let f = Bdd.dnot(Bdd.eq var.(0) var.(1)) in
-  let g = Bdd.dand var.(2) var.(3) in
-  let h = Bdd.dor f g in 
-  let add1 = Idd.ite h cst.(2) cst.(3) in
-  printf "add1 = %a@."
-    Idd.print__minterm add1
-  ;
-  let add2 = Idd.mapunop (fun v -> v+10) add1 in
-  printf "add2 = %a@."
-    Idd.print__minterm add2
-  ;
-  add2
+Array.iter
+  (fun f -> printf "cst = %a@." Rdd.print__minterm f)
+  cst
 ;;
-let exprim2 () =
-  let f = Bdd.dnot(Bdd.eq var.(0) var.(1)) in
-  let g = Bdd.dand var.(2) var.(3) in
-  let h = Bdd.dor f g in
-  let add1 = Idd.ite h cst.(2) cst.(3) in
-  let add2 = Idd.ite f cst.(4) cst.(5) in
-  printf "add1 = %a@.add2 = %a@."
-    Idd.print__minterm add1
-    Idd.print__minterm add2
-  ;
-  let add3 = Idd.mapbinop ~commutative:true (fun x y -> x*y) add1 add2 in
-  printf "add3 = %a@."
-    Idd.print__minterm add3
-  ;
-  add3
+Array.iter
+  (fun f -> printf "f = %a@." Bdd.print__minterm f)
+  f
 ;;
+  *)
+  
+let rdd1 = Rdd.ite f.(0) cst.(0) cst.(1);;
+let rdd2 = Rdd.ite f.(1) cst.(2) cst.(4);;
 
-let add1 = exprim1();;
-let add2 = exprim2();;
-(*
-Gc.compact();;
-Manager.debugcheck man;;
-Manager.check_keys man;;
-Manager.reduce_heap man Manager.REORDER_SIFT 1;;
-*)
+let rdda = Rdd.add rdd1 rdd2;;
+let rddb = Rdd.map_op2 
+  ~bottom1:(fun x -> None)
+  ~bottom2:(fun x -> None) 
+  ~neutral1:(fun x -> false) 
+  ~neutral2:(fun x -> false) 
+  ~commutative:true (fun x y -> 
+    Gc.compact (); x +. y)  rdd1 rdd2;;
 
-(*
-let gc b () =
-  Format.pp_print_string Format.std_formatter 
-    (if b then "reordering" else "gc");
-  Format.printf "@.";
-  Gc.full_major()
+let g = Array.init 6 (fun i -> Bdd.ite var.(i) var.(i+1) (Bdd.dor var.(i+2) var.(i+3)));;
+let h = Array.init 6 (fun i -> Bdd.dand f.(i) f.(i+1));;
 
-let f man size =
-  let f = ref (Bdd.dtrue man) in
-  for i=0 to size-1 do
-    let g = Bdd.eq (Bdd.ithvar man i) (Bdd.ithvar man (i+2*size)) in
-    f := Bdd.dand !f g;
+let make_rdd bdd index depth = 
+  let res = ref (Rdd.ite bdd.(index) cst.(index) cst.(0)) in
+  for i=0 to depth-1 do
+    res := Rdd.ite bdd.(index+i) cst.(index+i) !res
   done;
-  Format.printf "DONE1 %i@." (Bdd.size !f);
-  Manager.reduce_heap man Manager.REORDER_GROUP_SIFT_CONV 10;
-  Format.printf "DONE1 %i@." (Bdd.size !f);
-  for i=0 to size-1 do
-    let g = Bdd.xor (Bdd.ithvar man (i)) (Bdd.ithvar man (i+size)) in
-    f := Bdd.dand !f g;
+  !res
+;;
+let testop bdd opa opb =
+  for index=0 to (Array.length bdd) - 2 do
+    for depth=0 to (Array.length bdd) - index do
+      let rdd1 = make_rdd bdd index depth in
+      let rdd2 = make_rdd bdd (index+1) (depth-1) in
+      let rdda = opa rdd1 rdd2 in
+      let rddb = opb rdd1 rdd2 in
+      if rdda<>rddb then failwith "";
+    done;
   done;
-  Format.printf "DONE2 %i@." (Bdd.size !f);
-  Manager.reduce_heap man Manager.REORDER_GROUP_SIFT_CONV 10;
-  Format.printf "DONE2 %i@." (Bdd.size !f);
-  for i=0 to size-1 do
-    let g = Bdd.xor (Bdd.ithvar man (i+size)) (Bdd.ithvar man (i+3*size)) in
-    f := Bdd.dand !f g;
-  done;
-  Format.printf "DONE3 %i@." (Bdd.size !f);
-  Manager.reduce_heap man Manager.REORDER_GROUP_SIFT_CONV 10;
-  Format.printf "DONE3 %i@." (Bdd.size !f);
-  !f
-
-let g () = 
-  let _ = 
-    let man = Manager.make 200 0 0 0 500000000 in
-    Manager.set_gc 500000000 (gc false) (gc true);
-    let bdd1 = f man 20 in
-    let bdd2 = f man 20 in
-    ()
-  in
-  Gc.full_major();
-  Format.printf "@.";
   ()
 ;;
-g ();
-g ();
-Format.printf "@.";;
-*)
+
+printf "Here 2@.";;
+
+testop f Rdd.add (Rdd.map_op2 ~bottom1:(fun x -> None) ~commutative:true (+.));;
+testop g Rdd.add (Rdd.map_op2 ~commutative:true (+.));;
+testop h Rdd.add (Rdd.map_op2 ~commutative:true (+.));;
+printf "Here 3@.";;
+testop f Rdd.mul (Rdd.map_op2 ~commutative:true (fun x y -> Gc.compact (); Manager.garbage_collect man; x *. y));;
+printf "Here 4@.";;
+testop g Rdd.mul (Rdd.map_op2 ~commutative:true (fun x y -> Gc.compact (); Manager.garbage_collect man; x *. y));;
+testop h Rdd.mul (Rdd.map_op2 ~commutative:true (fun x y -> Gc.compact (); Manager.garbage_collect man; x *. y));;

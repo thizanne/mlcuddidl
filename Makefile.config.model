@@ -8,10 +8,6 @@
 #
 MLCUDDIDL_PREFIX =
 
-# Where to find CUDDAUX  ($(CUDDAUX_PREFIX)/lib/, ...)
-#
-CUDDAUX_PREFIX = /usr/local
-
 # Where to find CUDD ($(CUDD_PREFIX)/bin, $(CUDD_PREFIX)/lib/, ...)
 #
 CUDD_PREFIX = /usr/local
