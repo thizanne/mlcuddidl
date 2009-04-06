@@ -1,8 +1,5 @@
 (** Lifting operation on leaves to operations on MTBDDs *)
 
-(** Be cautious: here the background leaf is used as a special
-    value, and should not be used for ordinary purpose. *)
-
 val restrict : bool ref
 val combineretractive : Man.v Bdd.t * 'a -> 'a Vdd.t -> 'a Vdd.t
 val combineexpansive :

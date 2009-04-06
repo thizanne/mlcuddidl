@@ -4,10 +4,11 @@ Then, type on shour shell the command:
 "cuddtop -I installation_path_of_lib" or
 "cuddtop" if in source directory, after compilation
 *)
+open Cudd;;
 
 let man = Man.make_d ~numVars:10 ();;
 #install_printer Bdd.print__minterm;;
-#install_printer Idd.print__minterm;;
+#install_printer Rdd.print__minterm;;
 let x = (Bdd.dnot (Bdd.ithvar man 1));;
 let y = (Bdd.dnot (Bdd.ithvar man 2));;
 let z = Bdd.ithvar man 3;;
@@ -16,15 +17,15 @@ let w = Bdd.ithvar man 4;;
 let f = Bdd.dand (Bdd.dand x y) (Bdd.dand (Bdd.dnot z) (Bdd.dnot w));;
 let g = Bdd.dand (Bdd.dand y z) (Bdd.dnot w);;
 
-let idd1 = Idd.ite f (Idd.cst man 0) (Idd.cst man 1);;
-let supp = Idd.support idd1;;
-let h = Idd.guard_of_nonbackground idd1;;
+let rdd1 = Rdd.ite f (Rdd.cst man 0.0) (Rdd.cst man 1.0);;
+let supp = Rdd.support rdd1;;
+let h = Rdd.guard_of_nonbackground rdd1;;
 Bdd.gendisjdecomp h;;
-Idd.nbpaths idd1;;
-Idd.nbnonzeropaths idd1;;
-Idd.nbminterms 4 idd1;;
-Idd.nbleaves idd1;;
-Idd.leaves idd1;;
+Rdd.nbpaths rdd1;;
+Rdd.nbnonzeropaths rdd1;;
+Rdd.nbminterms 4 rdd1;;
+Rdd.nbleaves rdd1;;
+Rdd.leaves rdd1;;
 
 let res = Bdd.cube_union f g;;
 let res = Bdd.cube_union (Bdd.dnot f) g;;
@@ -36,12 +37,12 @@ let res = Bdd.support_inter f g;;
 let res = Bdd.support_union f g;;
 let z = Bdd.nxor x y;;
 let z = Bdd.xor x y;;
-Bdd.pick_cubes_on_support z (Bdd.cube_of_minterm man [|Manager.True;Manager.True;Manager.True;Manager.True|]) 2;;
+Bdd.pick_cubes_on_support z (Bdd.cube_of_minterm man [|Man.True;Man.True;Man.True;Man.True|]) 2;;
 
 (* essai des Vdd avec des entiers *)
 Gc.set { (Gc.get()) with Gc.verbose = 0x11 };;
 
-let man = Manager.make_v ~numVars:20 ();;
+let man = Man.make_v ~numVars:20 ();;
 #install_printer Bdd.print__minterm;;
 let p = Vdd.print__minterm Format.pp_print_int;;
 #install_printer p;;
@@ -55,12 +56,12 @@ let _ =
   done;
   ()
 ;;
-Manager.print_info man;;
+Man.print_info man;;
 Gc.full_major();;
-Manager.reduce_heap man Manager.REORDER_SIFT 1;;
+Man.reduce_heap man Man.REORDER_SIFT 1;;
 Gc.full_major();;
-Manager.reduce_heap man Manager.REORDER_NONE 0;;
-Manager.print_info man;;
+Man.reduce_heap man Man.REORDER_NONE 0;;
+Man.print_info man;;
 
 let x = (Bdd.dnot (Bdd.ithvar man 1));;
 let y = (Bdd.dnot (Bdd.ithvar man 2));;
@@ -70,15 +71,15 @@ let w = Bdd.ithvar man 4;;
 let f = Bdd.dand (Bdd.dand x y) (Bdd.dand (Bdd.dnot z) (Bdd.dnot w));;
 let g = Bdd.dand (Bdd.dand y z) (Bdd.dnot w);;
 
-let idd1 = Vdd.ite f (Vdd.cst man 0) (Vdd.cst man 1);;
-let supp = Vdd.support idd1;;
-let h = Vdd.guard_of_nonbackground idd1;;
+let vdd1 = Vdd.ite f (Vdd.cst man 0) (Vdd.cst man 1);;
+let supp = Vdd.support vdd1;;
+let h = Vdd.guard_of_nonbackground vdd1;;
 Bdd.gendisjdecomp h;;
-Vdd.nbpaths idd1;;
-Vdd.nbnonzeropaths idd1;;
-Vdd.nbminterms 4 idd1;;
-Vdd.nbleaves idd1;;
-Vdd.leaves idd1;;
+Vdd.nbpaths vdd1;;
+Vdd.nbnonzeropaths vdd1;;
+Vdd.nbminterms 4 vdd1;;
+Vdd.nbleaves vdd1;;
+Vdd.leaves vdd1;;
 
 let res = Bdd.cube_union f g;;
 let res = Bdd.cube_union (Bdd.dnot f) g;;
@@ -90,11 +91,11 @@ let res = Bdd.support_inter f g;;
 let res = Bdd.support_union f g;;
 let z = Bdd.nxor x y;;
 let z = Bdd.xor x y;;
-Bdd.pick_cubes_on_support z (Bdd.cube_of_minterm man [|Manager.True;Manager.True;Manager.True;Manager.True|]) 2;;
+Bdd.pick_cubes_on_support z (Bdd.cube_of_minterm man [|Man.True;Man.True;Man.True;Man.True|]) 2;;
 
 (* essai des Vdd avec des références sur des entiers *)
 Gc.set { (Gc.get()) with Gc.verbose = 0x11 };;
-let man = Manager.make_v ~numVars:20 ();;
+let man = Man.make_v ~numVars:20 ();;
 #install_printer Bdd.print__minterm;;
 let p = Vdd.print__minterm (fun fmt r -> Format.pp_print_int fmt !r);;
 #install_printer p;;
@@ -112,7 +113,7 @@ for i=0 to 9 do
   res := Vdd.ite (Bdd.ithvar man i) tab.(i) !res
 done;;
 Gc.compact();;
-Manager.garbage_collect man;;
+Man.garbage_collect man;;
 for i=0 to 9 do
   res := Vdd.ite (Bdd.ithvar man (i+10)) tab.(i) !res
 done;;
@@ -128,19 +129,19 @@ let g = Bdd.dand (Bdd.dand y z) (Bdd.dnot w);;
 
 
 let leaf0 = ref 0 and leaf1 = ref 1;;
-let idd1 = Vdd.ite f (Vdd.cst man leaf0) (Vdd.cst man leaf1);;
-let supp = Vdd.support idd1;;
-let h = Vdd.guard_of_nonbackground idd1;;
-let h = Vdd.guard_of_leaf idd1 leaf0;;
-let h = Vdd.guard_of_leaf idd1 leaf1;;
-let h = Vdd.guard_of_leaf idd1 (ref 0);;
-let h = Vdd.guard_of_leaf idd1 (ref 1);;
+let vdd1 = Vdd.ite f (Vdd.cst man leaf0) (Vdd.cst man leaf1);;
+let supp = Vdd.support vdd1;;
+let h = Vdd.guard_of_nonbackground vdd1;;
+let h = Vdd.guard_of_leaf vdd1 leaf0;;
+let h = Vdd.guard_of_leaf vdd1 leaf1;;
+let h = Vdd.guard_of_leaf vdd1 (ref 0);;
+let h = Vdd.guard_of_leaf vdd1 (ref 1);;
 Bdd.gendisjdecomp h;;
-Vdd.nbpaths idd1;;
-Vdd.nbnonzeropaths idd1;;
-Vdd.nbminterms 4 idd1;;
-Vdd.nbleaves idd1;;
-Vdd.leaves idd1;;
+Vdd.nbpaths vdd1;;
+Vdd.nbnonzeropaths vdd1;;
+Vdd.nbminterms 4 vdd1;;
+Vdd.nbleaves vdd1;;
+Vdd.leaves vdd1;;
 
 let res = Bdd.cube_union f g;;
 let res = Bdd.cube_union (Bdd.dnot f) g;;
@@ -152,7 +153,7 @@ let res = Bdd.support_inter f g;;
 let res = Bdd.support_union f g;;
 let z = Bdd.nxor x y;;
 let z = Bdd.xor x y;;
-Bdd.pick_cubes_on_support z (Bdd.cube_of_minterm man [|Manager.True;Manager.True;Manager.True;Manager.True|]) 2;;
+Bdd.pick_cubes_on_support z (Bdd.cube_of_minterm man [|Man.True;Man.True;Man.True;Man.True|]) 2;;
 
 
 
@@ -168,15 +169,15 @@ let w = Bdd.ithvar man 4;;
 let f = Bdd.dand (Bdd.dand x y) (Bdd.dand (Bdd.dnot z) (Bdd.dnot w));;
 let g = Bdd.dand (Bdd.dand y z) (Bdd.dnot w);;
 
-let idd1 = Vdd.ite f (Vdd.cst man 0.0) (Vdd.cst man 1.0);;
-let supp = Vdd.support idd1;;
-let h = Vdd.guard_of_nonbackground idd1;;
+let vdd1 = Vdd.ite f (Vdd.cst man 0.0) (Vdd.cst man 1.0);;
+let supp = Vdd.support vdd1;;
+let h = Vdd.guard_of_nonbackground vdd1;;
 Bdd.gendisjdecomp h;;
-Vdd.nbpaths idd1;;
-Vdd.nbnonzeropaths idd1;;
-Vdd.nbminterms 4 idd1;;
-Vdd.nbleaves idd1;;
-Vdd.leaves idd1;;
+Vdd.nbpaths vdd1;;
+Vdd.nbnonzeropaths vdd1;;
+Vdd.nbminterms 4 vdd1;;
+Vdd.nbleaves vdd1;;
+Vdd.leaves vdd1;;
 
 let res = Bdd.cube_union f g;;
 let res = Bdd.cube_union (Bdd.dnot f) g;;
@@ -188,12 +189,12 @@ let res = Bdd.support_inter f g;;
 let res = Bdd.support_union f g;;
 let z = Bdd.nxor x y;;
 let z = Bdd.xor x y;;
-Bdd.pick_cubes_on_support z (Bdd.cube_of_minterm man [|Manager.True;Manager.True;Manager.True;Manager.True|]) 2;;
+Bdd.pick_cubes_on_support z (Bdd.cube_of_minterm man [|Man.True;Man.True;Man.True;Man.True|]) 2;;
 
 
 (* essai des Rdd *)
 
-let man = Manager.make_d ~numVars:10 ();;
+let man = Man.make_d ~numVars:10 ();;
 #install_printer Bdd.print__minterm;;
 #install_printer Rdd.print__minterm;;
 
@@ -236,7 +237,7 @@ let testop bdd opa opb =
   ()
 ;;
 
-testop f Rdd.add (Rdd.map_op2 ~bottom1:(fun x -> None) ~commutative:true (+.));;
+testop f Rdd.add (Rdd.map_op2 ~commutative:true (+.));;
 testop g Rdd.add (Rdd.map_op2 ~commutative:true (+.));;
 testop h Rdd.add (Rdd.map_op2 ~commutative:true (+.));;
 testop f Rdd.mul (Rdd.map_op2 ~commutative:true (fun x y -> Gc.compact (); x *. y));;

@@ -1,19 +1,25 @@
 {1 Introduction}
 
-This library provides an OCAML interface to the BDD's library
-CUDD. The reader is supposed to have looked at the
-{{:http://vlsi.colorado.edu/~fabio/CUDD/}user's manual} of this
-library.
+This library provides an OCAML interface to the BDD's library CUDD, as well
+as additional C functions to CUDD (in cuddauxXXX files). The reader is
+supposed to have looked at the
+{{:http://vlsi.colorado.edu/~fabio/CUDD/}user's manual} of this library.
 
-Most functions of the CUDD library are interfaced; with the
-exception of ZDDs functions. If you need it, please tell me, I
-can do it quickly.
+Most functions of the CUDD library are interfaced; with the exception of ZDDs
+functions. If you need it, please tell me, I can do it quickly.
 
 {2 Outline}
 
-The interface is decomposed in the following modules
-{!modules: Manager Bdd Rdd Idd Mtbdd}
-{!indexlist}
+The interface is decomposed in the following user modules:
+- {!Man}: CUDD managers;
+- {!Bdd}: CUDD BDDs;
+- {!Rdd}: CUDD ADDs;
+- {!Mtbdd}: does not exist in CUDD.
+
+The other internal modules are mainly used by {!Mtbdd}:
+- {!Custom} and {!Mapleaf}: for user operations on RDDs and MTBDDs;
+- {!Vdd}: raw MTBDDs:
+- {!Weakke}: for polymorphic weak hashtables.
 
 {2 Memory management}
 
@@ -34,7 +40,7 @@ node) or because of a reordering operation, it first calls the
 OCAML garbage collector, in order to be able to garbage collect as
 many nodes as possible.
 
-The function {!Manager.set_gc} allows to tune the OCAML garbage
+The function {!Man.set_gc} allows to tune the OCAML garbage
 collection of diagrams and the link with the CUDD garbage
 collection.
 
@@ -60,7 +66,7 @@ documentation.
 
 The interface has been written with the help of the CamlIDL tool,
 the input files of which are suffixed with [.idl]. CamlIDL
-automizes most of the cumbersome task of writing stub codes and
+automatizes most of the cumbersome task of writing stub codes and
 converting datatypes back and forth between C and OCAML. However,
 as we implemented more than a direct interface, we also used the
 M4 preprocessor on [.idl] files to simplify the task (instead of

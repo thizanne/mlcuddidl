@@ -49,7 +49,7 @@ boolean is_cst(bdd__t no) quote(call, "_res = Cudd_IsConstant(no.node);");
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_IsComplement}[Cudd_IsComplement]}. Is the BDD a complemented one ? *)")
 boolean is_complement(bdd__t no) quote(call, "_res = Cudd_IsComplement(no.node);");
 
-quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_NodeReadIndex}[Cudd_NodeReadIndex]}. Returns the index of the BDD (65535 for a constant BDD) *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_NodeReadIndex}[Cudd_NodeReadIndex]}. Returns the index of the (top node of the) BDD (65535 for a constant BDD) *)")
 int topvar(bdd__t no) quote(call, "_res = Cudd_NodeReadIndex(no.node);");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_T}[Cudd_T]}. Returns the positive subnode of the BDD *)")

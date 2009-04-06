@@ -21,7 +21,7 @@ typedef [abstract,c2ml(camlidl_cudd_leaf_c2ml),ml2c(camlidl_cudd_leaf_ml2c)] str
 
 quote(MLMLI,"
 (** Public type for exploring the abstract type [t] *)\n\
-type 'a vdd = \n\
+type +'a vdd = \n\
 | Leaf of 'a         (** Terminal value *)\n\
 | Ite of int * 'a t * 'a t (** Decision on CUDD variable *)\n	\
 \n\

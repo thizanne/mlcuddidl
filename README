@@ -3,28 +3,41 @@ The basic distribution contain the following files:
 	README
 	Makefile Makefile.config.model
 	Changes
-	manager.idl    bdd.idl    rdd.idl    idd.idl 
-	manager.mli    bdd.mli    rdd.mli    idd.mli    mtbdd.mli  
-	manager.ml     bdd.ml     rdd.ml     idd.ml     mtbdd.ml   
-	session.ml example.ml
+        
+        sedscript_c sedscript_caml macros.m4
 
-	cudd_caml.c manager_caml.c bdd_caml.c rdd_caml.c idd_caml.c
-	cudd_caml.h sedscript_c sedscript_caml macros.m4
-	texinfo.tex mlcuddidl.texi
+        mlcuddidl.odoc
+
+	man.idl bdd.idl rdd.idl vdd.idl (zdd.idl)
+	man.mli man.ml
+	bdd.mli bdd.ml
+	rdd.mli rdd.ml
+	vdd.mli vdd.ml
+
+	weakke.mli custom.mli mapleaf.mli mtbdd.mli
+        weakke.ml  custom.ml  mapleaf.ml  mtbdd.ml
+
+	session.ml test_mtbdd.ml
+
+	cudd_caml.h cudd_caml.c custom_caml.c
+  
+        cuddaux.h  cuddauxInt.h
+	cuddauxAddApply.c cuddauxAddIte.c cuddauxCompose.c cuddauxMisc.c
+	cuddauxAddCamlTable.c cuddauxBridge.c cuddauxGenCof.c cuddauxTDGenCof.c
+
 	mlcuddidl.dvi mlcuddidl.info ./html/*.html
 
 * What's needed :
 - An ANSI C compiler (gcc is the only tested compiler)
 - GNU MAKE
 - The CUDD BDDs library (http://vlsi.colorado.edu/software.html)
-- The CUDDAUX extension library (same location as this package)
 - OBJECTIVE CAML 3.0 or higher (http://caml.inria.fr)
 - CAMLIDL 1.05 (http://caml.inria.fr/camlidl)
 
 - GREP, SED, M4 if you want to regenerate files from .idl files
 
 * This code provides an interface to user's functions of the CUDD
-library. It generates five ML modules: Manager, Bdd, Rdd, Idd, Mtbdd.
+library. It generates five ML modules: Man, Bdd, Rdd, Vdd, Mtbdd.
 
 * To build,
 Set Makefile.config from Makefile.config.model model.
@@ -40,8 +53,8 @@ make install: installs the two versions of the interface
 make cuddrun: builds a OCaml bytecode interpreter containing the
               CUDD and CUDDAUX libraries
 make cuddtop: builds a OCaml toplevel containing the interface
-make example: build bytecode version of example.ml
-make example.opt: build native-code version of example.ml
+make test_mtbdd.byte: build bytecode version of test_mtbdd.ml
+make test_mtbdd.opt: build native-code version of test_mtbdd.ml
 make clean: normal clean
 make mostylclean: delete also generated files (from .idl files)
 make rebuild: regenerate C and OCaml files from .idl files

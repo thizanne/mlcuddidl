@@ -1,6 +1,6 @@
 1 a\\n(* This file is part of the MLCUDDIDL Library, released under LGPL license.\n   Please read the COPYING file packaged in the distribution  *)
 s/type man__tf/(** CUDD Manager *)\n\ntype d\n  (** Indicates that a CUDD manager manipulates standard ADDs with leaves of type C double *)\n/g;
-s/and man__tv/type v\n  (** Indicates that a CUDD manager manipulates ``custom'' ADDs with leaves of type an [OCaml] value. A manager cannot manipulate the two types of ADDs (for garbage collection reasons *)\n/g; 
+s/and man__tv/type v\n  (** Indicates that a CUDD manager manipulates ``custom'' ADDs with leaves of type an [OCaml] value. A manager cannot manipulate the two types of ADDs (for garbage collection reasons) *)\n/g; 
 s/and man__t/type 'a t\n  (** Type of CUDD managers, where ['a] is either [d] or [v]*)/g; 
 s/and reorder/\n(** Reordering method. *)\ntype reorder/g; 
 s/and aggregation/\n(** Type of aggregation methods. *)\ntype aggregation/g; 
@@ -25,9 +25,7 @@ s/bdd__tv/Man.v t/g;
 s/bdd__t/'a t/g;  
 s/type rdd__t/(** Binary Decision Diagrams with float leaves (CUDD ADDs) *)\n\ntype t\n  (** Abstract type for RDDs (that are necessarily attached to a manager of type [Man.d Man.t]).\n\n    Objects of this type contains both the top node of the ADD and the manager to which the node belongs. The manager can be retrieved with {!manager}. Objects of this type are automatically garbage collected. *)\n/g;
 s/rdd__t/t/g;  
-s/type idd__t/(** Binary Decision Diagrams with int leaves (based on CUDD ADDs) *)\n\ntype t\n  (** Abstract type for IDDs (that are necessarily attached to a manager of type [Man.d Man.t]).\n\n    Objects of this type contains both the top node of the ADD and the manager to which the node belongs. The manager can be retrieved with {!manager}. Objects of this type are automatically garbage collected. *)\n/g;  
-s/idd__t/t/g;  
-s/type vdd__t/(** Binary Decision Diagrams with OCaml value leaves (based on CUDD ADDs) *)\n\ntype 'a t\n  (** Type of VDDs (that are necessarily attached to a manager of type [Man.v Man.t]).\n\n    Objects of this type contains both the top node of the ADD and the manager to which the node belongs. The manager can be retrieved with {!manager}. Objects of this type are automatically garbage collected. *)\n/g;  
+s/type vdd__t/(** Binary Decision Diagrams with OCaml value leaves (based on CUDD ADDs) *)\n\ntype +'a t\n  (** Type of VDDs (that are necessarily attached to a manager of type [Man.v Man.t]).\n\n    Objects of this type contains both the top node of the ADD and the manager to which the node belongs. The manager can be retrieved with {!manager}. Objects of this type are automatically garbage collected. *)\n/g;  
 s/vdd__t/'a t/g;
 s/and vdd__leaf//g;
 s/vdd__leaf/'a/g;  

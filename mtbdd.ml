@@ -33,7 +33,6 @@ include Mapleaf
 include Vdd
 
 let dval_u = dval
-let inspect_u = inspect
 let is_eval_cst_u = is_eval_cst
 let is_ite_cst_u = is_ite_cst
 let iter_cube_u = iter_cube

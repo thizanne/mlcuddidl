@@ -28,8 +28,8 @@ ICFLAGS = \
 
 IDLMODULES = man bdd rdd vdd 
 
-MLMODULES = weakke man bdd custom rdd vdd mapleaf mtbdd
-MLSRC = $(IDLMODULES:%=%.mli) $(IDLMODULES:%=%.ml) mtbdd.ml mtbdd.mli
+MLMODULES = man bdd custom rdd weakke vdd mapleaf mtbdd
+MLSRC = $(IDLMODULES:%=%.mli) $(IDLMODULES:%=%.ml) custom.ml custom.mli mapleaf.ml mapleaf.mli weakke.ml weakke.mli mtbdd.ml mtbdd.mli
 MLINT = $(MLMODULES:%=%.cmi)
 MLOBJ = $(MLMODULES:%=%.cmo)
 MLOBJx = $(MLMODULES:%=%.cmx)
@@ -169,7 +169,7 @@ mlcuddidl.dvi: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 	$(OCAMLDOC) $(OCAMLINC) \
 -t "MLCUDDIDL: OCaml interface for CUDD library, version 1.3" \
 -latextitle 1,chapter -latextitle 2,section -latextitle 3,subsection -latextitle 4,subsubsection -latextitle 5,paragraph -latextitle 6,subparagraph \
--latex -intro mlcuddidl.odoc -o ocamldoc.tex $(MLMODULES:%=%.mli)
+-latex -intro mlcuddidl.odoc -o ocamldoc.tex man.mli bdd.mli rdd.mli mtbdd.mli custom.mli mapleaf.mli weakke.mli vdd.mli
 	$(SED) -e 's/\\documentclass\[11pt\]{article}/\\documentclass[10pt,twosdie,a4paper]{book}\\usepackage{ae,fullpage,makeidx,fancyhdr}\\usepackage[ps2pdf]{hyperref}\\pagestyle{fancy}\\setlength{\\parindent}{0em}\\setlength{\\parskip}{0.5ex}\\sloppy\\makeindex\\author{Bertrand Jeannet}/' -e 's/\\end{document}/\\appendix\\printindex\\end{document}/' ocamldoc.tex >mlcuddidl.tex
 	$(LATEX) mlcuddidl
 	$(MAKEINDEX) mlcuddidl
@@ -178,7 +178,7 @@ mlcuddidl.dvi: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 
 html: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 	mkdir -p html
-	$(OCAMLDOC) $(OCAMLINC) -html -d html -colorize-code -intro mlcuddidl.odoc $(MLMODULES:%=%.mli)
+	$(OCAMLDOC) $(OCAMLINC) -html -d html -colorize-code -intro mlcuddidl.odoc man.mli bdd.mli rdd.mli mtbdd.mli custom.mli mapleaf.mli weakke.mli vdd.mli
 
 #--------------------------------------------------------------
 # IMPLICIT RULES AND DEPENDENCIES

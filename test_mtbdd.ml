@@ -111,10 +111,12 @@ let rec equal dd1 rdd2 =
     else
       false
   in
-  if not res then
+  if not res then begin
     printf "@.PROBLEM EQUAL:@.(@[<hv>%a,@ %a@])@."
       F.print dd1 R.print rdd2
-  ;
+    ;
+    failwith "";
+  end;
   res
 ;;
 
@@ -233,6 +235,8 @@ for i=0 to 1000 do
   printf "t5=%a@." C.print t5;
   let t6 = C.mul t3 t5 in
   printf "t6=%a@." C.print t6;
+(* For restrict, the operation is order dependant,so
+   it is normal not to have equality 
   let t3 = C.restrict t3 !bdd in
   printf "t3=%a@." C.print t3;
   let t4 = C.restrict t4 !bdd in
@@ -241,6 +245,7 @@ for i=0 to 1000 do
   printf "t5=%a@." C.print t5;
   let t6 = C.tdrestrict t6 !bdd in
   printf "t6=%a@." C.print t6;
+*)
   assert(not (Man.debugcheck manv));
   assert(not (Man.debugcheck mand));
   Man.check_keys manv;

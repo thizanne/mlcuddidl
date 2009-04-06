@@ -14,7 +14,9 @@
 (* $Id: weak.mli,v 1.16.2.1 2008/11/13 10:39:46 doligez Exp $ *)
 
 (** Hash tables of weak pointers. *)
-(* Modified by Bertrand Jeannet with a Custom module *)
+
+(** Original [Weak] module of OCaml distribution modified by
+    Bertrand Jeannet with a [Custom] (polymorphic) module *)
 
 (** A weak hash table is a hashed set of values.  Each value may
     magically disappear from the set when it is not used by the
@@ -27,7 +29,7 @@
 
     The [equal] relation must be able to work on a shallow copy of
     the values and give the same result as with the values themselves.
-    *)
+*)
 
 type 'a t
 type 'a hashtbl = 'a t

@@ -1,9 +1,33 @@
 
+-------------
+MLCuddIDL 2.0:
+-------------
 
-Rdd/Idd/Mtbdd:
-API extended: nodes_below_level, mapbinop
-New functions: pick_leaf, mapcmpop, mapexistop, mapexistandop,
-               mapexistandapplyop
+General: big reorganization ! (and new, not fully compatible API).
+
+  * Integration of former cuddaux and mlcuddidl packages into the new
+    mlcuddidl package.
+
+  * all the modules are packaged in a global Cudd module
+
+  * Manager: 
+    - renamed in Man
+    - type Manager.t becomes either Man.d Man.t or Man.v Man.t
+      (for technical reasons introduced by new MTBDDs, this is
+       unfortunately not a feature)
+
+    - for BDDs, type Bdd.t becomes either Man.d Bdd.t or Man.v Bdd.t
+
+  * new Vdd/Mtbdd module, much more smoothly integrated with OCaml
+    programming.  (no more global and not-garbage-collected
+    correspondance table integers <-> values)
+
+  * Idd removed (use the type int Vdd instead).
+
+  * new user operations system for Rdd, Vdd, and Mtbdd, with
+    possibility of selecting global or local caches.
+
+Migration advices: mostly change of types Manager.t and Bdd.t.
 
 -------------
 MLCuddIDL 1.4:

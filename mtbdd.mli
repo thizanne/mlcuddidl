@@ -4,10 +4,15 @@
 (** MTBDDs using a weak hashtable for unique constants *)
 
 type 'a unique
-  (** Type of "unique" MTBDD leaves *)
+  (** Type of unique representants of MTBDD leaves *)
 
 type 'a t = 'a unique Vdd.t
-  (** Type of MTBDDs *)
+  (** Type of MTBDDs.
+
+      Objects of this type contains both the top node of the MTBDD
+      and the manager to which the node belongs. The manager can
+      be retrieved with {!manager}. Objects of this type are
+      automatically garbage collected.  *)
 
 type 'a table = 'a Weakke.Custom.t
   (** Hashtable to manage unique constants *)
@@ -27,27 +32,47 @@ val unique : 'a table -> 'a -> 'a unique
 val get : 'a unique -> 'a 
   (** Type conversion (no computation) *)
 
-type 'a mtbdd = 
-  'a Vdd.vdd =
-  | Leaf of 'a
-  | Ite of int * 'a Vdd.t * 'a Vdd.t
+(** Public type for exploring the abstract type [t] *)
+type 'a mtbdd =
+  | Leaf of 'a unique      (** Terminal value *)
+  | Ite of int * 'a t * 'a t (** Decision on CUDD variable *)
+
+(** We refer to the modules {!Rdd} and {!Vdd} for the description
+    of the interface. *)
 
 (* ====================================================== *)
 (** {2 Extractors} *)
 (* ====================================================== *)
 
 external manager : 'a t -> Man.v Man.t = "camlidl_cudd_bdd_manager"
+  (** Returns the manager associated to the MTBDD *)
+
 external is_cst : 'a t -> bool = "camlidl_cudd_bdd_is_cst"
+  (** Is the MTBDD constant ? *)
+
 external topvar : 'a t -> int = "camlidl_cudd_bdd_topvar"
+  (** Returns the index of the top node of the MTBDD (65535 for a
+      constant MTBDD) *)
+
 external dthen : 'a t -> 'a t = "camlidl_cudd_rdd_dthen"
+  (** Returns the positive subnode of the MTBDD *)
+
 external delse : 'a t -> 'a t = "camlidl_cudd_rdd_delse"
+  (** Returns the negative subnode of the MTBDD *)
+
 external cofactors : int -> 'a t -> 'a t * 'a t = "camlidl_cudd_rdd_cofactors"
+  (** Returns the positive and negative cofactor of the MTBDD wrt
+      the variable *)
+
 external cofactor : 'a t -> Man.v Bdd.t -> 'a t = "camlidl_cudd_rdd_cofactor"
+  (** [cofactor mtbdd cube] evaluates [mtbbdd] on the cube [cube] *)
 
 val dval_u : 'a t -> 'a unique
 val dval : 'a t -> 'a
-val inspect_u : 'a t -> 'a unique mtbdd
-val inspect : 'a t -> 'a unique mtbdd
+  (** Returns the value of the assumed constant MTBDD *)
+
+val inspect : 'a t -> 'a mtbdd
+  (** Decompose the MTBDD *)
 
 (* ====================================================== *)
 (** {2 Supports} *)
