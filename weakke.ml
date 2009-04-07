@@ -338,38 +338,6 @@ struct
   let print = print
 end
 
-module Custom = struct
-  type 'a t = {
-    compare : 'a compare;
-    hashtbl:'a hashtbl;
-  }
-
-  let create (hash:'a -> int) (equal:'a -> 'a -> bool) n = 
-    {
-      compare = { 
-	hash=(fun x -> (hash x) land max_int);
-	equal=equal 
-      };
-      hashtbl = create n
-    }
-  let clear t = clear t.hashtbl
-  let fold f t init = fold f t.hashtbl init
-  let iter f t = iter f t.hashtbl
-  let count t = count t.hashtbl
-  let add t data = Compare.add t.compare t.hashtbl data
-  let merge t data = Compare.merge t.compare t.hashtbl data
-  let merge_map t data map = Compare.merge_map t.compare t.hashtbl data map
-  let find t data = Compare.find t.compare t.hashtbl data
-  let remove t data = Compare.remove t.compare t.hashtbl data
-  let mem t data = Compare.mem t.compare t.hashtbl data
-  let find_all t data = Compare.find_all t.compare t.hashtbl data
-  let stats t = stats t.hashtbl
-  let print ?first ?sep ?last print_data fmt t = 
-    print
-      ?first ?sep ?last print_data fmt t.hashtbl
-end
-
-
 let compare = {
   hash=Hashtbl.hash;
   equal=(=)

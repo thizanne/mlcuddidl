@@ -16,7 +16,8 @@
 (** Hash tables of weak pointers. *)
 
 (** Original [Weak] module of OCaml distribution modified by
-    Bertrand Jeannet with a [Custom] (polymorphic) module *)
+    Bertrand Jeannet with a [Custom] (polymorphic) module.
+*)
 
 (** A weak hash table is a hashed set of values.  Each value may
     magically disappear from the set when it is not used by the
@@ -121,30 +122,6 @@ end;;
 
 module Make (H : Hashtbl.HashedType) : S with type data = H.t;;
 (** Functor building an implementation of the weak hash table structure. *)
-
-module Custom : sig
-  type 'a t = { compare : 'a compare; hashtbl : 'a hashtbl }
-
-  val create : ('a -> int) -> ('a -> 'a -> bool) -> int -> 'a t
-  val clear : 'a t -> unit
-  val merge : 'a t -> 'a -> 'a
-  val merge_map : 'a t -> 'a -> ('a -> 'a) -> 'a
-  val add : 'a t -> 'a -> unit
-  val remove : 'a t -> 'a -> unit
-  val find : 'a t -> 'a -> 'a
-  val find_all : 'a t -> 'a -> 'a list
-  val mem : 'a t -> 'a -> bool
-  val iter : ('a -> 'b) -> 'a t -> unit
-  val fold : ('a -> 'b -> 'b) -> 'a t -> 'b -> 'b
-  val count : 'a t -> int
-  val stats : 'a t -> int * int * int * int * int * int
-  val print :
-    ?first:(unit, Format.formatter, unit) format ->
-    ?sep:(unit, Format.formatter, unit) format ->
-    ?last:(unit, Format.formatter, unit) format ->
-    (Format.formatter -> 'a -> unit) ->
-    Format.formatter -> 'a t -> unit
-end
 
 module Compare : sig
   val add : 'a compare -> 'a t -> 'a -> unit

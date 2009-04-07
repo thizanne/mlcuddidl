@@ -14,7 +14,7 @@ type 'a t = 'a unique Vdd.t
       be retrieved with {!manager}. Objects of this type are
       automatically garbage collected.  *)
 
-type 'a table = 'a Weakke.Custom.t
+type 'a table = 'a PWeakke.t
   (** Hashtable to manage unique constants *)
 
 val print_table :

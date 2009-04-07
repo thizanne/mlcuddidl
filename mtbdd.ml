@@ -3,11 +3,11 @@
 open Format
 
 
-type 'a table = 'a Weakke.Custom.t
+type 'a table = 'a PWeakke.t
 
 type 'a unique = 'a
 
-let print_table = Weakke.Custom.print
+let print_table = PWeakke.print
 
 let make_table
   ~(hash : 'leaf -> int)
@@ -15,12 +15,12 @@ let make_table
   :
   'leaf table
   =
-  Weakke.Custom.create hash equal 23
+  PWeakke.create hash equal 23
 
 external copy_shr : 'a -> 'a = "camlidl_cudd_custom_copy_shr"
 
 let unique (table:'a table) (elt:'a) : 'a unique =
-  Weakke.Custom.merge_map table elt copy_shr
+  PWeakke.merge_map table elt copy_shr
 
 let get (leaf:'a unique) : 'a = leaf
 
