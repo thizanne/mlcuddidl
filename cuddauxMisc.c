@@ -330,22 +330,34 @@ cuddauxSupportRecur(DdManager* dd,
     Cudd_IterDerefBdd(dd,T);
     return(NULL);
   }
-  cuddRef(E);
-  res1 = (T==E) ? T : cuddBddAndRecur(dd,T,E);
-  if (res1 == NULL){
+  if (T==E){
+    res = cuddUniqueInter(dd,f->index,T,Cudd_Not(one));
+    if (res == NULL){
+      Cudd_IterDerefBdd(dd,T);
+      return NULL;
+    }
+    cuddDeref(T);
+  }
+  else {
+    cuddRef(E);
+    res1 = cuddBddAndRecur(dd,T,E);
+    if (res1 == NULL){
+      Cudd_IterDerefBdd(dd,T);
+      Cudd_IterDerefBdd(dd,E);
+      return(NULL);
+    }
+    cuddRef(res1);
     Cudd_IterDerefBdd(dd,T);
     Cudd_IterDerefBdd(dd,E);
-    return(NULL);
+    res = cuddUniqueInter(dd,f->index,res1,Cudd_Not(one));
+    if (res == NULL){
+      Cudd_IterDerefBdd(dd,T);
+      Cudd_IterDerefBdd(dd,E);
+      Cudd_IterDerefBdd(dd,res1);
+      return(NULL);
+    }
+    cuddDeref(res1);
   }
-  cuddRef(res1);
-  res = cuddUniqueInter(dd,f->index,res1,Cudd_Not(one));
-  if (res == NULL){
-    Cudd_IterDerefBdd(dd,T);
-    Cudd_IterDerefBdd(dd,E);
-    Cudd_IterDerefBdd(dd,res1);
-    return(NULL);
-  }
-  cuddDeref(res1);
   cuddCacheInsert1(dd,Cuddaux_Support,f,res);
   return(res);
 } /* end of cuddauxSupportRecur */
