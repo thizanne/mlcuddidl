@@ -20,12 +20,11 @@ import "bdd.idl";
 typedef [abstract,c2ml(camlidl_cudd_node_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t rdd__t;
 
 quote(MLMLI,"\
-(** Public type for exploring the abstract type [t] *)\n\
-type rdd = \n\
-| Leaf of float      (** Terminal value *)\n\
-| Ite of int * t * t (** Decision on CUDD variable *)\n\
-\n\
-\n\
+(** Public type for exploring the abstract type [t] *)
+type rdd = 
+| Leaf of float      (** Terminal value *)
+| Ite of int * t * t (** Decision on CUDD variable *)
+
 ")
 
 quote(MLI,"(** Dummy value (useful in some cases) *)")
@@ -211,7 +210,7 @@ _res.node = Cuddaux_addCompose(no1.man->man, no2.node, no1.node, var);
 End_roots();
 ");
 
-quote(MLMLI,"\n
+quote(MLMLI,"
 (** [Cuddaux_addVectorCompose]/{{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_addVectorCompose}[Cudd_addVectorCompose]}. Parallel substitution of every variable [var] present in the manager by the BDD [table.(var)] in the RDD. *)
 external vectorcompose: Man.d Bdd.t array -> t -> t = \"camlidl_rdd_vectorcompose\"
 ")
@@ -739,7 +738,7 @@ val map_op3 :
 val map_exist :
   'a mexist ->
   supp:(Man.v Bdd.t) -> t -> t
-\n
+
 ")
 
 quote(ML,"

@@ -243,3 +243,30 @@ testop h Rdd.add (Rdd.map_op2 ~commutative:true (+.));;
 testop f Rdd.mul (Rdd.map_op2 ~commutative:true (fun x y -> Gc.compact (); x *. y));;
 testop g Rdd.mul (Rdd.map_op2 ~commutative:true (fun x y -> Gc.compact (); x *. y));;
 testop h Rdd.mul (Rdd.map_op2 ~commutative:true (fun x y -> Gc.compact (); x *. y));;
+
+(* ********************************************************************** *)
+
+open Cudd;;
+let _ = 
+  let man = Man.make_v ~numVars:2 () in
+(*
+  let x = (Bdd.dnot (Bdd.ithvar man 1)) in
+  let y = (Bdd.dnot (Bdd.ithvar man 2)) in
+*)
+  let z = Bdd.ithvar man 0 in
+  let w = Bdd.ithvar man 1 in
+(*  
+  let f = Bdd.dand (Bdd.dand x y) (Bdd.dand (Bdd.dnot z) (Bdd.dnot w)) in
+  let g = Bdd.dand (Bdd.dand y z) (Bdd.dnot w) in
+*)
+  let f = Bdd.dand z w in
+  let supp = Bdd.support f in
+(*
+  let vdd1 = Vdd.ite f (Vdd.cst man 0.0) (Vdd.cst man 1.0) in
+  let supp = Vdd.support vdd1 in
+*)
+  ()
+;;
+Gc.compact();;
+
+Gc.full_major();;
