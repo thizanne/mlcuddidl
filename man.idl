@@ -79,10 +79,15 @@ enum error {
     CUDD_INTERNAL_ERROR
 };
 
-quote(MLMLI,"\n
-(** Ternary Boolean type, used to defines minterms where [Top] means [True] or
-[False] *)
-type tbool = False | True | Top")
+quote(MLMLI,"
+type dt = d t
+type vt = v t
+  (** Shortcuts *)
+
+type tbool = False | True | Top 
+  (** Ternary Boolean type, used to defines minterms where [Top] means [True]
+      or [False] *)
+")
 
 quote(MLI,"\n
 (** ``Dummy'' objet of type [d t]. It can be practical to put default values

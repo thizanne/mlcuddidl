@@ -19,11 +19,15 @@ typedef [abstract,c2ml(camlidl_cudd_bdd_c2ml),ml2c(camlidl_cudd_node_ml2c)] stru
 typedef [abstract,c2ml(camlidl_cudd_bdd_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t bdd__tv;
 typedef [abstract,c2ml(camlidl_cudd_bdd_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t bdd__t;
 
-quote(MLMLI,"\
-(** Public type for exploring the abstract type [t] *)\n\
-type 'a bdd = \n\
-| Bool of bool             (** Terminal value *)\n\
-| Ite of int * 'a t * 'a t (** Decision on CUDD variable *)\n\
+quote(MLMLI,"
+(** Public type for exploring the abstract type [t] *)
+type 'a bdd = 
+| Bool of bool             (** Terminal value *)
+| Ite of int * 'a t * 'a t (** Decision on CUDD variable *)\n
+
+type dt = Man.d t
+type vt = Man.v t
+  (** Shortcuts *)
 ")
 
 quote(MLI,"(** Dummy value (useful in some cases) *)")
@@ -39,7 +43,7 @@ quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
 quote(MLI,"(** Returns the manager associated to the BDD *)")
-man__t manager(bdd__t no) 
+man__t manager(bdd__t no)
   quote(call, "Begin_roots1(_v_no); _res=no.man;")
      quote(dealloc, "End_roots();");
 
@@ -116,7 +120,8 @@ End_roots();
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Cudd_VectorSupport}[Cudd_Cudd_VectorSupport]}. Returns the support of the array of BDDs.
 
 Raises a [Failure] exception in case where the array is of size 0 (in such
-case, the manager is unknown, and we cannot return an empty support). *)")
+case, the manager is unknown, and we cannot return an empty support).  This
+operation does not use the global cache, unlike {!support}.  *)")
 quote(MLMLI, "external vectorsupport : 'a t array -> 'a t = \"camlidl_bdd_vectorsupport\"")
 
 /* ====================================================================== */
@@ -257,25 +262,25 @@ int size(bdd__t no) quote(call, "_res = Cudd_DagSize(no.node);");
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountPath}[Cudd_CountPath]}. Number of paths in the BDD from the root to the leaves. *)")
 double nbpaths(bdd__t no)
 quote(call,
-"_res = Cudd_CountPath(no.node); \
-if (_res==(double)CUDD_OUT_OF_MEM){ \
-  failwith(\"Bdd.nbpaths returned CUDD_OUT_OF_MEM\"); \
+"_res = Cudd_CountPath(no.node); 
+if (_res==(double)CUDD_OUT_OF_MEM){ 
+  failwith(\"Bdd.nbpaths returned CUDD_OUT_OF_MEM\"); 
 }");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountPathsToNonZero}[Cudd_CountPathsToNonZero]}. Number of paths in the BDD from the root to the true leaf. *)")
 double nbtruepaths(bdd__t no)
 quote(call,
-"_res = Cudd_CountPathsToNonZero(no.node); \
-if (_res==(double)CUDD_OUT_OF_MEM){ \
-  failwith(\"Bdd.nbtruepaths returned CUDD_OUT_OF_MEM\"); \
+"_res = Cudd_CountPathsToNonZero(no.node); 
+if (_res==(double)CUDD_OUT_OF_MEM){ 
+  failwith(\"Bdd.nbtruepaths returned CUDD_OUT_OF_MEM\"); 
 }");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountMinterm}[Cudd_CountMinterm]}. Number of minterms  of the BDD assuming that it depends on the given number of variables. *)")
 double nbminterms(int nvar, bdd__t no)
 quote(call,
-"_res = Cudd_CountMinterm(no.man->man,no.node,nvar); \
-if (_res==(double)CUDD_OUT_OF_MEM){ \
-  failwith(\"Bdd.nbminterms returned CUDD_OUT_OF_MEM\"); \
+"_res = Cudd_CountMinterm(no.man->man,no.node,nvar); 
+if (_res==(double)CUDD_OUT_OF_MEM){ 
+  failwith(\"Bdd.nbminterms returned CUDD_OUT_OF_MEM\"); 
 }");
 
 quote(MLI,"(**
@@ -284,9 +289,9 @@ of the BDD, which is the ratio of the number of minterms to the number of
 nodes. The BDD is assumed to depend on [nvars] variables. *)")
 double density(int nvar, bdd__t no)
 quote(call,
-"_res = Cudd_Density(no.man->man,no.node,nvar); \
-if (_res==(double)CUDD_OUT_OF_MEM){ \
-  failwith(\"Bdd.density returned CUDD_OUT_OF_MEM\"); \
+"_res = Cudd_Density(no.man->man,no.node,nvar); 
+if (_res==(double)CUDD_OUT_OF_MEM){ 
+  failwith(\"Bdd.density returned CUDD_OUT_OF_MEM\"); 
 }");
 
 /* ====================================================================== */
@@ -656,7 +661,7 @@ _res.node = Cudd_SupersetShortPaths(no.man->man,no.node,nvars,threshold,hardlimi
 End_roots();
 ");
 
-quote(MLI,"\n
+quote(MLI,"
 (** The following functions perform two-way conjunctive (disjunctive)
 decomposition of a BDD. Returns a pair if successful, [None] if no
 decomposition has been found. *)")
