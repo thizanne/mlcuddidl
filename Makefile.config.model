@@ -58,9 +58,9 @@ OCAMLC = $(CAML_PREFIX)/bin/ocamlc.opt
 OCAMLOPT = $(CAML_PREFIX)/bin/ocamlopt.opt
 
 # ocamlc compilation flags
-OCAMLFLAGS = -g
+OCAMLFLAGS = -annot -g
 # ocamlopt compilation flags
-OCAMLOPTFLAGS = -inline 20
+OCAMLOPTFLAGS = -annot -inline 20
 
 OCAMLDEP = $(CAML_PREFIX)/bin/ocamldep
 OCAMLLEX = $(CAML_PREFIX)/bin/ocamllex.opt
