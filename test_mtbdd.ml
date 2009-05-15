@@ -79,7 +79,7 @@ end;;
 let print_table () =
   if false then
     printf "table=%a@."
-      (Weakke.Custom.print 
+      (PWeakke.print 
 	(fun fmt l -> fprintf fmt "(%f,%a)" (Obj.magic l) print_value l))
       F.table
 ;;

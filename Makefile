@@ -55,44 +55,45 @@ CCINC_TOINSTALL = cuddaux.h cuddauxInt.h cudd_caml.h
 all: cudd.cmi cudd.cmo cudd.cmx cudd.cma cudd.cmxa libcudd_caml.a libcudd_caml_debug.a
 
 cuddtop: cudd.cma libcudd_caml.a
-	ocamlmktop -verbose $(OCAMLFLAGS) -o $@ -custom -cc "$(CC) -g" -ccopt -L. cudd.cma -noautolink \
-	-ccopt -L. -ccopt -L$(MLCUDDIDL_INSTALL)/lib -cclib -lcudd_caml_debug \
-	-ccopt -L$(CAMLIDL_INSTALL)/lib/ocaml -cclib -lcamlidl \
-	-ccopt -L$(CUDD_INSTALL)/lib -cclib "-lcudd_debug -lmtr -lst -lutil -lepd" \
-	-ccopt -L$(CAML_INSTALL)/lib/ocaml -cclib "-lcamlrun_debug"
+	$(OCAMLMKTOP) -verbose $(OCAMLFLAGS) -o $@ -custom -cc "$(CC) -g" -ccopt -L. cudd.cma -noautolink \
+	-ccopt -L. -cclib -lcudd_caml_debug \
+	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
+	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd -lmtr -lst -lutil -lepd" \
+	-cclib "-lcamlrun"
 # Example of compilation command
 # If the library is installed somewhere, add a -I $(PATH) option
 example.byte: example.ml cudd.cma 
-	$(OCAMLC) $(OCAMLFLAGS) -o $@ -custom -cc "$(CC)" \
+	$(OCAMLC) $(OCAMLFLAGS) $(OCAMLINC) -o $@ -custom -cc "$(CC)" \
 	cudd.cma example.ml
 example.opt: example.ml cudd.cmxa libcudd_caml.a
-	$(OCAMLOPT) $(OCAMLOPTFLAGS) -o $@ -cc "$(CC)" \
+	$(OCAMLOPT) $(OCAMLOPTFLAGS) $(OCAMLINC) -o $@ -cc "$(CC)" \
 	cudd.cmxa example.ml
 
 # Example of compilation command if the autolink feature is disabled
 # This may be useful for selecting debug version of libraries
 example.opt2: example.ml cudd.cmxa libcudd_caml.a
-	$(OCAMLOPT) $(OCAMLOPTFLAGS) -o $@ -cc "$(CC)" -noautolink \
+	$(OCAMLOPT) $(OCAMLOPTFLAGS) $(OCAMLINC) -o $@ -cc "$(CC)" -noautolink \
 	cudd.cmxa example.ml \
-	-ccopt -L$(MLCUDDIDL_INSTALL)/lib -cclib -lcudd_caml_debug \
-	-ccopt -L$(CAMLIDL_INSTALL)/lib/ocaml -cclib -lcamlidl \
-	-ccopt -L$(CUDDAUX_INSTALL)/lib -cclib -lcuddaux \
-	-ccopt -L$(CUDD_INSTALL)/lib -cclib "-lcudd -lmtr -lst -lutil -lepd"
+	-ccopt -L$(MLCUDDIDL_PREFIX)/lib -cclib -lcudd_caml_debug \
+	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
+	-ccopt -L$(CUDDAUX_PREFIX)/lib -cclib -lcuddaux \
+	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd -lmtr -lst -lutil -lepd"
+	-cclib "-lasmrun"
 
 %.byte: %.ml cudd.cma libcudd_caml_debug.a
-	$(OCAMLC) $(OCAMLFLAGS) -o $@ -cc "$(CC) -g" -custom -verbose -noautolink \
+	$(OCAMLC) $(OCAMLFLAGS) $(OCAMLINC) -o $@ -cc "$(CC) -g" -custom -verbose -noautolink \
 	cudd.cma $*.ml \
-	-ccopt -L. -ccopt -L$(MLCUDDIDL_INSTALL)/lib -cclib -lcudd_caml_debug \
-	-ccopt -L$(CAMLIDL_INSTALL)/lib/ocaml -cclib -lcamlidl \
-	-ccopt -L$(CUDD_INSTALL)/lib -cclib "-lcudd_debug -lmtr -lst -lutil -lepd" \
-	-ccopt -L$(CAML_INSTALL)/lib/ocaml -cclib "-lcamlrun_debug"
+	-ccopt -L. -ccopt -L$(MLCUDDIDL_PREFIX)/lib -cclib -lcudd_caml_debug \
+	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
+	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd_debug -lmtr -lst -lutil -lepd" \
+	-cclib "-lcamlrun"
 %.opt: %.ml cudd.cmxa libcudd_caml_debug.a
-	$(OCAMLOPT) $(OCAMLOPTFLAGS) -o $@ -cc "$(CC)" -verbose -noautolink \
+	$(OCAMLOPT) $(OCAMLOPTFLAGS) $(OCAMLINC) -o $@ -cc "$(CC)" -verbose -noautolink \
 	cudd.cmxa $*.ml \
-	-ccopt -L. -ccopt -L$(MLCUDDIDL_INSTALL)/lib -cclib -lcudd_caml_debug \
-	-ccopt -L$(CAMLIDL_INSTALL)/lib/ocaml -cclib -lcamlidl \
-	-ccopt -L$(CUDD_INSTALL)/lib -cclib "-lcudd_debug -lmtr -lst -lutil -lepd" \
-	-ccopt -L$(CAML_INSTALL)/lib/ocaml -cclib "-lasmrun_debug"
+	-ccopt -L. -ccopt -L$(MLCUDDIDL_PREFIX)/lib -cclib -lcudd_caml_debug \
+	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
+	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd_debug -lmtr -lst -lutil -lepd" \
+	-cclib "-lasmrun"
 
 install: cudd.ml cudd.mli
 	mkdir -p $(INCDIR) $(LIBDIR) $(BINDIR)

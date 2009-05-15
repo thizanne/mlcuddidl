@@ -14,10 +14,10 @@ The basic distribution contain the following files:
 	rdd.mli rdd.ml
 	vdd.mli vdd.ml
 
-	weakke.mli custom.mli mapleaf.mli mtbdd.mli
-        weakke.ml  custom.ml  mapleaf.ml  mtbdd.ml
+	weakke.mli pWeakke.mli custom.mli mapleaf.mli mtbdd.mli
+        weakke.ml   pWeakke.ml  custom.ml  mapleaf.ml  mtbdd.ml
 
-	session.ml test_mtbdd.ml
+	session.ml example.ml test_mtbdd.ml
 
 	cudd_caml.h cudd_caml.c custom_caml.c
   
@@ -30,7 +30,8 @@ The basic distribution contain the following files:
 * What's needed :
 - An ANSI C compiler (gcc is the only tested compiler)
 - GNU MAKE
-- The CUDD BDDs library (http://vlsi.colorado.edu/software.html)
+- The CUDD BDDs library (http://vlsi.colorado.edu/software.html),
+  version 2.4.1 or higher
 - OBJECTIVE CAML 3.0 or higher (http://caml.inria.fr)
 - CAMLIDL 1.05 (http://caml.inria.fr/camlidl)
 
@@ -42,8 +43,16 @@ library. It generates five ML modules: Man, Bdd, Rdd, Vdd, Mtbdd.
 * To build,
 Set Makefile.config from Makefile.config.model model.
 
-IMPORTANT REMARK: The C compilation flags in XCFLAGS (processor, alignement)
-should be the same than those with which CUDD and CUDDAUX are compiled.
+TWO IMPORTANT REMARKS:
+
+1. The CUDD Makefile does not provide an 'install' target.
+   mlcuddidl expect to find .h files in $(MLCUDDIDL_PREFIX)/include and
+   .a files $(MLCUDDIDL_PREFIX)/lib.
+   Ensures this is the case
+
+2. The C compilation flags in XCFLAGS (processor, alignement)
+   should be the same than those with which CUDD and CUDDAUX are
+   compiled.
 
 make rebuild: requested only if download from subvsersion directory.
 	      regenerate C and OCaml files from .idl files
