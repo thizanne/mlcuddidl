@@ -76,7 +76,6 @@ example.opt2: example.ml cudd.cmxa libcudd_caml.a
 	cudd.cmxa example.ml \
 	-ccopt -L$(MLCUDDIDL_PREFIX)/lib -cclib -lcudd_caml_debug \
 	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
-	-ccopt -L$(CUDDAUX_PREFIX)/lib -cclib -lcuddaux \
 	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd -lmtr -lst -lutil -lepd"
 	-cclib "-lasmrun"
 
@@ -130,13 +129,11 @@ cudd.cma: cudd.cmo
 	$(OCAMLC) $(OCAMLFLAGS) -a -o $@ $^ \
 	-ccopt -L$(MLCUDDIDL_PREFIX)/lib -cclib -lcudd_caml \
 	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
-	-ccopt -L$(CUDDAUX_PREFIX)/lib -cclib -lcuddaux \
 	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd -lmtr -lst -lutil -lepd"
 cudd.cmxa: cudd.cmx
 	$(OCAMLOPT) $(OCAMLOPTFLAGS) -a -o $@ $^ \
 	-ccopt -L$(MLCUDDIDL_PREFIX)/lib -cclib -lcudd_caml \
 	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
-	-ccopt -L$(CUDDAUX_PREFIX)/lib -cclib -lcuddaux \
 	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd -lmtr -lst -lutil -lepd"
 	$(RANLIB) cudd.a
 
