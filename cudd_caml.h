@@ -24,16 +24,16 @@ struct man__t {
   size_t count;
 };
 typedef struct man__t* man__t;
-typedef struct man__t* man__tf;
-typedef struct man__t* man__tv;
+typedef struct man__t* man__dt;
+typedef struct man__t* man__vt;
 
 struct node__t {
   struct man__t* man; 
   DdNode* node;
 };
 typedef struct node__t bdd__t;
-typedef struct node__t bdd__tf;
-typedef struct node__t bdd__tv;
+typedef struct node__t bdd__dt;
+typedef struct node__t bdd__vt;
 typedef struct node__t node__t;
 typedef struct node__t rdd__t;
 typedef struct node__t idd__t;

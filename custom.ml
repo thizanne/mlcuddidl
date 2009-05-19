@@ -253,16 +253,16 @@ let apply_test2 (op:(('a,'b) test2, 'c) op) (dd1:'add) (dd2:'bdd) : bool =
 let apply_op3 (op:(('a,'b,'c,'d) op3, 'e local) op) (dd1:'add) (dd2:'bdd) (dd3:'cdd) : 'ddd =
   _internal_map_op op [|dd1;Obj.magic dd2;Obj.magic dd3|]
 
-let apply_exist (op:(('a,'b) exist, 'c) op) ~(supp:Man.v Bdd.t) (dd:'add) : 'add =
+let apply_exist (op:(('a,'b) exist, 'c) op) ~(supp:'d Bdd.t) (dd:'add) : 'add =
   _internal_map_op op [|Obj.magic supp; dd|]
 
-let apply_existop1 (op:(('a,'b,'c,'d) existop1, 'e) op) ~(supp:Man.v Bdd.t) (dd:'add) : 'bdd =
+let apply_existop1 (op:(('a,'b,'c,'d) existop1, 'e) op) ~(supp:'f Bdd.t) (dd:'add) : 'bdd =
   _internal_map_op op [|Obj.magic supp; dd|]
 
-let apply_existand (op:(('a,'b) existand, 'c local) op) ~(supp:Man.v Bdd.t) (bdd:Man.v Bdd.t) (dd:'add) : 'add =
+let apply_existand (op:(('a,'b) existand, 'c local) op) ~(supp:'d Bdd.t) (bdd:'d Bdd.t) (dd:'add) : 'add =
   _internal_map_op op [|Obj.magic supp; Obj.magic bdd; dd|]
 
-let apply_existandop1 (op:(('a,'b,'c,'d) existandop1, 'e local) op) ~(supp:Man.v Bdd.t) (bdd:Man.v Bdd.t) (dd:'add) : 'bdd =
+let apply_existandop1 (op:(('a,'b,'c,'d) existandop1, 'e local) op) ~(supp:'f Bdd.t) (bdd:'f Bdd.t) (dd:'add) : 'bdd =
   _internal_map_op op [|Obj.magic supp; Obj.magic bdd; dd|]
 
 (*  ********************************************************************** *)

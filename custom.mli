@@ -183,10 +183,10 @@ val apply_op2 : (('a, 'b, 'c) op2, 'd) op -> 'add -> 'bdd -> 'cdd
 val apply_test2 : (('a, 'b) test2, 'c) op -> 'add -> 'bdd -> bool
 val apply_op3 :
   (('a, 'b, 'c, 'd) op3, 'e local) op -> 'add -> 'bdd -> 'cdd -> 'ddd
-val apply_exist : (('a,'b) exist, 'c) op -> supp:(Man.v Bdd.t) -> 'add -> 'add
-val apply_existop1 : (('a,'b,'c,'d) existop1, 'e) op -> supp:(Man.v Bdd.t) -> 'add -> 'bdd
-val apply_existand : (('a,'b) existand, 'c local) op -> supp:(Man.v Bdd.t) -> Man.v Bdd.t -> 'add -> 'add
-val apply_existandop1 : (('a,'b,'c,'d) existandop1, 'e local) op -> supp:(Man.v Bdd.t) -> Man.v Bdd.t -> 'add -> 'bdd
+val apply_exist : (('a,'b) exist, 'c) op -> supp:('d Bdd.t) -> 'add -> 'add
+val apply_existop1 : (('a,'b,'c,'d) existop1, 'e) op -> supp:('f Bdd.t) -> 'add -> 'bdd
+val apply_existand : (('a,'b) existand, 'c local) op -> supp:('d Bdd.t) -> 'd Bdd.t -> 'add -> 'add
+val apply_existandop1 : (('a,'b,'c,'d) existandop1, 'e local) op -> supp:('f Bdd.t) -> 'f Bdd.t -> 'add -> 'bdd
 
 (*  ********************************************************************** *)
 (** {2 Map operations (based on automatic local caches} *)
@@ -213,16 +213,16 @@ val map_op3 :
   ('a -> 'b -> 'c -> 'd) ->
   'add -> 'bdd -> 'cdd -> 'ddd
 val map_exist :
-  ddtyp:int -> ('a, 'add, 'b) mexist -> supp:Man.v Bdd.t -> 'add -> 'add
+  ddtyp:int -> ('a, 'add, 'b) mexist -> supp:'c Bdd.t -> 'add -> 'add
 val map_existop1 :
   ddtyp:int ->
-  ('a, 'b, 'c) mop1 -> ('b, 'bdd, 'd) mexist -> supp:Man.v Bdd.t -> 'add -> 'bdd
+  ('a, 'b, 'c) mop1 -> ('b, 'bdd, 'd) mexist -> supp:'e Bdd.t -> 'add -> 'bdd
 val map_existand :
   ddtyp:int ->
   bottom:'a ->
-  ('a, 'add, 'b) mexist -> supp:Man.v Bdd.t -> Man.v Bdd.t -> 'add -> 'add
+  ('a, 'add, 'b) mexist -> supp:'c Bdd.t -> 'c Bdd.t -> 'add -> 'add
 val map_existandop1 :
   ddtyp:int ->
   bottom:'b ->
   ('a, 'b, 'c) mop1 -> ('b, 'bdd, 'd) mexist ->
-  supp:Man.v Bdd.t -> Man.v Bdd.t -> 'add -> 'bdd
+  supp:'e Bdd.t -> 'e Bdd.t -> 'add -> 'bdd

@@ -13,8 +13,8 @@ quote(C, "
 /* Datatypes */
 /* ====================================================================== */
 
-typedef [abstract,c2ml(camlidl_cudd_man_c2ml),ml2c(camlidl_cudd_man_ml2c)] struct man_t* man__tf;
-typedef [abstract,c2ml(camlidl_cudd_man_c2ml),ml2c(camlidl_cudd_man_ml2c)] struct man_t* man__tv;
+typedef [abstract,c2ml(camlidl_cudd_man_c2ml),ml2c(camlidl_cudd_man_ml2c)] struct man_t* man__dt;
+typedef [abstract,c2ml(camlidl_cudd_man_c2ml),ml2c(camlidl_cudd_man_ml2c)] struct man_t* man__vt;
 typedef [abstract,c2ml(camlidl_cudd_man_c2ml),ml2c(camlidl_cudd_man_ml2c)] struct man_t* man__t;
 
 enum reorder {
@@ -334,7 +334,7 @@ quote(MLMLI,"(*  ------------------------------------------------------ *)")
 quote(MLMLI,"\n")
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ReadBackground}[Cudd_ReadBackground]}. *)")
-double get_background(man__tf man)
+double get_background(man__dt man)
      quote(call,
 "{
   DdNode* add = Cudd_ReadBackground(man->man);
@@ -342,7 +342,7 @@ double get_background(man__tf man)
 }");
 
 quote(MLI,"(** Variation of {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SetBackground}[Cudd_SetBackground]}. *)")
-void   set_background(man__tf man, double v)
+void   set_background(man__dt man, double v)
      quote(call,
 "{
   DdNode* add = Cudd_addConst(man->man,v);
@@ -351,10 +351,10 @@ void   set_background(man__tf man, double v)
 }");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ReadEpsilon}[Cudd_ReadEpsilon]}. *)")
-double get_epsilon(man__tf man) VAL_OF_MAN(Cudd_ReadEpsilon);
+double get_epsilon(man__dt man) VAL_OF_MAN(Cudd_ReadEpsilon);
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SetEpsilon}[Cudd_SetEpsilon]}. *)")
-void   set_epsilon(man__tf man, double v) UNIT_OF_MAN_VAL(Cudd_SetEpsilon);
+void   set_epsilon(man__dt man, double v) UNIT_OF_MAN_VAL(Cudd_SetEpsilon);
 
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ------------------------------------------------------ *)")

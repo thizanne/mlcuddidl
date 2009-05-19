@@ -46,8 +46,14 @@ Set Makefile.config from Makefile.config.model model.
 TWO IMPORTANT REMARKS:
 
 1. The CUDD Makefile does not provide an 'install' target.
-   mlcuddidl expect to find .h files in $(MLCUDDIDL_PREFIX)/include and
-   .a files $(MLCUDDIDL_PREFIX)/lib.
+
+   - mlcuddidl expect to find .h files in
+     $(MLCUDDIDL_PREFIX)/include and .a files
+     $(MLCUDDIDL_PREFIX)/lib.
+
+   - It also expects to find cuddInt.h, which is located in the
+     cudd subdirectory when the CUDD source distribution.
+   
    Ensures this is the case
 
 2. The C compilation flags in XCFLAGS (processor, alignement)

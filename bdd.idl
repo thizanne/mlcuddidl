@@ -15,8 +15,8 @@ import "man.idl";
 /* ====================================================================== */
 
 /* For nodes that need Garbage collection */
-typedef [abstract,c2ml(camlidl_cudd_bdd_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t bdd__tf;
-typedef [abstract,c2ml(camlidl_cudd_bdd_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t bdd__tv;
+typedef [abstract,c2ml(camlidl_cudd_bdd_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t bdd__dt;
+typedef [abstract,c2ml(camlidl_cudd_bdd_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t bdd__vt;
 typedef [abstract,c2ml(camlidl_cudd_bdd_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t bdd__t;
 
 quote(MLMLI,"
