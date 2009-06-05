@@ -15,12 +15,12 @@ let combineexpansive ~default ~merge (guard,leaf) res =
 (*  ********************************************************************** *)
 
 let combineleaf1
-    ~(default:'b Vdd.t)
-    ~(combine : Man.v Bdd.t * 'c -> 'b Vdd.t -> 'b Vdd.t)
-    (f:Man.v Bdd.t -> 'a -> Man.v Bdd.t * 'c)
+    ~(default:'c)
+    ~(combine : 'b -> 'c -> 'c)
+    (f:Bdd.vt -> 'a -> 'b)
     (vdd:'a Vdd.t)
     :
-    'b Vdd.t
+    'c
     =
   let res = ref default in
   let leaves = Vdd.leaves vdd in
@@ -34,18 +34,18 @@ let combineleaf1
 
 let retractivemapleaf1
     ~(default:'b Vdd.t)
-    (f:Man.v Bdd.t -> 'a -> Man.v Bdd.t * 'b)
+    (f:Bdd.vt -> 'a -> Bdd.vt * 'b)
     (vdd:'a Vdd.t)
   :
     'b Vdd.t
   =
-    combineleaf1 ~default ~combine:combineretractive
+  combineleaf1 ~default ~combine:combineretractive
     f vdd
 
 let expansivemapleaf1
     ~(default:'b Vdd.t)
     ~(merge:'b Vdd.t -> 'b Vdd.t -> 'b Vdd.t)
-    (f:Man.v Bdd.t -> 'a -> Man.v Bdd.t * 'b)
+    (f:Bdd.vt -> 'a -> Bdd.vt * 'b)
     (vdd:'a Vdd.t)
   :
     'b Vdd.t
@@ -70,13 +70,13 @@ let mapleaf1
 (*  ********************************************************************** *)
 
 let combineleaf2
-    ~(default:'c Vdd.t)
-    ~(combine : Man.v Bdd.t * 'd -> 'c Vdd.t -> 'c Vdd.t)
-    (f:Man.v Bdd.t -> 'a -> 'b -> Man.v Bdd.t * 'd)
+    ~(default:'d)
+    ~(combine : 'c -> 'd -> 'd)
+    (f:Bdd.vt -> 'a -> 'b -> 'c)
     (vdd1:'a Vdd.t)
     (vdd2:'b Vdd.t)
     :
-    'c Vdd.t
+    'd
     =
   let res = ref default in
   let leaves1 = Vdd.leaves vdd1 in
@@ -116,7 +116,7 @@ let combineleaf2
 
 let retractivemapleaf2
     ~(default:'c Vdd.t)
-    (f:Man.v Bdd.t -> 'a -> 'b -> Man.v Bdd.t * 'c)
+    (f:Bdd.vt -> 'a -> 'b -> Bdd.vt * 'c)
     (vdd1:'a Vdd.t)
     (vdd2:'b Vdd.t)
     :
@@ -128,7 +128,7 @@ let retractivemapleaf2
 let expansivemapleaf2
     ~(default:'c Vdd.t)
     ~(merge:'c Vdd.t -> 'c Vdd.t -> 'c Vdd.t)
-    (f:Man.v Bdd.t -> 'a -> 'b -> Man.v Bdd.t * 'c)
+    (f:Bdd.vt -> 'a -> 'b -> Bdd.vt * 'c)
     (vdd1:'a Vdd.t)
     (vdd2:'b Vdd.t)
     :
@@ -155,13 +155,13 @@ let mapleaf2
 (*  ********************************************************************** *)
 
 let combineleaf_array
-    ~(default:'b Vdd.t)
-    ~(combine : Man.v Bdd.t * 'c -> 'b Vdd.t -> 'b Vdd.t)
+    ~(default:'c)
+    ~(combine : 'b -> 'c -> 'c)
     ~(tabsorbant: ('a -> bool) option array)
-    (f:Man.v Bdd.t -> 'a array -> Man.v Bdd.t * 'c)
+    (f:Bdd.vt -> 'a array -> 'b)
     (tvdd:'a Vdd.t array)
     :
-    'b Vdd.t
+    'c
     =
   let length = Array.length tvdd in
   let cudd = Vdd.manager tvdd.(0) in
@@ -228,18 +228,18 @@ let combineleaf_array
   !res
 
 let combineleaf1_array
-    ~(default:'c Vdd.t)
-    ~(combine : Man.v Bdd.t * 'd -> 'c Vdd.t -> 'c Vdd.t)
+    ~(default:'d)
+    ~(combine : 'c -> 'd -> 'd)
     ?(absorbant:('a -> bool) option)
     ~(tabsorbant: ('b -> bool) option array)
-    (f:Man.v Bdd.t -> 'a -> 'b array -> Man.v Bdd.t * 'd)
+    (f:Bdd.vt -> 'a -> 'b array -> 'c)
     (vdd:'a Vdd.t) (tvdd:'b Vdd.t array)
     :
-    'c Vdd.t
+    'd
     =
   let (absorbant :('b -> bool) option) = Obj.magic absorbant in
   let (vdd : 'b Vdd.t) = Obj.magic vdd in
-  let (f : Man.v Bdd.t -> 'b -> 'b array -> Man.v Bdd.t * 'd) = Obj.magic f in
+  let (f : Bdd.vt -> 'b -> 'b array -> 'c) = Obj.magic f in
   combineleaf_array
     ~default
     ~combine
@@ -252,21 +252,21 @@ let combineleaf1_array
     (Array.append [|vdd|] tvdd)
 
 let combineleaf2_array
-    ~(default:'d Vdd.t)
-    ~(combine : Man.v Bdd.t * 'e -> 'd Vdd.t -> 'd Vdd.t)
+    ~(default:'e)
+    ~(combine : 'd -> 'e -> 'e)
     ?(absorbant1:('a -> bool) option)
     ?(absorbant2:('b -> bool) option)
     ~(tabsorbant: ('c -> bool) option array)
-    (f:Man.v Bdd.t -> 'a -> 'b -> 'c array -> Man.v Bdd.t * 'e)
+    (f:Bdd.vt -> 'a -> 'b -> 'c array -> 'd)
     (vdd1:'a Vdd.t) (vdd2:'b Vdd.t) (tvdd:'c Vdd.t array)
     :
-    'd Vdd.t
+    'e
     =
   let (absorbant1 :('c -> bool) option) = Obj.magic absorbant1 in
   let (absorbant2 :('c -> bool) option) = Obj.magic absorbant2 in
   let (vdd1 : 'c Vdd.t) = Obj.magic vdd1 in
   let (vdd2 : 'c Vdd.t) = Obj.magic vdd2 in
-  let (f : Man.v Bdd.t -> 'c -> 'c -> 'c array -> Man.v Bdd.t * 'e) = Obj.magic f in
+  let (f : Bdd.vt -> 'c -> 'c -> 'c array -> 'd) = Obj.magic f in
   combineleaf_array
     ~default
     ~combine
@@ -278,3 +278,4 @@ let combineleaf2_array
       f guard leaf1 leaf2 tleaf
     )
     (Array.append [|vdd1;vdd2|] tvdd)
+

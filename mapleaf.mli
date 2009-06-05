@@ -6,49 +6,49 @@ val combineexpansive :
   default:'a Vdd.t ->
   merge:('a Vdd.t -> 'b Vdd.t -> 'c Vdd.t) -> Man.v Bdd.t * 'a -> 'b Vdd.t -> 'c Vdd.t
 val combineleaf1 :
-  default:'a Vdd.t ->
-  combine:(Man.v Bdd.t * 'c -> 'a Vdd.t -> 'a Vdd.t) ->
-  (Man.v Bdd.t -> 'b -> Man.v Bdd.t * 'c) -> 'b Vdd.t -> 'a Vdd.t
+  default:'c ->
+  combine:('b -> 'c -> 'c) ->
+  (Bdd.vt -> 'a -> 'b) -> 'a Vdd.t -> 'c
 val retractivemapleaf1 :
   default:'a Vdd.t ->
-  (Man.v Bdd.t -> 'b -> Man.v Bdd.t * 'a) -> 'b Vdd.t -> 'a Vdd.t
+  (Bdd.vt -> 'b -> Bdd.vt * 'a) -> 'b Vdd.t -> 'a Vdd.t
 val expansivemapleaf1 :
   default:'a Vdd.t ->
   merge:('a Vdd.t -> 'a Vdd.t -> 'a Vdd.t) ->
-  (Man.v Bdd.t -> 'b -> Man.v Bdd.t * 'a) -> 'b Vdd.t -> 'a Vdd.t
+  (Bdd.vt -> 'b -> Bdd.vt * 'a) -> 'b Vdd.t -> 'a Vdd.t
 val mapleaf1 : ('a -> 'b) -> 'a Vdd.t -> 'b Vdd.t
 val combineleaf2 :
-  default:'a Vdd.t ->
-  combine:(Man.v Bdd.t * 'd -> 'a Vdd.t -> 'a Vdd.t) ->
-  (Man.v Bdd.t -> 'b -> 'c -> Man.v Bdd.t * 'd) ->
-  'b Vdd.t -> 'c Vdd.t -> 'a Vdd.t
+  default:'d ->
+  combine:('c -> 'd -> 'd) ->
+  (Bdd.vt -> 'a -> 'b -> 'c) ->
+  'a Vdd.t -> 'b Vdd.t -> 'd
 val retractivemapleaf2 :
   default:'a Vdd.t ->
-  (Man.v Bdd.t -> 'b -> 'c -> Man.v Bdd.t * 'a) ->
+  (Bdd.vt -> 'b -> 'c -> Bdd.vt * 'a) ->
   'b Vdd.t -> 'c Vdd.t -> 'a Vdd.t
 val expansivemapleaf2 :
   default:'a Vdd.t ->
   merge:('a Vdd.t -> 'a Vdd.t -> 'a Vdd.t) ->
-  (Man.v Bdd.t -> 'b -> 'c -> Man.v Bdd.t * 'a) ->
+  (Bdd.vt -> 'b -> 'c -> Bdd.vt * 'a) ->
   'b Vdd.t -> 'c Vdd.t -> 'a Vdd.t
 val mapleaf2 : ('a -> 'b -> 'c) -> 'a Vdd.t -> 'b Vdd.t -> 'c Vdd.t
 val combineleaf_array :
-  default:'a Vdd.t ->
-  combine:(Man.v Bdd.t * 'c -> 'a Vdd.t -> 'a Vdd.t) ->
-  tabsorbant:('b -> bool) option array ->
-  (Man.v Bdd.t -> 'b array -> Man.v Bdd.t * 'c) -> 'b Vdd.t array -> 'a Vdd.t
+  default:'c ->
+  combine:('b -> 'c -> 'c) ->
+  tabsorbant:('a -> bool) option array ->
+  (Bdd.vt -> 'a array -> 'b) -> 'a Vdd.t array -> 'c
 val combineleaf1_array :
-  default:'a Vdd.t ->
-  combine:(Man.v Bdd.t * 'd -> 'a Vdd.t -> 'a Vdd.t) ->
-  ?absorbant:('b -> bool) ->
-  tabsorbant:('c -> bool) option array ->
-  (Man.v Bdd.t -> 'b -> 'c array -> Man.v Bdd.t * 'd) ->
-  'b Vdd.t -> 'c Vdd.t array -> 'a Vdd.t
+  default:'d ->
+  combine:('c -> 'd -> 'd) ->
+  ?absorbant:('a -> bool) ->
+  tabsorbant:('b -> bool) option array ->
+  (Bdd.vt -> 'a -> 'b array -> 'c) ->
+  'a Vdd.t -> 'b Vdd.t array -> 'd
 val combineleaf2_array :
-  default:'a Vdd.t ->
-  combine:(Man.v Bdd.t * 'e -> 'a Vdd.t -> 'a Vdd.t) ->
-  ?absorbant1:('b -> bool) ->
-  ?absorbant2:('c -> bool) ->
-  tabsorbant:('d -> bool) option array ->
-  (Man.v Bdd.t -> 'b -> 'c -> 'd array -> Man.v Bdd.t * 'e) ->
-  'b Vdd.t -> 'c Vdd.t -> 'd Vdd.t array -> 'a Vdd.t
+  default:'e ->
+  combine:('d -> 'e -> 'e) ->
+  ?absorbant1:('a -> bool) ->
+  ?absorbant2:('b -> bool) ->
+  tabsorbant:('c -> bool) option array ->
+  (Bdd.vt -> 'a -> 'b -> 'c array -> 'd) ->
+  'a Vdd.t -> 'b Vdd.t -> 'c Vdd.t array -> 'e
