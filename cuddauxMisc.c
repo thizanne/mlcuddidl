@@ -99,8 +99,10 @@ int Cuddaux_SupportSize(DdManager* dd, DdNode* f)
   DdNode* res;
   int size;
   res = Cuddaux_Support(dd,f);
+  cuddRef(res);
   size = Cudd_DagSize(f) - 1;
   assert(size>=0);
+  Cudd_IterDerefBdd(dd,f);
   return size;
 }
 
