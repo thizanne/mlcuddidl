@@ -26,7 +26,7 @@ ICFLAGS = \
 # Files
 #---------------------------------------
 
-IDLMODULES = man bdd rdd vdd 
+IDLMODULES = man bdd rdd vdd
 
 MLMODULES = man bdd custom rdd weakke pWeakke vdd mapleaf mtbdd
 MLSRC = $(IDLMODULES:%=%.mli) $(IDLMODULES:%=%.ml) custom.ml custom.mli mapleaf.ml mapleaf.mli weakke.ml weakke.mli pWeakke.ml pWeakke.mli mtbdd.ml mtbdd.mli
@@ -62,7 +62,7 @@ cuddtop: cudd.cma libcudd_caml.a
 	-cclib "-lcamlrun"
 # Example of compilation command
 # If the library is installed somewhere, add a -I $(PATH) option
-example.byte: example.ml cudd.cma 
+example.byte: example.ml cudd.cma
 	$(OCAMLC) $(OCAMLFLAGS) $(OCAMLINC) -o $@ -custom -cc "$(CC)" \
 	cudd.cma example.ml
 example.opt: example.ml cudd.cmxa libcudd_caml.a
@@ -94,17 +94,16 @@ example.opt2: example.ml cudd.cmxa libcudd_caml.a
 	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd_debug -lmtr -lst -lutil -lepd" \
 	-cclib "-lasmrun"
 
-install: cudd.ml cudd.mli
+install: 
 	mkdir -p $(INCDIR) $(LIBDIR) $(BINDIR)
-	cp -f $(MLLIB_TOINSTALL) $(MLLIB_TOINSTALLx) cudd.ml cudd.mli $(LIBDIR)
-	rm cudd.ml cudd.mli
+	cp -f $(MLLIB_TOINSTALL) $(MLLIB_TOINSTALLx) $(LIBDIR)
 	cp -f $(CCINC_TOINSTALL) $(INCDIR)
 	for i in $(CCLIB_TOINSTALL); do if test -f $$i; then cp -f $$i $(LIBDIR); fi; done
 	for i in $(CCBIN_TOINSTALL); do if test -f $$i; then cp -f $$i $(BINDIR); fi; done
 
-distclean: mostlyclean
+distclean:
 	(cd $(INCDIR); /bin/rm -f $(CCINC_TOINSTALL))
-	(cd $(LIBDIR); /bin/rm -f $(CCLIB_TOINSTALL) $(LIB_TOINSTALLx) $(MLLIB_TOINSTALL) $(MLLIB_TOINSTALLx) cudd.ml cudd.mli)
+	(cd $(LIBDIR); /bin/rm -f $(CCLIB_TOINSTALL) $(LIB_TOINSTALLx) $(MLLIB_TOINSTALL) $(MLLIB_TOINSTALLx) )
 	(cd $(BINDIR); /bin/rm -f $(CCBIN_TOINSTALL))
 
 mostlyclean: clean
@@ -114,7 +113,7 @@ mostlyclean: clean
 clean:
 	/bin/rm -f cuddtop *.byte *.opt
 	/bin/rm -f cuddaux.?? cuddaux.??? cuddaux.info
-	/bin/rm -f cudd.ml cudd.mli *.[ao] *.cm[ioxa] *.cmxa *.opt *.opt2 *.annot
+	/bin/rm -f *.[ao] *.cm[ioxa] *.cmxa *.opt *.opt2 *.annot
 	/bin/rm -f cmttb*
 	/bin/rm -fr html
 
@@ -227,31 +226,31 @@ rebuild: macros.m4 sedscript_caml sedscript_c
 %.cmx: %.ml %.cmi
 	$(OCAMLOPT) $(OCAMLOPTFLAGS) $(OCAMLINC) -for-pack Cudd -c $<
 
-cudd.ml: $(MLMODULES:%=%.ml)
-	echo "" >$@
-	for i in $(MLMODULES); do \
-		echo "" >>$@; \
-		echo "(*  ********************************************************************** *)" >>$@; \
-		echo "(*  ********************************************************************** *)" >>$@; \
-		echo "(*  ********************************************************************** *)" >>$@; \
-		echo "" >>$@; \
-		echo "$$i" | sed -e "s/\(.*\)/module \u\1 = struct/g" >>$@; \
-		cat <$$i.ml | sed -e "s/^/  /g" >>$@; \
-		echo "end" >>$@; \
-	done
-
-cudd.mli: $(MLMODULES:%=%.mli)
-	echo "" >$@
-	for i in $(MLMODULES); do \
-		echo "" >>$@; \
-		echo "(*  ********************************************************************** *)" >>$@; \
-		echo "(*  ********************************************************************** *)" >>$@; \
-		echo "(*  ********************************************************************** *)" >>$@; \
-		echo "" >>$@; \
-		echo "$$i" | sed -e "s/\(.*\)/module \u\1 : sig/g" >>$@; \
-		cat <$$i.mli | sed -e "s/^/  /g" >>$@; \
-		echo "end" >>$@; \
-	done
+#cudd.ml: $(MLMODULES:%=%.ml)
+#	echo "" >$@
+#	for i in $(MLMODULES); do \
+#		echo "" >>$@; \
+#		echo "(*  ********************************************************************** *)" >>$@; \
+#		echo "(*  ********************************************************************** *)" >>$@; \
+#		echo "(*  ********************************************************************** *)" >>$@; \
+#		echo "" >>$@; \
+#		echo "$$i" | sed -e "s/\(.*\)/module \u\1 = struct/g" >>$@; \
+#		cat <$$i.ml | sed -e "s/^/  /g" >>$@; \
+#		echo "end" >>$@; \
+#	done
+#
+#cudd.mli: $(MLMODULES:%=%.mli)
+#	echo "" >$@
+#	for i in $(MLMODULES); do \
+#		echo "" >>$@; \
+#		echo "(*  ********************************************************************** *)" >>$@; \
+#		echo "(*  ********************************************************************** *)" >>$@; \
+#		echo "(*  ********************************************************************** *)" >>$@; \
+#		echo "" >>$@; \
+#		echo "$$i" | sed -e "s/\(.*\)/module \u\1 : sig/g" >>$@; \
+#		cat <$$i.mli | sed -e "s/^/  /g" >>$@; \
+#		echo "end" >>$@; \
+#	done
 
 #-----------------------------------
 # Dependencies
