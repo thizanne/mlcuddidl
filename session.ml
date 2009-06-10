@@ -16,6 +16,10 @@ let w = Bdd.ithvar man 4;;
 
 let f = Bdd.dand (Bdd.dand x y) (Bdd.dand (Bdd.dnot z) (Bdd.dnot w));;
 let g = Bdd.dand (Bdd.dand y z) (Bdd.dnot w);;
+let h = Bdd.dor (Bdd.dor x y) (Bdd.dor z w);;
+
+let r = Bdd.support h;;
+let n = Bdd.supportsize h;;
 
 let rdd1 = Rdd.ite f (Rdd.cst man 0.0) (Rdd.cst man 1.0);;
 let supp = Rdd.support rdd1;;
