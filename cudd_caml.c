@@ -252,8 +252,10 @@ value camlidl_cudd_node_c2ml(struct node__t* no)
   val = caml_alloc_custom(&camlidl_custom_node, sizeof(struct node__t), 1, camlidl_cudd_heap);
   ((node__t*)(Data_custom_val(val)))->man = no->man;
   ((node__t*)(Data_custom_val(val)))->node = no->node;
+  /*
   assert(Cudd_CheckKeys(no->man->man)==0);
   assert(Cudd_DebugCheck(no->man->man)==0);
+  */
   return val;
 }
 void camlidl_cudd_node_ml2c(value val, struct node__t *node)
@@ -310,8 +312,10 @@ value camlidl_cudd_bdd_c2ml(struct node__t* bdd)
   val = caml_alloc_custom(&camlidl_custom_bdd, sizeof(struct node__t), 1, camlidl_cudd_heap);
   ((node__t*)(Data_custom_val(val)))->man = bdd->man;
   ((node__t*)(Data_custom_val(val)))->node = bdd->node;
+  /*
   assert(Cudd_CheckKeys(bdd->man->man)==0);
   assert(Cudd_DebugCheck(bdd->man->man)==0);
+  */
   return val;
 }
 
