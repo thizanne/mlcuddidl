@@ -8,7 +8,6 @@ type 'a table = 'a PWeakke.t
 type 'a unique = 'a
 
 let print_table = PWeakke.print
-
 let make_table
   ~(hash : 'leaf -> int)
   ~(equal : 'leaf -> 'leaf -> bool)

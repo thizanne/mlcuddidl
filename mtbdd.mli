@@ -4,7 +4,15 @@
 (** MTBDDs using a weak hashtable for unique constants *)
 
 type 'a unique
-  (** Type of unique representants of MTBDD leaves *)
+  (** Type of unique representants of MTBDD leaves of type ['a].
+      
+      For technical reason, type ['a] should not be implemented as
+      a custom block with finalization function. (This is checked
+      and the program aborts with an error message). 
+
+      Use {!Mtbddc} module if your type does not fulfill this
+      requirement.  [Mtbddc] modules automatically encapsulate the
+      value into a ML type. *)
 
 type 'a t = 'a unique Vdd.t
   (** Type of MTBDDs.
@@ -190,52 +198,52 @@ val combineexpansive :
   default:'a t ->
   merge:('a t -> 'b t -> 'c t) -> Man.v Bdd.t * 'a unique -> 'b t -> 'c t
 val combineleaf1 :
-  default:'a t ->
-  combine:(Man.v Bdd.t * 'c -> 'a t -> 'a t) ->
-  (Man.v Bdd.t -> 'b unique -> Man.v Bdd.t * 'c) -> 'b t -> 'a t
+  default:'c ->
+  combine:('b -> 'c -> 'c) ->
+  (Bdd.vt -> 'a unique -> 'b) -> 'a t -> 'c
 val retractivemapleaf1 :
   default:'a t ->
-  (Man.v Bdd.t -> 'b unique -> Man.v Bdd.t * 'a unique) -> 'b t -> 'a t
+  (Bdd.vt -> 'b unique -> Bdd.vt * 'a unique) -> 'b t -> 'a t
 val expansivemapleaf1 :
   default:'a t ->
   merge:('a t -> 'a t -> 'a t) ->
-  (Man.v Bdd.t -> 'b unique -> Man.v Bdd.t * 'a unique) -> 'b t -> 'a t
+  (Bdd.vt -> 'b unique -> Bdd.vt * 'a unique) -> 'b t -> 'a t
 val mapleaf1 : ('a unique -> 'b unique) -> 'a t -> 'b t
 val combineleaf2 :
-  default:'a t ->
-  combine:(Man.v Bdd.t * 'd -> 'a t -> 'a t) ->
-  (Man.v Bdd.t -> 'b unique -> 'c unique -> Man.v Bdd.t * 'd) ->
-  'b t -> 'c t -> 'a t
+  default:'d ->
+  combine:('c -> 'd -> 'd) ->
+  (Bdd.vt -> 'a unique -> 'b unique -> 'c) ->
+  'a t -> 'b t -> 'd
 val retractivemapleaf2 :
   default:'a t ->
-  (Man.v Bdd.t -> 'b unique -> 'c unique -> Man.v Bdd.t * 'a unique) ->
+  (Bdd.vt -> 'b unique -> 'c unique -> Bdd.vt * 'a unique) ->
   'b t -> 'c t -> 'a t
 val expansivemapleaf2 :
   default:'a t ->
   merge:('a t -> 'a t -> 'a t) ->
-  (Man.v Bdd.t -> 'b unique -> 'c unique -> Man.v Bdd.t * 'a unique) ->
+  (Bdd.vt -> 'b unique -> 'c unique -> Bdd.vt * 'a unique) ->
   'b t -> 'c t -> 'a t
 val mapleaf2 : ('a unique -> 'b unique -> 'c unique) -> 'a t -> 'b t -> 'c t
 val combineleaf_array :
-  default:'a t ->
-  combine:(Man.v Bdd.t * 'c -> 'a t -> 'a t) ->
-  tabsorbant:('b -> bool) option array ->
-  (Man.v Bdd.t -> 'b unique array -> Man.v Bdd.t * 'c) -> 'b t array -> 'a t
+  default:'c ->
+  combine:('b -> 'c -> 'c) ->
+  tabsorbant:('a unique -> bool) option array ->
+  (Bdd.vt -> 'a unique array -> 'b) -> 'a t array -> 'c
 val combineleaf1_array :
-  default:'a t ->
-  combine:(Man.v Bdd.t * 'd -> 'a t -> 'a t) ->
-  ?absorbant:('b -> bool) ->
-  tabsorbant:('c -> bool) option array ->
-  (Man.v Bdd.t -> 'b unique -> 'c unique array -> Man.v Bdd.t * 'd) ->
-  'b t -> 'c t array -> 'a t
+  default:'d ->
+  combine:('c -> 'd -> 'd) ->
+  ?absorbant:('a unique -> bool) ->
+  tabsorbant:('b unique -> bool) option array ->
+  (Bdd.vt -> 'a unique -> 'b unique array -> 'c) ->
+  'a t -> 'b t array -> 'd
 val combineleaf2_array :
-  default:'a t ->
-  combine:(Man.v Bdd.t * 'e -> 'a t -> 'a t) ->
-  ?absorbant1:('b -> bool) ->
-  ?absorbant2:('c -> bool) ->
-  tabsorbant:('d -> bool) option array ->
-  (Man.v Bdd.t -> 'b unique -> 'c unique -> 'd unique array -> Man.v Bdd.t * 'e) ->
-  'b t -> 'c t -> 'd t array -> 'a t
+  default:'e ->
+  combine:('d -> 'e -> 'e) ->
+  ?absorbant1:('a unique -> bool) ->
+  ?absorbant2:('b unique -> bool) ->
+  tabsorbant:('c unique -> bool) option array ->
+  (Bdd.vt -> 'a unique -> 'b unique -> 'c unique array -> 'd) ->
+  'a t -> 'b t -> 'c t array -> 'e
 
 (* ====================================================== *)
 (** {3 By using CUDD cache} *)
