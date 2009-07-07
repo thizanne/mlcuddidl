@@ -96,14 +96,14 @@ int camlidl_custom_man_compare(value val1, value val2)
   DdManager* man1 = DdManager_of_vmanager(val1);
   DdManager* man2 = DdManager_of_vmanager(val2);
   res = (long)man1==(long)man2 ? 0 : (long)man1<(long)man2 ? -1 : 1;
-  CAMLreturn(res);
+  CAMLreturnT(int,res);
 }
 long camlidl_custom_man_hash(value val)
 {
   CAMLparam1(val);
   DdManager* man = DdManager_of_vmanager(val);
   long hash = (long)man;
-  CAMLreturn(hash);
+  CAMLreturnT(long,hash);
 }
 
 struct custom_operations camlidl_custom_manager = {
@@ -137,14 +137,14 @@ int camlidl_custom_node_compare(value val1, value val2)
   res = (long)man1==(long)man2 ? 0 : ( (long)man1<(long)man2 ? -1 : 1);
   if (res==0)
     res = (long)node1==(long)node2 ? 0 : ( (long)node1<(long)node2 ? -1 : 1);
-  CAMLreturn(res);
+  CAMLreturnT(int,res);
 }
 long camlidl_custom_node_hash(value val)
 {
   CAMLparam1(val);
   DdNode* node = DdNode_of_vnode(val);
   long hash = (long)node;
-  CAMLreturn(hash);
+  CAMLreturnT(long,hash);
 }
 
 struct custom_operations camlidl_custom_node = {
@@ -206,6 +206,7 @@ int bdd_compteur=0;
 #define FREQ_node 500
 #define FREQ_bdd 5000
 #endif
+
 value camlidl_cudd_node_c2ml(struct node__t* no)
 {
   value val;
@@ -231,6 +232,12 @@ value camlidl_cudd_node_c2ml(struct node__t* no)
   cuddRef(no->node);
   managerRef(no->man);
   /*
+  caml_gc_full_major(Val_unit);
+  cuddGarbageCollect(no->man->man,1);
+  assert(Cudd_CheckKeys(no->man->man)==0);
+  assert(Cudd_DebugCheck(no->man->man)==0);
+  */
+  /*
 #ifndef NDEBUG
   node_compteur++;
   if (node_compteur > START_node && node_compteur % FREQ_node == 0){
@@ -252,10 +259,6 @@ value camlidl_cudd_node_c2ml(struct node__t* no)
   val = caml_alloc_custom(&camlidl_custom_node, sizeof(struct node__t), 1, camlidl_cudd_heap);
   ((node__t*)(Data_custom_val(val)))->man = no->man;
   ((node__t*)(Data_custom_val(val)))->node = no->node;
-  /*
-  assert(Cudd_CheckKeys(no->man->man)==0);
-  assert(Cudd_DebugCheck(no->man->man)==0);
-  */
   return val;
 }
 void camlidl_cudd_node_ml2c(value val, struct node__t *node)
@@ -291,31 +294,14 @@ value camlidl_cudd_bdd_c2ml(struct node__t* bdd)
   cuddRef(bdd->node);
   managerRef(bdd->man);
   /*
-#ifndef NDEBUG
-  bdd_compteur++;
-  if (bdd_compteur > START_bdd && bdd_compteur % FREQ_bdd == 0){
-    int res1,res2;
-    fprintf(stderr,"bdd_check(%d,%d)...",node_compteur,bdd_compteur);
-    gc_full_major(Val_unit);
-    res1 = Cudd_ReduceHeap(bdd->man,CUDD_REORDER_NONE,0);
-    res2 = Cudd_DebugCheck(bdd->man);
-    if (!res1 || res2){
-      fprintf(stderr,"bdd\nnode_compteur=%d, bdd_compteur=%d\n",
-	      node_compteur,bdd_compteur);
-      abort();
-    }
-    fprintf(stderr,"done\n");
-  }
-#endif
-  */
-
-  val = caml_alloc_custom(&camlidl_custom_bdd, sizeof(struct node__t), 1, camlidl_cudd_heap);
-  ((node__t*)(Data_custom_val(val)))->man = bdd->man;
-  ((node__t*)(Data_custom_val(val)))->node = bdd->node;
-  /*
+  caml_gc_full_major(Val_unit);
+  cuddGarbageCollect(bdd->man->man,1);
   assert(Cudd_CheckKeys(bdd->man->man)==0);
   assert(Cudd_DebugCheck(bdd->man->man)==0);
   */
+  val = caml_alloc_custom(&camlidl_custom_bdd, sizeof(struct node__t), 1, camlidl_cudd_heap);
+  ((node__t*)(Data_custom_val(val)))->man = bdd->man;
+  ((node__t*)(Data_custom_val(val)))->node = bdd->node;
   return val;
 }
 
