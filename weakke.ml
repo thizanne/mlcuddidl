@@ -34,10 +34,11 @@ let limit = 7;;
 let over_limit = 2;;
 
 let create sz =
+  let emptybucket = Weak.create 0 in
   let sz = if sz < 7 then 7 else sz in
   let sz = if sz > Sys.max_array_length then Sys.max_array_length else sz in
   {
-    table = Array.create sz (Weak.create 0);
+    table = Array.create sz emptybucket;
     hashes = Array.create sz [| |];
     limit = limit;
     oversize = 0;
@@ -105,12 +106,12 @@ let test_shrink_bucket t =
   if live <= prev_len then begin
     let rec loop i j =
       if j >= prev_len then begin
-        if Weak.check bucket i then loop (i + 1) j
-        else if Weak.check bucket j then begin
-          Weak.blit bucket j bucket i 1;
-          hbucket.(i) <- hbucket.(j);
-          loop (i + 1) (j - 1);
-        end else loop i (j - 1);
+	if Weak.check bucket i then loop (i + 1) j
+	else if Weak.check bucket j then begin
+	  Weak.blit bucket j bucket i 1;
+	  hbucket.(i) <- hbucket.(j);
+	  loop (i + 1) (j - 1);
+	end else loop i (j - 1);
       end;
     in
     loop 0 (Weak.length bucket - 1);
@@ -165,8 +166,8 @@ and add_aux t setter d h index =
       t.table.(index) <- newbucket;
       t.hashes.(index) <- newhashes;
       if sz <= t.limit && newsz > t.limit then begin
-        t.oversize <- t.oversize + 1;
-        for i = 0 to over_limit do test_shrink_bucket t done;
+	t.oversize <- t.oversize + 1;
+	for i = 0 to over_limit do test_shrink_bucket t done;
       end;
       if t.oversize > Array.length t.table / over_limit then resize t;
     end else if Weak.check bucket i then begin
@@ -221,13 +222,13 @@ module Compare = struct
     let rec loop i =
       if i >= sz then ifnotfound h index
       else if h = hashes.(i) then begin
-        match Weak.get_copy bucket i with
-        | Some v when compare.equal v d
-           -> begin match Weak.get bucket i with
-              | Some v -> v
-              | None -> loop (i + 1)
-              end
-        | _ -> loop (i + 1)
+	match Weak.get_copy bucket i with
+	| Some v when compare.equal v d
+	   -> begin match Weak.get bucket i with
+	      | Some v -> v
+	      | None -> loop (i + 1)
+	      end
+	| _ -> loop (i + 1)
       end else loop (i + 1)
     in
     loop 0
@@ -254,9 +255,9 @@ module Compare = struct
     let rec loop i =
       if i >= sz then ifnotfound
       else if h = hashes.(i) then begin
-        match Weak.get_copy bucket i with
-        | Some v when compare.equal v d -> iffound bucket i
-        | _ -> loop (i + 1)
+	match Weak.get_copy bucket i with
+	| Some v when compare.equal v d -> iffound bucket i
+	| _ -> loop (i + 1)
       end else loop (i + 1)
     in
     loop 0
@@ -275,13 +276,13 @@ module Compare = struct
     let rec loop i accu =
       if i >= sz then accu
       else if h = hashes.(i) then begin
-        match Weak.get_copy bucket i with
-        | Some v when compare.equal v d
-           -> begin match Weak.get bucket i with
-              | Some v -> loop (i + 1) (v :: accu)
-              | None -> loop (i + 1) accu
-              end
-        | _ -> loop (i + 1) accu
+	match Weak.get_copy bucket i with
+	| Some v when compare.equal v d
+	   -> begin match Weak.get bucket i with
+	      | Some v -> loop (i + 1) (v :: accu)
+	      | None -> loop (i + 1) accu
+	      end
+	| _ -> loop (i + 1) accu
       end else loop (i + 1) accu
     in
     loop 0 []
