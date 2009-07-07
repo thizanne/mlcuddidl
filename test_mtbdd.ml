@@ -8,7 +8,7 @@ let mand = Man.make_d ();;
 Man.set_background mand (-.1000000000.0);;
 let manv = Man.make_v ();;
 Gc.set { (Gc.get()) with Gc.verbose = 0x11 };;
-Man.set_gc 1000000 (fun () -> printf "@.CUDD GARBAGE@.")(fun () -> printf "@.CUDD REORDERING@.");;
+Man.set_gc 1000000 (fun () -> Gc.major(); printf "@.CUDD GARBAGE@.")(fun () -> Gc.major(); printf "@.CUDD  REORDERING@.");;
 Man.print_limit := 30;;
 
 
@@ -18,43 +18,46 @@ Man.set_next_autodyn mand 1000;;
 Man.set_next_autodyn manv 1000;;
 
 module F = struct
-  type t = float Mtbdd.t
+  type leaf = float
+  let pp_print_leaf = pp_print_float
 
-  let (table:float Mtbdd.table) =
-    Mtbdd.make_table ~hash:Hashtbl.hash ~equal:(=)
+  type t = leaf Mtbddc.t
 
-  let get = Mtbdd.get
-  let unique = Mtbdd.unique
-  let ite = Mtbdd.ite
-  let restrict = Mtbdd.restrict
-  let tdrestrict = Mtbdd.tdrestrict
-  let print = Mtbdd.print_minterm pp_print_int pp_print_float
+  let (table:leaf Mtbddc.table) =
+    Mtbddc.make_table ~hash:Hashtbl.hash ~equal:(=)
 
-  let cst dbl = Mtbdd.cst manv table dbl
+  let get = Mtbddc.get
+  let unique = Mtbddc.unique
+  let ite = Mtbddc.ite
+  let restrict = Mtbddc.restrict
+  let tdrestrict = Mtbddc.tdrestrict
+  let print = Mtbddc.print_minterm pp_print_int pp_print_leaf
+
+  let cst dbl = Mtbddc.cst manv table dbl
 
   let is_zero dd =
-    if Mtbdd.is_cst dd then
-      (Mtbdd.dval dd)=0.0
+    if Mtbddc.is_cst dd then
+      (Mtbddc.dval dd)=0.0
     else
       false
   let is_one dd =
-    if Mtbdd.is_cst dd then
-      (Mtbdd.dval dd)=1.0
+    if Mtbddc.is_cst dd then
+      (Mtbddc.dval dd)=1.0
     else
       false
 
   let is_leq dd1 dd2 =
-    Mtbdd.map_test2 ~reflexive:true
+    Mtbddc.map_test2 ~reflexive:true
       (fun xu yu -> (get xu)<=(get yu))
       dd1 dd2
 
   let negate dd =
-    Mtbdd.map_op1
+    Mtbddc.map_op1
       (fun xu -> unique table (-. (get xu)))
       dd
 
   let add dd1 dd2 =
-    Mtbdd.map_op2 ~commutative:true
+    Mtbddc.map_op2 ~commutative:true
       ~special:(fun dd1 dd2 ->
 	if is_zero dd1 then Some dd2
 	else if is_zero dd2 then Some dd1
@@ -64,7 +67,7 @@ module F = struct
       dd1 dd2
 
   let mul dd1 dd2 =
-    Mtbdd.map_op2 ~commutative:true
+    Mtbddc.map_op2 ~commutative:true
       ~special:(fun dd1 dd2 ->
 	if is_zero dd1 then Some dd1
 	else if is_zero dd2 then Some dd2
@@ -100,12 +103,12 @@ end;;
 
 let rec equal dd1 rdd2 =
   let res = 
-    if Mtbdd.is_cst dd1 && Rdd.is_cst rdd2 then
-      (Mtbdd.dval dd1)=(Rdd.dval rdd2)
-    else if not (Mtbdd.is_cst dd1) && not (Rdd.is_cst rdd2) then
-      let top1 = Mtbdd.topvar dd1 in
-      let then1 = Mtbdd.dthen dd1 in
-      let else1 = Mtbdd.delse dd1 in
+    if Mtbddc.is_cst dd1 && Rdd.is_cst rdd2 then
+      (Mtbddc.dval dd1)=(Rdd.dval rdd2)
+    else if not (Mtbddc.is_cst dd1) && not (Rdd.is_cst rdd2) then
+      let top1 = Mtbddc.topvar dd1 in
+      let then1 = Mtbddc.dthen dd1 in
+      let else1 = Mtbddc.delse dd1 in
       let (then2,else2) = Rdd.cofactors top1 rdd2 in
       equal then1 then2 && equal else1 else2
     else
@@ -205,7 +208,7 @@ let rec generate_t maxvar depth0 maxcst depth =
 
 Random.init 2;;
 let tr = ref (C.cst 0.0);;
-for i=0 to 1000 do
+for i=0 to 50 do
   printf "i=%i@." i;
 
   let t1 = generate_t 15 6 100 4 in
@@ -214,7 +217,9 @@ for i=0 to 1000 do
   while (Bdd.is_false !bdd) do
     bdd := generate_bdd 15 6;
   done;
-
+  Cudd.Man.garbage_collect manv;
+  Cudd.Man.garbage_collect mand;
+  
 (*
   let t1 = generate_t 15 6 100 4 in
   let t2 = generate_t 3 2 10 2 in

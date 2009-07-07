@@ -28,8 +28,8 @@ ICFLAGS = \
 
 IDLMODULES = man bdd rdd vdd
 
-MLMODULES = man bdd custom rdd weakke pWeakke vdd mapleaf mtbdd
-MLSRC = $(IDLMODULES:%=%.mli) $(IDLMODULES:%=%.ml) custom.ml custom.mli mapleaf.ml mapleaf.mli weakke.ml weakke.mli pWeakke.ml pWeakke.mli mtbdd.ml mtbdd.mli
+MLMODULES = man bdd custom rdd weakke pWeakke vdd mapleaf mtbdd mtbddc
+MLSRC = $(IDLMODULES:%=%.mli) $(IDLMODULES:%=%.ml) custom.ml custom.mli mapleaf.ml mapleaf.mli weakke.ml weakke.mli pWeakke.ml pWeakke.mli mtbdd.ml mtbdd.mli mtbddc.ml mtbddc.mli
 MLINT = $(MLMODULES:%=%.cmi)
 MLOBJ = $(MLMODULES:%=%.cmo)
 MLOBJx = $(MLMODULES:%=%.cmx)
@@ -270,14 +270,16 @@ mapleaf.cmo: vdd.cmi man.cmi bdd.cmi mapleaf.cmi
 mapleaf.cmx: vdd.cmx man.cmx bdd.cmx mapleaf.cmi
 mtbdd.cmo: vdd.cmi pWeakke.cmi mapleaf.cmi mtbdd.cmi
 mtbdd.cmx: vdd.cmx pWeakke.cmx mapleaf.cmx mtbdd.cmi
+mtbddc.cmo: vdd.cmi pWeakke.cmi mapleaf.cmi mtbddc.cmi
+mtbddc.cmx: vdd.cmx pWeakke.cmx mapleaf.cmx mtbddc.cmi
 pWeakke.cmo: weakke.cmi pWeakke.cmi
 pWeakke.cmx: weakke.cmx pWeakke.cmi
 rdd.cmo: man.cmi custom.cmi bdd.cmi rdd.cmi
 rdd.cmx: man.cmx custom.cmx bdd.cmx rdd.cmi
 session.cmo: vdd.cmi rdd.cmi man.cmi bdd.cmi
 session.cmx: vdd.cmx rdd.cmx man.cmx bdd.cmx
-test_mtbdd.cmo: weakke.cmi rdd.cmi mtbdd.cmi man.cmi bdd.cmi
-test_mtbdd.cmx: weakke.cmx rdd.cmx mtbdd.cmx man.cmx bdd.cmx
+test_mtbdd.cmo: weakke.cmi rdd.cmi mtbdd.cmi mtbddc.cmi man.cmi bdd.cmi
+test_mtbdd.cmx: weakke.cmx rdd.cmx mtbdd.cmx mtbddc.cmx man.cmx bdd.cmx
 vdd.cmo: rdd.cmi man.cmi custom.cmi bdd.cmi vdd.cmi
 vdd.cmx: rdd.cmx man.cmx custom.cmx bdd.cmx vdd.cmi
 weakke.cmo: weakke.cmi
