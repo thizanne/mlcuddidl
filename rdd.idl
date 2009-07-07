@@ -561,11 +561,12 @@ quote(MLMLI,"(** {3 By decomposition into guards and leaves} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLI,"
-val mapleaf1 : ~default:t -> (Bdd.dt -> float -> float) -> t -> t
-val mapleaf2 : ~default:t -> (Bdd.dt -> float -> float -> float) -> t -> t -> t
+val mapleaf1 : default:t -> (Bdd.dt -> float -> float) -> t -> t
+val mapleaf2 : default:t -> (Bdd.dt -> float -> float -> float) -> t -> t -> t
 ")
 quote(ML,"
 let mapleaf1
+  ~(default:t)
   (f:Bdd.dt -> float -> float)
   (rdd:t)
   :
@@ -583,6 +584,7 @@ let mapleaf1
   !res
 
 let mapleaf2
+  ~(default:t)
   (f:Bdd.dt -> float -> float -> float)
   (rdd1:t)
   (rdd2:t)
@@ -595,7 +597,7 @@ let mapleaf2
   for i1=0 to pred (Array.length leaves1) do
     let leaf1 = leaves1.(i1) in
     let guard1 = guard_of_leaf rdd1 leaf1 in
-    let rdd2 = ite guard1 rdd2 ddbackground in
+    let rdd2 = ite guard1 rdd2 default in
     let leaves2 = leaves rdd2 in
     for i2=0 to pred (Array.length leaves2) do
       let leaf2 = leaves2.(i2) in
