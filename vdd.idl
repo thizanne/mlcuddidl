@@ -35,9 +35,11 @@ OCaml leaves.
 IMPORTANT NOTE: this is an internal module, which assumes that leaves are
 either immediate values (booleans, integers, constant sums), 
 or values allocated with caml_alloc_shr (that can 
-be moved only during a memory compaction.
+be moved only during a memory compaction).
 
-Use module {!Mtbdd} to be safe *)
+Use module {!Mtbdd} to be safe, and also to ensure that you do not
+have two constant MTBDDs pointing to different but semantically
+equivalent values. *)
 ")
 
 /* ====================================================================== */
