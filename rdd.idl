@@ -560,14 +560,9 @@ quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {3 By decomposition into guards and leaves} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
-quote(MLMLI,"(**
-Be cautious: here the background leaf is used as a special value,
-and should not be used for ordinary purpose.
-*)")
-
 quote(MLI,"
-val mapleaf1 : (Bdd.dt -> float -> float) -> t -> t
-val mapleaf2 : (Bdd.dt -> float -> float -> float) -> t -> t -> t
+val mapleaf1 : ~default:t -> (Bdd.dt -> float -> float) -> t -> t
+val mapleaf2 : ~default:t -> (Bdd.dt -> float -> float -> float) -> t -> t -> t
 ")
 quote(ML,"
 let mapleaf1
@@ -577,16 +572,13 @@ let mapleaf1
   t
   =
   let manager = manager rdd in
-  let background = Man.get_background manager in
   let leaves = leaves rdd in
-  let res = ref (cst manager background) in
+  let res = ref default in
   for i=0 to pred (Array.length leaves) do
     let leaf = leaves.(i) in
-    if leaf<>background then begin
-      let guard = guard_of_leaf rdd leaves.(i) in
-      let nleaf = f guard leaf in
-      res := ite guard (cst manager nleaf) !res
-    end
+    let guard = guard_of_leaf rdd leaves.(i) in
+    let nleaf = f guard leaf in
+    res := ite guard (cst manager nleaf) !res
   done;
   !res
 
@@ -598,25 +590,19 @@ let mapleaf2
   t
   =
   let manager = manager rdd1 in
-  let background = Man.get_background manager in
-  let ddbackground = cst manager background in
   let leaves1 = leaves rdd1 in
-  let res = ref ddbackground in
+  let res = ref default in
   for i1=0 to pred (Array.length leaves1) do
     let leaf1 = leaves1.(i1) in
-    if leaf1<>background then begin
-      let guard1 = guard_of_leaf rdd1 leaf1 in
-      let rdd2 = ite guard1 rdd2 ddbackground in
-      let leaves2 = leaves rdd2 in
-      for i2=0 to pred (Array.length leaves2) do
-	let leaf2 = leaves2.(i2) in
-	if leaf2<>background then begin
-	  let guard2 = guard_of_leaf rdd2 leaf2 in
-	  let nleaf = f guard2 leaf1 leaf2 in
-	  res := ite guard2 (cst manager nleaf) !res
-	end
-      done
-    end
+    let guard1 = guard_of_leaf rdd1 leaf1 in
+    let rdd2 = ite guard1 rdd2 ddbackground in
+    let leaves2 = leaves rdd2 in
+    for i2=0 to pred (Array.length leaves2) do
+      let leaf2 = leaves2.(i2) in
+      let guard2 = guard_of_leaf rdd2 leaf2 in
+      let nleaf = f guard2 leaf1 leaf2 in
+      res := ite guard2 (cst manager nleaf) !res
+    done
   done;
   !res
 ")
