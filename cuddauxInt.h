@@ -74,7 +74,6 @@ DdNode* cuddauxAddApplyVectorComposeRecur(
 /* File cuddauxAddApply.c */
 /* f, g and h are ADDs */
 
-void cuddauxHashTableQuit(DdHashTable * hash);
 DdNode* cuddauxAddApply1Recur(DdManager* dd, DdHashTable* table, DDAUX_IDOP pid, DDAUX_AOP1 op, DdNode* f);
 DdNode* cuddauxAddApply2Recur(DdManager* dd, DdHashTable* table, DDAUX_IDOP pid, int commutative, DDAUX_AOP2 op, DdNode* f, DdNode* g);
 DdNode* cuddauxAddTest2Recur(DdManager* dd, DdHashTable* table, DDAUX_IDOP pid, int commutative, DDAUX_AOP2 op, DdNode* f, DdNode* g);

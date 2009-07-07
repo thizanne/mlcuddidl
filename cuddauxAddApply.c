@@ -273,7 +273,7 @@ Cuddaux_addAbstract(DdManager * dd,
 	assert(*tableop==NULL);
 	*tableop = cuddHashTableInit(dd,2,2);
 	if (*tableop == NULL){
-	  cuddauxHashTableQuit(*table);
+	  cuddHashTableQuit(*table);
 	  *table = NULL;
 	  return(NULL);
 	}
@@ -334,7 +334,7 @@ Cuddaux_addApplyAbstract(DdManager * dd,
 	assert(*tableop==NULL);
 	*tableop = cuddHashTableInit(dd,2,2);
 	if (*tableop == NULL){
-	  cuddauxHashTableQuit(*table);
+	  cuddHashTableQuit(*table);
 	  *table = NULL;
 	  return(NULL);
 	}
@@ -343,9 +343,9 @@ Cuddaux_addApplyAbstract(DdManager * dd,
 	assert(*tableop1==NULL);
 	*tableop1 = cuddHashTableInit(dd,1,2);
 	if (*tableop1 == NULL){
-	  cuddauxHashTableQuit(*table);
+	  cuddHashTableQuit(*table);
 	  *table = NULL;
-	  cuddauxHashTableQuit(*tableop);
+	  cuddHashTableQuit(*tableop);
 	  *tableop = NULL;
 	  return(NULL);
 	}
@@ -403,7 +403,7 @@ Cuddaux_addBddAndAbstract(DdManager * dd,
 	assert(*tableop==NULL);
 	*tableop = cuddHashTableInit(dd,2,2);
 	if (*tableop == NULL){
-	  cuddauxHashTableQuit(*table);
+	  cuddHashTableQuit(*table);
 	  *table = NULL;
 	  return(NULL);
 	}
@@ -464,7 +464,7 @@ Cuddaux_addApplyBddAndAbstract(DdManager * dd,
 	assert(*tableop==NULL);
 	*tableop = cuddHashTableInit(dd,2,2);
 	if (*tableop == NULL){
-	  cuddauxHashTableQuit(*table);
+	  cuddHashTableQuit(*table);
 	  *table = NULL;
 	  return(NULL);
 	}
@@ -473,9 +473,9 @@ Cuddaux_addApplyBddAndAbstract(DdManager * dd,
 	assert(*tableop1==NULL);
 	*tableop1 = cuddHashTableInit(dd,1,2);
 	if (*tableop1 == NULL){
-	  cuddauxHashTableQuit(*table);
+	  cuddHashTableQuit(*table);
 	  *table = NULL;
-	  cuddauxHashTableQuit(*tableop);
+	  cuddHashTableQuit(*tableop);
 	  *tableop = NULL;
 	  return(NULL);
 	}
@@ -490,59 +490,6 @@ Cuddaux_addApplyBddAndAbstract(DdManager * dd,
 /*---------------------------------------------------------------------------*/
 /* Definition of internal functions                                          */
 /*---------------------------------------------------------------------------*/
-
-/**Function********************************************************************
-
-  Synopsis    [Shuts down a hash table, but performing cuddDeref instead of Cudd_RecursiveDeref]
-
-  Description [Shuts down a hash table, dereferencing all the values.  It
-  assumes that the values have been created recursively by cuddUniqueInter,
-  so that cuddDeref should be used instead of Cudd_RecursiveDeref]
-
-  SideEffects [None]
-
-  SeeAlso     [cuddHashTableQuit]
-
-******************************************************************************/
-
-void
-cuddauxHashTableQuit(
-  DdHashTable * hash)
-{
-#ifdef __osf__
-#pragma pointer_size save
-#pragma pointer_size short
-#endif
-    unsigned int i;
-    DdManager *dd = hash->manager;
-    DdHashItem *bucket;
-    DdHashItem **memlist, **nextmem;
-    unsigned int numBuckets = hash->numBuckets;
-
-    for (i = 0; i < numBuckets; i++) {
-	bucket = hash->bucket[i];
-	while (bucket != NULL) {
-	    cuddDeref(bucket->value);
-	    bucket = bucket->next;
-	}
-    }
-
-    memlist = hash->memoryList;
-    while (memlist != NULL) {
-	nextmem = (DdHashItem **) memlist[0];
-	FREE(memlist);
-	memlist = nextmem;
-    }
-
-    FREE(hash->bucket);
-    FREE(hash);
-#ifdef __osf__
-#pragma pointer_size restore
-#endif
-
-    return;
-
-} /* end of cuddauxHashTableQuit */
 
 /**Function********************************************************************
 
@@ -1053,8 +1000,8 @@ cuddauxAddAbstractRecur(DdManager * dd,
 	Cudd_RecursiveDeref(dd, E);
 	return(NULL);
       }
-      cuddDeref(E);
       cuddDeref(T);
+      cuddDeref(E);
     }
   }
  cuddauxAddAbstractRecur_end:
