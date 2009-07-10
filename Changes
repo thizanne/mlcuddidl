@@ -1,5 +1,36 @@
 
 -------------
+MLCuddIDL 2.1:
+-------------
+
+General: documentation and again (sorry) reorganizatioon
+
+  * Annoying GC bug in Custom module solved (use of CUDD hashtables).
+
+  * Rdd renamed in Ad (to match CUDD names).
+
+  * Vdd and Mtbdd does not contain user operations, which are available only
+    in Mapleaf and User modules.
+
+  * New module Mtbddc when the type of leaf are implemented as custom OCaml
+    blocks.
+
+  * User operations for VDDs and MTBDDs in Mapleaf and User modules (with
+    good documentation)
+
+  * Internal changes
+
+Migration advices
+
+  * Rdd -> Add
+
+  * Functions (Vdd|Mtbdd|Mtbddc).(register|map|apply) ->
+    User.(register|map|apply)
+ 
+  * In (Custom|Vdd|Mtbdd|Mtbddc), type 'a cache -> type ('a,'b) cache, and
+    related changes to the type of user operations.
+
+-------------
 MLCuddIDL 2.0:
 -------------
 

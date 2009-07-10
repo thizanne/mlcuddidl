@@ -164,9 +164,9 @@ mlcuddidl.pdf: mlcuddidl.dvi
 	$(DVIPDF) mlcuddidl.dvi
 mlcuddidl.dvi: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 	$(OCAMLDOC) $(OCAMLINC) \
--t "MLCUDDIDL: OCaml interface for CUDD library, version 2.0" \
+-t "MLCUDDIDL: OCaml interface for CUDD library, version 2.1" \
 -latextitle 1,chapter -latextitle 2,section -latextitle 3,subsection -latextitle 4,subsubsection -latextitle 5,paragraph -latextitle 6,subparagraph \
--latex -intro mlcuddidl.odoc -o ocamldoc.tex man.mli bdd.mli add.mli mtbdd.mli mtbddc.mli mapleaf.mli user.mli vdd.mli custom.mli weakke.mli pWeakke.mli
+-latex -intro mlcuddidl.odoc -o ocamldoc.tex man.mli bdd.mli add.mli vdd.mli mtbdd.mli mtbddc.mli mapleaf.mli user.mli custom.mli weakke.mli pWeakke.mli
 	$(SED) -e 's/\\documentclass\[11pt\]{article}/\\documentclass[10pt,twosdie,a4paper]{book}\\usepackage{ae,fullpage,makeidx,fancyhdr}\\usepackage[ps2pdf]{hyperref}\\pagestyle{fancy}\\setlength{\\parindent}{0em}\\setlength{\\parskip}{0.5ex}\\sloppy\\makeindex\\author{Bertrand Jeannet}/' -e 's/\\end{document}/\\appendix\\printindex\\end{document}/' ocamldoc.tex >mlcuddidl.tex
 	$(LATEX) mlcuddidl
 	$(MAKEINDEX) mlcuddidl

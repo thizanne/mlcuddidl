@@ -14,13 +14,14 @@ The interface is decomposed in the following user modules:
 - {!Man}: CUDD managers;
 - {!Bdd}: CUDD BDDs;
 - {!Add}: CUDD ADDs;
-- {!Mtbdd} and its variant {!Mtbddc}: does not exist in CUDD.
-- {!Mapleaf} and {!User} which maps user operations from leaves to MTBDDs on
-   such leaves.
+- {!Vdd} (rather internal), {!Mtbdd} and its variant {!Mtbddc}: do
+  not exist in CUDD.
+- {!Mapleaf} and {!User} which maps user operations from leaves to
+   MTBDDs on such leaves.
 
-The other internal modules are mainly used by {!Mtbdd} and {!Mtbddc}:
+The other internal modules are mainly used by {!Vdd}, {!Mtbdd} and
+{!Mtbddc}:
 - {!Custom}: for user operations on ADDs and MTBDDs;
-- {!Vdd}: raw MTBDDs:
 - {!Weakke} and {!PWeakke}: for polymorphic weak hashtables.
 
 {2 Memory management}
@@ -78,9 +79,9 @@ the default cpp C preprocessor).
 according to the macro file [macros.m4], then CamlIDL generates
 from them four files, suffixed with [.c], [.h], [.ml] and [.mli].
 
-[cudd_caml.c] and [cudd_caml.h] are not generated from a [.idl]
-file and contain code common to all the other files.  [mtbdd.ml]
-and [mtbdd.mli] are also not generated from a [.idl] file.
+[cudd_caml.c], [cudd_caml.h] [custom_caml.c] and [custom_caml.h]
+are not generated from a [.idl] file and contain code common to
+all the other files.
 
 The normal user doesn't need to understand this process, as the
 library is distributed with all the C and OCAML files already

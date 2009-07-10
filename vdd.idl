@@ -37,13 +37,13 @@ either immediate values (booleans, integers, constant sums),
 or values allocated with caml_alloc_shr (that can 
 be moved only during a memory compaction).
 
-Use module {!Mtbdd} or {!Mtbddc} to be safe, and also to ensure that you do not
-have two constant MTBDDs pointing to different but semantically
-equivalent values.
-
-The only case where you may use directly {!Vdd} without worries is when the
+The only case where you may use directly {!Vdd} without worrying is when the
 leaves are represented as immediate values (booleans, integers, constant
 sums) in the heap.
+
+Otherwise, use module {!Mtbdd} or {!Mtbddc} to be safe, and also to ensure
+that you do not have two constant MTBDDs pointing to different but
+semantically equivalent values.
  *)
 ")
 
