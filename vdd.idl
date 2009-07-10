@@ -28,8 +28,8 @@ type +'a vdd =
 ")
 
 quote(MLI,"
-(** We refer to the module {!Rdd} for the description of the interface, as
-it is nearly identical to {!Rdd}, except that real leaves are replaced by
+(** We refer to the module {!Add} for the description of the interface, as
+it is nearly identical to {!Add}, except that real leaves are replaced by
 OCaml leaves. 
 
 IMPORTANT NOTE: this is an internal module, which assumes that leaves are
@@ -37,9 +37,14 @@ either immediate values (booleans, integers, constant sums),
 or values allocated with caml_alloc_shr (that can 
 be moved only during a memory compaction).
 
-Use module {!Mtbdd} to be safe, and also to ensure that you do not
+Use module {!Mtbdd} or {!Mtbddc} to be safe, and also to ensure that you do not
 have two constant MTBDDs pointing to different but semantically
-equivalent values. *)
+equivalent values.
+
+The only case where you may use directly {!Vdd} without worries is when the
+leaves are represented as immediate values (booleans, integers, constant
+sums) in the heap.
+ *)
 ")
 
 /* ====================================================================== */
@@ -51,19 +56,19 @@ quote(ML,"(** {2 For internal use} *)")
 quote(ML,"(*  ====================================================== *)")
 
 quote(ML,"
-type _internal_ddtype = int (* 0:RDD, 1:IDD, 2:VDD *)
+type _internal_ddtype = int (* 0:ADD, 1:IDD, 2:VDD *)
 let _internal_ddtype = 2
-external _internal_dval : _internal_ddtype -> 'a t -> 'a = \"camlidl_cudd_rivdd_dval\"
-external _internal_inspect: _internal_ddtype -> 'a t -> 'a vdd = \"camlidl_cudd_rivdd_inspect\"
-external _internal_cst : _internal_ddtype -> Man.v Man.t -> 'a -> 'a t = \"camlidl_cudd_rivdd_cst\"
-external _internal_is_eval_cst : _internal_ddtype -> 'a t -> Man.v Bdd.t -> 'a option = \"camlidl_cudd_rivdd_is_eval_cst\"
-external _internal_is_ite_cst : _internal_ddtype -> Man.v Bdd.t -> 'a t -> 'a t -> 'a option = \"camlidl_cudd_rivdd_is_ite_cst\"
+external _internal_dval : _internal_ddtype -> 'a t -> 'a = \"camlidl_cudd_avdd_dval\"
+external _internal_inspect: _internal_ddtype -> 'a t -> 'a vdd = \"camlidl_cudd_avdd_inspect\"
+external _internal_cst : _internal_ddtype -> Man.v Man.t -> 'a -> 'a t = \"camlidl_cudd_avdd_cst\"
+external _internal_is_eval_cst : _internal_ddtype -> 'a t -> Man.v Bdd.t -> 'a option = \"camlidl_cudd_avdd_is_eval_cst\"
+external _internal_is_ite_cst : _internal_ddtype -> Man.v Bdd.t -> 'a t -> 'a t -> 'a option = \"camlidl_cudd_avdd_is_ite_cst\"
 
-external _internal_iter_cube: _internal_ddtype -> (Man.tbool array -> 'a -> unit) -> 'a t -> unit = \"camlidl_cudd_rivdd_iter_cube\"
-external _internal_nodes_below_level: _internal_ddtype -> 'a t -> int option -> int option -> 'a t array = \"camlidl_cudd_rivdd_nodes_below_level\"
-external _internal_guard_of_leaf : _internal_ddtype -> 'a t -> 'a -> Man.v Bdd.t = \"camlidl_cudd_rivdd_guard_of_leaf\"
-external _internal_leaves: _internal_ddtype -> 'a t -> 'a array = \"camlidl_cudd_rivdd_leaves\"
-external _internal_pick_leaf : _internal_ddtype -> 'a t -> 'a = \"camlidl_cudd_rivdd_pick_leaf\"
+external _internal_iter_cube: _internal_ddtype -> (Man.tbool array -> 'a -> unit) -> 'a t -> unit = \"camlidl_cudd_avdd_iter_cube\"
+external _internal_nodes_below_level: _internal_ddtype -> 'a t -> int option -> int option -> 'a t array = \"camlidl_cudd_avdd_nodes_below_level\"
+external _internal_guard_of_leaf : _internal_ddtype -> 'a t -> 'a -> Man.v Bdd.t = \"camlidl_cudd_avdd_guard_of_leaf\"
+external _internal_leaves: _internal_ddtype -> 'a t -> 'a array = \"camlidl_cudd_avdd_leaves\"
+external _internal_pick_leaf : _internal_ddtype -> 'a t -> 'a = \"camlidl_cudd_avdd_pick_leaf\"
 ")
 
 /* ********************************************************************** */
@@ -78,10 +83,10 @@ quote(MLMLI,"
 external manager : 'a t -> Man.v Man.t = \"camlidl_bdd_manager\"
 external is_cst : 'a t -> bool = \"camlidl_bdd_is_cst\"
 external topvar : 'a t -> int = \"camlidl_bdd_topvar\"
-external dthen : 'a t -> 'a t = \"camlidl_rdd_dthen\"
-external delse : 'a t -> 'a t = \"camlidl_rdd_delse\"
-external cofactors : int -> 'a t -> 'a t * 'a t = \"camlidl_cudd_rdd_cofactors\"
-external cofactor : 'a t -> Man.v Bdd.t -> 'a t = \"camlidl_rdd_cofactor\"
+external dthen : 'a t -> 'a t = \"camlidl_add_dthen\"
+external delse : 'a t -> 'a t = \"camlidl_add_delse\"
+external cofactors : int -> 'a t -> 'a t * 'a t = \"camlidl_cudd_add_cofactors\"
+external cofactor : 'a t -> Man.v Bdd.t -> 'a t = \"camlidl_add_cofactor\"
 ")
 quote(MLI,"
 val dval : 'a t -> 'a
@@ -104,7 +109,7 @@ external support : 'a t -> Man.v Bdd.t = \"camlidl_bdd_support\"
 external supportsize : 'a t -> int = \"camlidl_bdd_supportsize\"
 external is_var_in : int -> 'a t -> bool = \"camlidl_bdd_is_var_in\"
 external vectorsupport : 'a t array -> Man.v Bdd.t = \"camlidl_bdd_vectorsupport\"
-external vectorsupport2 : Man.v Bdd.t array -> 'a t array -> Man.v Bdd.t = \"camlidl_rdd_vectorsupport2\"
+external vectorsupport2 : Man.v Bdd.t array -> 'a t array -> Man.v Bdd.t = \"camlidl_add_vectorsupport2\"
 ")
 
 /* ********************************************************************** */
@@ -118,18 +123,18 @@ quote(MLMLI,"")
 quote(MLI,"
 val cst : Man.v Man.t -> 'a -> 'a t
 
-(** Be cautious, it is basically of type {Rdd.t}, so not type safe (if you use  {!nodes_below_level}, etc...: you can try to retrieve a constant value of some type and the C [double] of the background value will be treated as a C [value].*)val _background : Man.v Man.t -> 'a t
+(** Be cautious, it is basically of type {Add.t}, so not type safe (if you use  {!nodes_below_level}, etc...: you can try to retrieve a constant value of some type and the C [double] of the background value will be treated as a C [value].*)val _background : Man.v Man.t -> 'a t
 ")
 quote(ML,"
 let cst man leaf = _internal_cst _internal_ddtype man leaf
-let _background man : 'a t =  Obj.magic (Rdd.background (Obj.magic man))
-  (** Be cautious, it is basically of type {Rdd.t}, so not type safe (if you use  {!nodes_below_level}, etc...: you can try to retrieve a constant value of some type and the C [double] of the background value will be treated as a C [value].*)")
+let _background man : 'a t =  Obj.magic (Add.background (Obj.magic man))
+  (** Be cautious, it is basically of type {Add.t}, so not type safe (if you use  {!nodes_below_level}, etc...: you can try to retrieve a constant value of some type and the C [double] of the background value will be treated as a C [value].*)")
 quote(MLMLI,"
-external ite : Man.v Bdd.t -> 'a t -> 'a t -> 'a t = \"camlidl_rdd_ite\"
-external ite_cst : Man.v Bdd.t -> 'a t -> 'a t -> 'a t option = \"camlidl_cudd_rdd_ite_cst\"
-external eval_cst : 'a t -> Man.v Bdd.t -> 'a t option = \"camlidl_cudd_rdd_eval_cst\"
-external compose : int -> Man.v Bdd.t -> 'a t -> 'a t = \"camlidl_rdd_compose\"
-external vectorcompose: Man.v Bdd.t array -> 'a t -> 'a t = \"camlidl_rdd_vectorcompose\"
+external ite : Man.v Bdd.t -> 'a t -> 'a t -> 'a t = \"camlidl_add_ite\"
+external ite_cst : Man.v Bdd.t -> 'a t -> 'a t -> 'a t option = \"camlidl_cudd_add_ite_cst\"
+external eval_cst : 'a t -> Man.v Bdd.t -> 'a t option = \"camlidl_cudd_add_eval_cst\"
+external compose : int -> Man.v Bdd.t -> 'a t -> 'a t = \"camlidl_add_compose\"
+external vectorcompose: Man.v Bdd.t array -> 'a t -> 'a t = \"camlidl_add_vectorcompose\"
 ")
 
 /* ********************************************************************** */
@@ -165,7 +170,7 @@ external nbpaths : 'a t -> float = \"camlidl_bdd_nbpaths\"
 external nbnonzeropaths : 'a t -> float = \"camlidl_bdd_nbtruepaths\"
 external nbminterms : int -> 'a t -> float = \"camlidl_bdd_nbminterms\"
 external density : int -> 'a t -> float = \"camlidl_bdd_density\"
-external nbleaves : 'a t -> int = \"camlidl_rdd_nbleaves\"
+external nbleaves : 'a t -> int = \"camlidl_add_nbleaves\"
 ")
 
 /* ********************************************************************** */
@@ -176,8 +181,8 @@ quote(MLMLI,"(** {2 Variable mapping} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
-external varmap : 'a t -> 'a t = \"camlidl_rdd_varmap\"
-external permute : 'a t -> int array -> 'a t = \"camlidl_rdd_permute\"
+external varmap : 'a t -> 'a t = \"camlidl_add_varmap\"
+external permute : 'a t -> int array -> 'a t = \"camlidl_add_permute\"
 ")
 
 /* ********************************************************************** */
@@ -203,12 +208,12 @@ quote(MLMLI,"(** {2 Leaves and guards} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
-external guard_of_node : 'a t -> 'a t -> Man.v Bdd.t = \"camlidl_rdd_guard_of_node\"
-external guard_of_nonbackground : 'a t -> Man.v Bdd.t = \"camlidl_rdd_guard_of_nonbackground\"
+external guard_of_node : 'a t -> 'a t -> Man.v Bdd.t = \"camlidl_add_guard_of_node\"
+external guard_of_nonbackground : 'a t -> Man.v Bdd.t = \"camlidl_add_guard_of_nonbackground\"
 ")
 
 quote(MLI,"
-(** [Cuddaux_NodesBelowLevel]. [nodes_below_level ?max f olevel] returns all (if [max=None]), otherwise at most [Some max] nodes pointed by the RDD, indexed by a variable of level greater or equal than [level], and encountered first in the top-down exploration (i.e., whenever a node is collected, its sons are not collected). If [olevel=None], then only constant nodes are collected. *)
+(** [Cuddaux_NodesBelowLevel]. [nodes_below_level ?max f olevel] returns all (if [max=None]), otherwise at most [Some max] nodes pointed by the ADD, indexed by a variable of level greater or equal than [level], and encountered first in the top-down exploration (i.e., whenever a node is collected, its sons are not collected). If [olevel=None], then only constant nodes are collected. *)
 val nodes_below_level: ?max:int -> 'a t -> int option -> 'a t array
 
 (** Guard of the given leaf *)
@@ -220,7 +225,7 @@ val leaves: 'a t -> 'a array
 (** Picks (but not randomly) a non background leaf. Return [None] if the only leaf is the background leaf. *)
 val pick_leaf : 'a t -> 'a
 
-(** Returns the set of leaf values together with their guard in the RDD *)
+(** Returns the set of leaf values together with their guard in the ADD *)
 val guardleafs : 'a t -> (Man.v Bdd.t * 'a) array
 ")
 quote(ML,"
@@ -243,10 +248,10 @@ quote(MLMLI,"(** {2 Minimizations} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
-external constrain: 'a t -> Man.v Bdd.t -> 'a t = \"camlidl_rdd_constrain\"
-external tdconstrain: 'a t -> Man.v Bdd.t -> 'a t = \"camlidl_rdd_tdconstrain\"
-external restrict: 'a t -> Man.v Bdd.t -> 'a t = \"camlidl_rdd_restrict\"
-external tdrestrict : 'a t -> Man.v Bdd.t -> 'a t = \"camlidl_rdd_tdrestrict\"
+external constrain: 'a t -> Man.v Bdd.t -> 'a t = \"camlidl_add_constrain\"
+external tdconstrain: 'a t -> Man.v Bdd.t -> 'a t = \"camlidl_add_tdconstrain\"
+external restrict: 'a t -> Man.v Bdd.t -> 'a t = \"camlidl_add_restrict\"
+external tdrestrict : 'a t -> Man.v Bdd.t -> 'a t = \"camlidl_add_tdrestrict\"
 ")
 
 /* ********************************************************************** */
@@ -256,207 +261,19 @@ quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Conversions} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
+/* ********************************************************************** */
+/* User operations */
+/* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 User operations} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
-quote(MLI,"
-(** {3 Types} *)
-
-type ('a, 'b) op1
-type ('a, 'b, 'c) op2
-type ('a, 'b) test2
-type ('a, 'b, 'c, 'd) op3
-type ('a, 'b) exist
-type ('a, 'b, 'c, 'd) existop1
-type ('a, 'b) existand
-type ('a, 'b, 'c, 'd) existandop1
-type ('a, 'b) vectorcomposeop1
-
-type auto = Custom.auto
-type user = Custom.user
-type 'a local = 'a Custom.local
-type global = Custom.global
-
-type 'a cache = 'a Custom.cache
-type ('a, 'b) op
-
-val global : global cache
-val auto : auto local cache
-val user : user local cache
-")
-quote(ML,"
-(** {3 Types} *)
-
-type ('a, 'b) op1 = ('a, 'b) Custom.op1
-type ('a, 'b, 'c) op2 = ('a, 'b, 'c) Custom.op2
-type ('a, 'b) test2 = ('a, 'b) Custom.test2
-type ('a, 'b, 'c, 'd) op3 = ('a, 'b, 'c, 'd) Custom.op3
-type ('a, 'b) exist = ('a, 'b) Custom.exist
-type ('a, 'b, 'c, 'd) existop1 = ('a, 'b, 'c, 'd) Custom.existop1
-type ('a, 'b) existand = ('a, 'b) Custom.existand
-type ('a, 'b, 'c, 'd) existandop1 = ('a, 'b, 'c, 'd) Custom.existandop1
-type ('a, 'b) vectorcomposeop1 = ('a, 'b) Custom.vectorcomposeop1
-
-type auto = Custom.auto
-type user = Custom.user
-type 'a local = 'a Custom.local
-type global = Custom.global
-
-type 'a cache = 'a Custom.cache
-type ('a, 'b) op = ('a, 'b) Custom.op
-let global = Custom.global
-let auto = Custom.auto
-let user = Custom.user
-")
 quote(MLMLI,"
-type ('a, 'b) mexist = [
-  | `Fun of ('a t -> 'a t -> 'a t option) option * ('a -> 'a -> 'a)
-  | `Op of (('a, 'a, 'a) op2, 'b) op
-]
-type ('a, 'b, 'c) mop1 = [
-  | `Fun of 'a -> 'b
-  | `Op of (('a, 'b) op1, 'c) op
-]
-")
-
-quote(MLI,"
-(** {3 Registering operations} *)
-
-val register_op1 :
-  cachetyp:'c cache -> ('a -> 'b) -> (('a,'b) op1, 'c) op
-val register_op2 :
-  cachetyp:'d cache ->
-  ?commutative:bool ->
-  ?idempotent:bool ->
-  ?special:('a t -> 'b t -> 'c t option) ->
-  ('a -> 'b -> 'c) -> (('a,'b,'c) op2, 'd) op
-val register_test2 :
-  cachetyp:'c cache ->
-  ?commutative:bool ->
-  ?reflexive:bool ->
-  ?special:('a t -> 'b t -> bool option) ->
-  ('a -> 'b -> bool) -> (('a,'b) test2, 'c) op
-val register_op3 :
-  cachetyp:'e local cache ->
-  ?special:('a t -> 'b t -> 'c t -> 'd t option) ->
-  ('a -> 'b -> 'c -> 'd) ->
-  (('a,'b,'c,'d) op3, 'e local) op
-val register_exist :
-  cachetyp:'c cache -> (('a,'a,'a) op2,'b) op -> (('a,'b) exist, 'c) op
-val register_existop1 :
-  cachetyp:'e cache ->
-  (('a, 'b) op1, 'd) op ->
-  (('b, 'b, 'b) op2, 'c) op ->
-  (('a,'b,'d,'c) existop1, 'e) op
-val register_existand :
-  cachetyp:'c local cache ->
-  bottom:'a ->
-  (('a, 'a, 'a) op2, 'b) op -> (('a,'b) existand, 'c local) op
-val register_existandop1 :
-  cachetyp:'e local cache ->
-  bottom:'b ->
-  (('a, 'b) op1, 'd) op ->
-  (('b, 'b, 'b) op2, 'c) op ->
-  (('a,'b,'d,'c) existandop1, 'e local) op
-
-(** {3 Flushing cache and removing user operations based on local caches} *)
-
-val op2_of_exist : (('a,'b) exist, 'c) op -> (('a,'a,'a) op2, 'b) op
-val op2_of_existop1 : (('a,'b,'c,'d) existop1, 'e) op -> (('b,'b,'b) op2, 'd) op
-val op2_of_existand : (('a,'b) existand, 'c local) op -> (('a,'a,'a) op2, 'b) op
-val op2_of_existandop1 : (('a,'b,'c,'d) existandop1, 'e local) op -> (('b,'b,'b) op2, 'd) op
-val op1_of_existop1 : (('a,'b,'c,'d) existop1, 'e) op -> (('a,'b) op1, 'c) op
-val op1_of_existandop1 : (('a,'b,'c,'d) existandop1, 'e local) op -> (('a,'b) op1, 'c) op
-
-val flush_op : ('a, user local) op -> unit
-val flush_allop : unit -> unit
-
-(** {3 Applying operations} *)
-
-val apply_op1 : (('a,'b) op1, 'c) op -> 'a t -> 'b t
-val apply_op2 : (('a,'b,'c) op2, 'd) op -> 'a t -> 'b t -> 'c t
-val apply_test2 : (('a,'b) test2, 'c) op -> 'a t -> 'b t -> bool
-val apply_op3 :
-  (('a,'b,'c,'d) op3, 'e local) op ->
-  'a t -> 'b t -> 'c t -> 'd t
-val apply_exist : (('a,'b) exist, 'c) op -> supp:(Man.v Bdd.t) -> 'a t -> 'a t
-val apply_existop1 : (('a,'b,'c,'d) existop1, 'e) op -> supp:(Man.v Bdd.t) -> 'a t -> 'b t
-val apply_existand : (('a,'b) existand, 'c local) op -> supp:(Man.v Bdd.t) -> Man.v Bdd.t -> 'a t -> 'a t
-val apply_existandop1 : (('a,'b,'c,'d) existandop1, 'e local) op -> supp:(Man.v Bdd.t) -> Man.v Bdd.t -> 'a t -> 'b t
-
-(** {3 Map functions (based on automatic user caches)} *)
-
-val map_op1 :
-  ('a -> 'b) -> 'a t -> 'b t
-val map_op2 :
-  ?commutative:bool ->
-  ?idempotent:bool ->
-  ?special:('a t -> 'b t -> 'c t option) ->
-  ('a -> 'b -> 'c) ->
-  'a t -> 'b t -> 'c t
-val map_test2 :
-  ?commutative:bool ->
-  ?reflexive:bool ->
-  ?special:('a t -> 'b t -> bool option) ->
-  ('a -> 'b -> bool) ->
-  'a t -> 'b t -> bool
-val map_op3 :
-  ?special:('a t -> 'b t -> 'c t -> 'd t option) ->
-  ('a -> 'b -> 'c -> 'd) ->
-  'a t -> 'b t -> 'c t -> 'd t
-val map_exist :
-  ('a, 'b) mexist ->
-  supp:(Man.v Bdd.t) -> 'a t -> 'a t
-val map_existop1 :
-  ('a,'b,'c) mop1 -> ('b,'d) mexist ->
-  supp:(Man.v Bdd.t) -> 'a t -> 'b t
-val map_existand :
-  bottom:'a ->
-  ('a, 'b) mexist ->
-  supp:(Man.v Bdd.t) -> Man.v Bdd.t -> 'a t -> 'a t
-val map_existandop1 :
-  bottom:'b ->
-  ('a,'b,'c) mop1 -> ('b,'d) mexist ->
-  supp:(Man.v Bdd.t) -> Man.v Bdd.t -> 'a t -> 'b t
-")
-
-quote(ML,"
-let register_op1 ~cachetyp = Custom.register_op1 ~ddtyp:_internal_ddtype ~cachetyp
-let register_op2 ~cachetyp = Custom.register_op2 ~ddtyp:_internal_ddtype ~cachetyp
-let register_test2  ~cachetyp = Custom.register_test2 ~ddtyp:_internal_ddtype ~cachetyp
-let register_op3 ~cachetyp = Custom.register_op3 ~ddtyp:_internal_ddtype ~cachetyp
-let register_exist ~cachetyp (op:(('a,'a,'a) Custom.op2,'b) Custom.op) = Custom.register_exist ~ddtyp:_internal_ddtype ~cachetyp op
-let register_existop1 ~cachetyp (op1:(('a,'b) Custom.op1,'d) Custom.op) (op:(('b,'b,'b) Custom.op2,'c) Custom.op) = Custom.register_existop1 ~ddtyp:_internal_ddtype ~cachetyp op1 op
-let register_existand ~cachetyp ~(bottom:'a) (op:(('a,'a,'a) Custom.op2,'b) Custom.op) = Custom.register_existand ~ddtyp:_internal_ddtype ~cachetyp ~bottom op
-let register_existandop1 ~cachetyp ~(bottom:'b) (op1:(('a,'b) Custom.op1,'d) Custom.op) (op:(('b,'b,'b) Custom.op2,'c) Custom.op) = Custom.register_existandop1 ~ddtyp:_internal_ddtype ~cachetyp ~bottom op1 op
-
-let op2_of_exist = Custom.op2_of_exist
-let op2_of_existop1 = Custom.op2_of_existop1
-let op2_of_existand = Custom.op2_of_existand
-let op2_of_existandop1 = Custom.op2_of_existandop1
-let op1_of_existop1 = Custom.op1_of_existop1
-let op1_of_existandop1 = Custom.op1_of_existandop1
-
-let flush_op = Custom.flush_op
-let flush_allop = Custom.flush_allop
-
-let (apply_op1 : (('a,'b) Custom.op1,'c) Custom.op -> 'a t -> 'b t) = Custom.apply_op1
-let (apply_op2 : (('a,'b,'c) Custom.op2,'d) Custom.op -> 'a t -> 'b t -> 'c t) = Custom.apply_op2
-let (apply_test2 : (('a,'b) Custom.test2,'c) Custom.op -> 'a t -> 'b t -> bool) = Custom.apply_test2
-let (apply_op3 : (('a,'b,'c,'d) Custom.op3,'e Custom.local) Custom.op -> 'a t -> 'b t -> 'c t -> 'd t) = Custom.apply_op3
-let (apply_exist : (('a,'b) Custom.exist,'c) Custom.op -> supp:(Man.v Bdd.t) -> 'a t -> 'a t) = Custom.apply_exist
-let (apply_existop1 : (('a,'b,'c,'d) Custom.existop1,'e) Custom.op -> supp:(Man.v Bdd.t) -> 'a t -> 'b t) = Custom.apply_existop1
-let (apply_existand : (('a,'b) Custom.existand,'c Custom.local) Custom.op -> supp:(Man.v Bdd.t) -> Man.v Bdd.t -> 'a t -> 'a t) = Custom.apply_existand
-let (apply_existandop1 : (('a,'b,'c,'d) Custom.existandop1,'e Custom.local) Custom.op -> supp:(Man.v Bdd.t) -> Man.v Bdd.t -> 'a t -> 'b t) = Custom.apply_existandop1
-let map_op1 f dd = Custom.map_op1 ~ddtyp:_internal_ddtype f dd
-let map_op2 ?commutative ?idempotent ?special f dd1 dd2 = Custom.map_op2 ~ddtyp:_internal_ddtype ?commutative ?idempotent ?special f dd1 dd2
-let map_test2 ?commutative ?reflexive ?special f dd1 dd2 = Custom.map_test2 ~ddtyp:_internal_ddtype ?commutative ?reflexive ?special f dd1 dd2
-let map_op3 ?special f dd1 dd2 dd3 = Custom.map_op3 ~ddtyp:_internal_ddtype ?special f dd1 dd2 dd3
-let map_exist mexist ~supp dd = Custom.map_exist ~ddtyp:_internal_ddtype mexist ~supp dd
-let map_existop1 mop1 mexist ~supp dd = Custom.map_existop1 ~ddtyp:_internal_ddtype mop1 mexist ~supp dd
-let map_existand ~bottom mexist ~supp bdd dd = Custom.map_existand ~ddtyp:_internal_ddtype ~bottom mexist ~supp bdd dd
-let map_existandop1 ~bottom mop1 mexist ~supp bdd dd = Custom.map_existandop1 ~ddtyp:_internal_ddtype ~bottom mop1 mexist ~supp bdd dd
+(**
+Two options:
+- By decomposition into guards and leafs: see module {!Mapleaf}
+- By using CUDD cache: see module {!User}
+*)
 ")
 
 /* ********************************************************************** */
@@ -467,7 +284,7 @@ quote(MLMLI,"(** {2 Miscellaneous} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
-external transfer : 'a t -> Man.v Man.t -> 'a t = \"camlidl_rdd_transfer\"
+external transfer : 'a t -> Man.v Man.t -> 'a t = \"camlidl_add_transfer\"
 ")
 
 /* ********************************************************************** */
