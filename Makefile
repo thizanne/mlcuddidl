@@ -26,9 +26,9 @@ ICFLAGS = \
 # Files
 #---------------------------------------
 
-IDLMODULES = man bdd rdd vdd
+IDLMODULES = man bdd add vdd
 
-MLMODULES = man bdd custom rdd weakke pWeakke vdd mapleaf mtbdd mtbddc
+MLMODULES = man bdd custom add weakke pWeakke vdd mtbdd mtbddc mapleaf user 
 MLSRC = $(IDLMODULES:%=%.mli) $(IDLMODULES:%=%.ml) custom.ml custom.mli mapleaf.ml mapleaf.mli weakke.ml weakke.mli pWeakke.ml pWeakke.mli mtbdd.ml mtbdd.mli mtbddc.ml mtbddc.mli
 MLINT = $(MLMODULES:%=%.cmi)
 MLOBJ = $(MLMODULES:%=%.cmo)
@@ -166,7 +166,7 @@ mlcuddidl.dvi: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 	$(OCAMLDOC) $(OCAMLINC) \
 -t "MLCUDDIDL: OCaml interface for CUDD library, version 2.0" \
 -latextitle 1,chapter -latextitle 2,section -latextitle 3,subsection -latextitle 4,subsubsection -latextitle 5,paragraph -latextitle 6,subparagraph \
--latex -intro mlcuddidl.odoc -o ocamldoc.tex man.mli bdd.mli rdd.mli mtbdd.mli custom.mli mapleaf.mli weakke.mli pWeakke.mli vdd.mli
+-latex -intro mlcuddidl.odoc -o ocamldoc.tex man.mli bdd.mli add.mli mtbdd.mli mtbddc.mli mapleaf.mli user.mli vdd.mli custom.mli weakke.mli pWeakke.mli
 	$(SED) -e 's/\\documentclass\[11pt\]{article}/\\documentclass[10pt,twosdie,a4paper]{book}\\usepackage{ae,fullpage,makeidx,fancyhdr}\\usepackage[ps2pdf]{hyperref}\\pagestyle{fancy}\\setlength{\\parindent}{0em}\\setlength{\\parskip}{0.5ex}\\sloppy\\makeindex\\author{Bertrand Jeannet}/' -e 's/\\end{document}/\\appendix\\printindex\\end{document}/' ocamldoc.tex >mlcuddidl.tex
 	$(LATEX) mlcuddidl
 	$(MAKEINDEX) mlcuddidl
@@ -175,7 +175,7 @@ mlcuddidl.dvi: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 
 html: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 	mkdir -p html
-	$(OCAMLDOC) $(OCAMLINC) -html -d html -colorize-code -intro mlcuddidl.odoc man.mli bdd.mli rdd.mli mtbdd.mli custom.mli mapleaf.mli weakke.mli pWeakke.mli vdd.mli
+	$(OCAMLDOC) $(OCAMLINC) -html -d html -colorize-code -intro mlcuddidl.odoc man.mli bdd.mli add.mli mtbdd.mli custom.mli mapleaf.mli weakke.mli pWeakke.mli vdd.mli
 
 #--------------------------------------------------------------
 # IMPLICIT RULES AND DEPENDENCIES
@@ -260,36 +260,44 @@ cuddaux%.o: cuddaux.h cuddauxInt.h
 
 %_.caml.o: cudd_caml.h cuddaux.h cuddauxInt.h
 
+add.cmo: man.cmi custom.cmi bdd.cmi add.cmi
+add.cmx: man.cmx custom.cmx bdd.cmx add.cmi
 bdd.cmo: man.cmi bdd.cmi
 bdd.cmx: man.cmx bdd.cmi
-custom.cmo: man.cmi bdd.cmi custom.cmi
-custom.cmx: man.cmx bdd.cmx custom.cmi
+custom.cmo: bdd.cmi custom.cmi
+custom.cmx: bdd.cmx custom.cmi
+example.cmo: man.cmi bdd.cmi add.cmi
+example.cmx: man.cmx bdd.cmx add.cmx
 man.cmo: man.cmi
 man.cmx: man.cmi
-mapleaf.cmo: vdd.cmi man.cmi bdd.cmi mapleaf.cmi
-mapleaf.cmx: vdd.cmx man.cmx bdd.cmx mapleaf.cmi
-mtbdd.cmo: vdd.cmi pWeakke.cmi mapleaf.cmi mtbdd.cmi
-mtbdd.cmx: vdd.cmx pWeakke.cmx mapleaf.cmx mtbdd.cmi
-mtbddc.cmo: vdd.cmi pWeakke.cmi mapleaf.cmi mtbddc.cmi
-mtbddc.cmx: vdd.cmx pWeakke.cmx mapleaf.cmx mtbddc.cmi
+mapleaf.cmo: vdd.cmi bdd.cmi mapleaf.cmi
+mapleaf.cmx: vdd.cmx bdd.cmx mapleaf.cmi
+mtbddc.cmo: vdd.cmi pWeakke.cmi man.cmi bdd.cmi mtbddc.cmi
+mtbddc.cmx: vdd.cmx pWeakke.cmx man.cmx bdd.cmx mtbddc.cmi
+mtbdd.cmo: vdd.cmi pWeakke.cmi mtbdd.cmi
+mtbdd.cmx: vdd.cmx pWeakke.cmx mtbdd.cmi
 pWeakke.cmo: weakke.cmi pWeakke.cmi
 pWeakke.cmx: weakke.cmx pWeakke.cmi
-rdd.cmo: man.cmi custom.cmi bdd.cmi rdd.cmi
-rdd.cmx: man.cmx custom.cmx bdd.cmx rdd.cmi
-session.cmo: vdd.cmi rdd.cmi man.cmi bdd.cmi
-session.cmx: vdd.cmx rdd.cmx man.cmx bdd.cmx
-test_mtbdd.cmo: weakke.cmi rdd.cmi mtbdd.cmi mtbddc.cmi man.cmi bdd.cmi
-test_mtbdd.cmx: weakke.cmx rdd.cmx mtbdd.cmx mtbddc.cmx man.cmx bdd.cmx
-vdd.cmo: rdd.cmi man.cmi custom.cmi bdd.cmi vdd.cmi
-vdd.cmx: rdd.cmx man.cmx custom.cmx bdd.cmx vdd.cmi
+session.cmo: vdd.cmi man.cmi bdd.cmi add.cmi
+session.cmx: vdd.cmx man.cmx bdd.cmx add.cmx
+test_bdd.cmo: man.cmi bdd.cmi
+test_bdd.cmx: man.cmx bdd.cmx
+test_mtbdd.cmo: pWeakke.cmi mtbddc.cmi man.cmi bdd.cmi add.cmi
+test_mtbdd.cmx: pWeakke.cmx mtbddc.cmx man.cmx bdd.cmx add.cmx
+user.cmo: vdd.cmi man.cmi custom.cmi bdd.cmi user.cmi
+user.cmx: vdd.cmx man.cmx custom.cmx bdd.cmx user.cmi
+vdd.cmo: man.cmi bdd.cmi add.cmi vdd.cmi
+vdd.cmx: man.cmx bdd.cmx add.cmx vdd.cmi
 weakke.cmo: weakke.cmi
 weakke.cmx: weakke.cmi
+add.cmi: man.cmi custom.cmi bdd.cmi
 bdd.cmi: man.cmi
-custom.cmi: man.cmi bdd.cmi
+custom.cmi: bdd.cmi
 man.cmi:
-mapleaf.cmi: vdd.cmi man.cmi bdd.cmi
+mapleaf.cmi: vdd.cmi bdd.cmi
+mtbddc.cmi: vdd.cmi pWeakke.cmi man.cmi bdd.cmi
 mtbdd.cmi: vdd.cmi pWeakke.cmi man.cmi bdd.cmi
 pWeakke.cmi: weakke.cmi
-rdd.cmi: man.cmi custom.cmi bdd.cmi
-vdd.cmi: man.cmi custom.cmi bdd.cmi
+user.cmi: vdd.cmi bdd.cmi
+vdd.cmi: man.cmi bdd.cmi
 weakke.cmi:

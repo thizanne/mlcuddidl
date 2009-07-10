@@ -3,15 +3,15 @@
 
 (** Custom operations for ADDs (Internal) *)
 
-(** Internal module, used by modules {!Idd}, {!Rdd} and {!Vdd} *)
+(** Internal module, used by modules {!Add} and {!Vdd} *)
 
 (*  ********************************************************************** *)
-(** {2 Types of registered operations} *)
+(** {2 Types and values} *)
 (*  ********************************************************************** *)
 
-(*  ---------------------------------------------------------------------- *)
+(*  ====================================================================== *)
 (** {3 Operations on leaves of MTBDDs} *)
-(*  ---------------------------------------------------------------------- *)
+(*  ====================================================================== *)
 
 type ('a,'b) op1
   (** Type of unary operations ['a -> 'b] *)
@@ -48,9 +48,9 @@ type ('a,'b,'c,'d) existandop1
       [exist supp (ite bdd (op1 f) bottom))]. *)
 type ('a,'b) vectorcomposeop1
 
-(*  ---------------------------------------------------------------------- *)
+(*  ====================================================================== *)
 (** {3 Caching policy} *)
-(*  ---------------------------------------------------------------------- *)
+(*  ====================================================================== *)
 
 (** {4 Local cache} *)
 
@@ -65,7 +65,7 @@ type auto
 type user
   (** It is up to the user to clear regularly the local
       table. Forgetting to do so will prevent garbage collection
-      of nodes stored in the table, which can only grow.
+      of nodes stored in the table, which can only grows.
 
       The OCaml closure defining the function should not use free
       variables that may be modified and so impact its result:
@@ -74,9 +74,12 @@ type user
 
       If such hidden parameters are modified, the cache should be cleared with {!flush_cache}
   *)
+type hash
+type cach
 
-type 'a local
-  (** Local cache (hashtable) policy, where ['a] is either [auto] or [user]. *)
+type ('a,'b) local
+  (** Local cache policy, where ['a] is either [auto] or [user]
+      and ['b] is either [hash] or [cach]. *)
 
 (** {4 Global cache} *)
 
@@ -89,14 +92,18 @@ type global
       {!Man.flush_cache}.
   *)
 
-(** {4 Caching policy} *)
+(** {4 Caching policies} *)
 
 type 'a cache
-  (** Caching policy, where ['a] is either ['a local] or [global]. *)
+  (** Caching policy, where ['a] is either [('a,'b) local] or [global]. *)
 
-(*  ---------------------------------------------------------------------- *)
+val global : global cache
+val autohash : (auto,hash) local cache
+val userhash : (user,hash) local cache
+
+(*  ====================================================================== *)
 (** {3 Type of registered operations} *)
-(*  ---------------------------------------------------------------------- *)
+(*  ====================================================================== *)
 
 type ('a,'b) op
   (** ['a] indicates the type and arity of the corresponding operation on leaves
@@ -116,12 +123,8 @@ type ('a, 'b, 'c) mop1 = [
 ]
 
 (*  ********************************************************************** *)
-(** {2 Registering and managing operations} *)
+(** {2 Registering operations} *)
 (*  ********************************************************************** *)
-
-val global : global cache
-val auto : auto local cache
-val user : user local cache
 
 val register_op1 :
   ddtyp:int -> cachetyp:'a cache -> ('b -> 'c) -> (('b, 'c) op1, 'a) op
@@ -141,9 +144,9 @@ val register_test2 :
   ('b -> 'c -> bool) -> (('b, 'c) test2, 'a) op
 val register_op3 :
   ddtyp:int ->
-  cachetyp:'a local cache ->
+  cachetyp:('a,'b) local cache ->
   ?special:('bdd -> 'cdd -> 'ddd -> 'edd option) ->
-  ('b -> 'c -> 'd -> 'e) -> (('b, 'c, 'd, 'e) op3, 'a local) op
+  ('c -> 'd -> 'e -> 'f) -> (('c, 'd, 'e, 'f) op3, ('a,'b) local) op
 val register_exist :
   ddtyp:int ->
   cachetyp:'a cache -> (('b, 'b, 'b) op2, 'c) op -> (('b, 'c) exist, 'a) op
@@ -154,25 +157,29 @@ val register_existop1 :
   (('c, 'c, 'c) op2, 'e) op -> (('b, 'c, 'd, 'e) existop1, 'a) op
 val register_existand :
   ddtyp:int ->
-  cachetyp:'a local cache ->
-  bottom:'b -> (('b, 'b, 'b) op2, 'c) op -> (('b, 'c) existand, 'a local) op
+  cachetyp:('a,'b) local cache ->
+  bottom:'c -> (('c, 'c, 'c) op2, 'd) op -> (('c, 'd) existand, ('a,'b) local) op
 val register_existandop1 :
   ddtyp:int ->
-  cachetyp:'a local cache ->
-  bottom:'b ->
-  (('c, 'b) op1, 'd) op ->
-  (('b, 'b, 'b) op2, 'e) op -> (('c, 'b, 'd, 'e) existandop1, 'a local) op
+  cachetyp:('a,'b) local cache ->
+  bottom:'c ->
+  (('d, 'c) op1, 'e) op ->
+  (('c, 'c, 'c) op2, 'f) op -> (('d, 'c, 'e, 'f) existandop1, ('a,'b) local) op
 
-external op2_of_exist : (('a,'b) exist, 'c) op -> (('a,'a,'a) op2, 'b) op = "camlidl_cudd_rivdd_op2_of_exist"
-external op2_of_existop1 : (('a,'b,'c,'d) existop1, 'e) op -> (('b,'b,'b) op2, 'd) op = "camlidl_cudd_rivdd_op2_of_exist"
-external op2_of_existand : (('a,'b) existand, 'c local) op -> (('a,'a,'a) op2, 'b) op = "camlidl_cudd_rivdd_op2_of_exist"
-external op2_of_existandop1 : (('a,'b,'c,'d) existandop1, 'e local) op -> (('b,'b,'b) op2, 'd) op = "camlidl_cudd_rivdd_op2_of_exist"
+(*  ********************************************************************** *)
+(** {2 Inspecting operations and flushing caches} *)
+(*  ********************************************************************** *)
 
-external op1_of_existop1 : (('a,'b,'c,'d) existop1, 'e) op -> (('a,'b) op1, 'c) op = "camlidl_cudd_rivdd_op1_of_existop1"
-external op1_of_existandop1 : (('a,'b,'c,'d) existandop1, 'e local) op -> (('a,'b) op1, 'c) op = "camlidl_cudd_rivdd_op1_of_existop1"
+external op2_of_exist : (('a,'b) exist, 'c) op -> (('a,'a,'a) op2, 'b) op = "camlidl_cudd_avdd_op2_of_exist"
+external op2_of_existop1 : (('a,'b,'c,'d) existop1, 'e) op -> (('b,'b,'b) op2, 'd) op = "camlidl_cudd_avdd_op2_of_exist"
+external op2_of_existand : (('a,'b) existand, ('c,'d) local) op -> (('a,'a,'a) op2, 'b) op = "camlidl_cudd_avdd_op2_of_exist"
+external op2_of_existandop1 : (('a,'b,'c,'d) existandop1, ('e,'f) local) op -> (('b,'b,'b) op2, 'd) op = "camlidl_cudd_avdd_op2_of_exist"
 
-external flush_op : ('a, user local) op -> unit = "camlidl_cudd_rivdd_flush_op"
-external flush_allop : unit -> unit = "camlidl_cudd_rivdd_flush_allop"
+external op1_of_existop1 : (('a,'b,'c,'d) existop1, 'e) op -> (('a,'b) op1, 'c) op = "camlidl_cudd_avdd_op1_of_existop1"
+external op1_of_existandop1 : (('a,'b,'c,'d) existandop1, ('e,'f) local) op -> (('a,'b) op1, 'c) op = "camlidl_cudd_avdd_op1_of_existop1"
+
+external flush_op : ('a, (user,'b) local) op -> unit = "camlidl_cudd_avdd_flush_op"
+external flush_allop : unit -> unit = "camlidl_cudd_avdd_flush_allop"
 
 (*  ********************************************************************** *)
 (** {2 Applying operations} *)
@@ -182,14 +189,14 @@ val apply_op1 : (('a, 'b) op1, 'c) op -> 'add -> 'bdd
 val apply_op2 : (('a, 'b, 'c) op2, 'd) op -> 'add -> 'bdd -> 'cdd
 val apply_test2 : (('a, 'b) test2, 'c) op -> 'add -> 'bdd -> bool
 val apply_op3 :
-  (('a, 'b, 'c, 'd) op3, 'e local) op -> 'add -> 'bdd -> 'cdd -> 'ddd
+  (('a, 'b, 'c, 'd) op3, ('e,'f) local) op -> 'add -> 'bdd -> 'cdd -> 'ddd
 val apply_exist : (('a,'b) exist, 'c) op -> supp:('d Bdd.t) -> 'add -> 'add
 val apply_existop1 : (('a,'b,'c,'d) existop1, 'e) op -> supp:('f Bdd.t) -> 'add -> 'bdd
-val apply_existand : (('a,'b) existand, 'c local) op -> supp:('d Bdd.t) -> 'd Bdd.t -> 'add -> 'add
-val apply_existandop1 : (('a,'b,'c,'d) existandop1, 'e local) op -> supp:('f Bdd.t) -> 'f Bdd.t -> 'add -> 'bdd
+val apply_existand : (('a,'b) existand, ('c,'d) local) op -> supp:('e Bdd.t) -> 'e Bdd.t -> 'add -> 'add
+val apply_existandop1 : (('a,'b,'c,'d) existandop1, ('e,'f) local) op -> supp:('g Bdd.t) -> 'g Bdd.t -> 'add -> 'bdd
 
 (*  ********************************************************************** *)
-(** {2 Map operations (based on automatic local caches} *)
+(** {2 Map operations (based on automatic localhash caches} *)
 (*  ********************************************************************** *)
 
 val map_op1 : ddtyp:int -> ('a -> 'b) -> 'add -> 'bdd

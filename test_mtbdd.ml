@@ -47,17 +47,17 @@ module F = struct
       false
 
   let is_leq dd1 dd2 =
-    Mtbddc.map_test2 ~reflexive:true
+    User.map_test2 ~reflexive:true
       (fun xu yu -> (get xu)<=(get yu))
       dd1 dd2
 
   let negate dd =
-    Mtbddc.map_op1
+    User.map_op1
       (fun xu -> unique table (-. (get xu)))
       dd
 
   let add dd1 dd2 =
-    Mtbddc.map_op2 ~commutative:true
+    User.map_op2 ~commutative:true
       ~special:(fun dd1 dd2 ->
 	if is_zero dd1 then Some dd2
 	else if is_zero dd2 then Some dd1
@@ -67,7 +67,7 @@ module F = struct
       dd1 dd2
 
   let mul dd1 dd2 =
-    Mtbddc.map_op2 ~commutative:true
+    User.map_op2 ~commutative:true
       ~special:(fun dd1 dd2 ->
 	if is_zero dd1 then Some dd1
 	else if is_zero dd2 then Some dd2
@@ -89,7 +89,7 @@ let print_table () =
 
 
 module R = struct
-  include Rdd
+  include Add
   let cst = cst mand
   let ite bddv r1 r2 =
     let bddd = Bdd.transfer bddv mand in
@@ -98,25 +98,25 @@ module R = struct
   let restrict f bddv = restrict f (Bdd.transfer bddv mand)
   let tdrestrict f bddv = tdrestrict f (Bdd.transfer bddv mand)
 
-  let print = Rdd.print_minterm pp_print_int pp_print_float
+  let print = Add.print_minterm pp_print_int pp_print_float
 end;;
 
-let rec equal dd1 rdd2 =
+let rec equal dd1 add2 =
   let res = 
-    if Mtbddc.is_cst dd1 && Rdd.is_cst rdd2 then
-      (Mtbddc.dval dd1)=(Rdd.dval rdd2)
-    else if not (Mtbddc.is_cst dd1) && not (Rdd.is_cst rdd2) then
+    if Mtbddc.is_cst dd1 && Add.is_cst add2 then
+      (Mtbddc.dval dd1)=(Add.dval add2)
+    else if not (Mtbddc.is_cst dd1) && not (Add.is_cst add2) then
       let top1 = Mtbddc.topvar dd1 in
       let then1 = Mtbddc.dthen dd1 in
       let else1 = Mtbddc.delse dd1 in
-      let (then2,else2) = Rdd.cofactors top1 rdd2 in
+      let (then2,else2) = Add.cofactors top1 add2 in
       equal then1 then2 && equal else1 else2
     else
       false
   in
   if not res then begin
     printf "@.PROBLEM EQUAL:@.(@[<hv>%a,@ %a@])@."
-      F.print dd1 R.print rdd2
+      F.print dd1 R.print add2
     ;
     failwith "";
   end;
@@ -269,7 +269,7 @@ done
 Gc.set { (Gc.get()) with Gc.verbose = 0x13 };;
 let b = Array.init 4 (fun i -> Bdd.ithvar manv i);;
 let f = Array.init 4 (fun i -> F.cst (float_of_int i));;
-let r = Array.init 4 (fun i -> Rdd.cst mand (float_of_int i));;
+let r = Array.init 4 (fun i -> Add.cst mand (float_of_int i));;
 
 let g1 = Bdd.dand (Bdd.dand b.(0) b.(1)) (Bdd.dnot b.(2));;
 let g = Bdd.dand (Bdd.dand b.(0) b.(1)) (Bdd.dand (Bdd.dnot b.(2)) (Bdd.dnot b.(3)));;

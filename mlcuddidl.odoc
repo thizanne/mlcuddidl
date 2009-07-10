@@ -13,13 +13,15 @@ functions. If you need it, please tell me, I can do it quickly.
 The interface is decomposed in the following user modules:
 - {!Man}: CUDD managers;
 - {!Bdd}: CUDD BDDs;
-- {!Rdd}: CUDD ADDs;
-- {!Mtbdd}: does not exist in CUDD.
+- {!Add}: CUDD ADDs;
+- {!Mtbdd} and its variant {!Mtbddc}: does not exist in CUDD.
+- {!Mapleaf} and {!User} which maps user operations from leaves to MTBDDs on
+   such leaves.
 
-The other internal modules are mainly used by {!Mtbdd}:
-- {!Custom} and {!Mapleaf}: for user operations on RDDs and MTBDDs;
+The other internal modules are mainly used by {!Mtbdd} and {!Mtbddc}:
+- {!Custom}: for user operations on ADDs and MTBDDs;
 - {!Vdd}: raw MTBDDs:
-- {!Weakke}: for polymorphic weak hashtables.
+- {!Weakke} and {!PWeakke}: for polymorphic weak hashtables.
 
 {2 Memory management}
 

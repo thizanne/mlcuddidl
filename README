@@ -8,14 +8,14 @@ The basic distribution contain the following files:
 
         mlcuddidl.odoc
 
-	man.idl bdd.idl rdd.idl vdd.idl (zdd.idl)
+	man.idl bdd.idl add.idl vdd.idl (zdd.idl)
 	man.mli man.ml
 	bdd.mli bdd.ml
-	rdd.mli rdd.ml
+	add.mli add.ml
 	vdd.mli vdd.ml
 
-	weakke.mli pWeakke.mli custom.mli mapleaf.mli mtbdd.mli
-        weakke.ml   pWeakke.ml  custom.ml  mapleaf.ml  mtbdd.ml
+	weakke.mli pWeakke.mli custom.mli mapleaf.mli user.mli mtbdd.mli mtbddc.mli
+        weakke.ml  pWeakke.ml  custom.ml  mapleaf.ml  user.ml  mtbdd.ml  mtbddc.ml
 
 	session.ml example.ml test_mtbdd.ml
 
@@ -38,7 +38,7 @@ The basic distribution contain the following files:
 - GREP, SED, M4 if you want to regenerate files from .idl files
 
 * This code provides an interface to user's functions of the CUDD
-library. It generates five ML modules: Man, Bdd, Rdd, Vdd, Mtbdd.
+library. It generates five ML modules: Man, Bdd, Add, Vdd, Mtbdd.
 
 * To build,
 Set Makefile.config from Makefile.config.model model.

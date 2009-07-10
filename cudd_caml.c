@@ -376,12 +376,12 @@ value camlidl_cudd_bdd_cofactors(value v_var, value v_no)
   CAMLreturn(vres);
 }
 
-value camlidl_cudd_rdd_cofactors(value v_var, value v_no)
+value camlidl_cudd_add_cofactors(value v_var, value v_no)
 {
   CAMLparam2(v_var,v_no); CAMLlocal3(vthen,velse,vres);
   int var;
-  rdd__t no;
-  rdd__t nothen,noelse;
+  add__t no;
+  add__t nothen,noelse;
 
   var = Int_val(v_var);
   camlidl_cudd_node_ml2c(v_no, &no);
@@ -468,21 +468,21 @@ inline int cuddauxTypeEqual(int ddtype, cuddauxType* type1, cuddauxType* type2)
   return ddtype==2 ? type1->value==type2->value : type1->dbl == type2->dbl;
 }
 
-value camlidl_cudd_rivdd_dval(value vddtype, value vno)
+value camlidl_cudd_avdd_dval(value vddtype, value vno)
 {
   CAMLparam2(vddtype,vno); CAMLlocal1(vres);
-  rdd__t no;
+  add__t no;
   int ddtype;
 
   ddtype = Int_val(vddtype);
   camlidl_cudd_node_ml2c(vno, &no);
   if (!cuddIsConstant(no.node))
-    failwith("Rdd|Idd|Vdd.dval: non constant DD");
+    failwith("Add|Vdd.dval: non constant DD");
   vres = Val_DdNode(ddtype,no.node);
   CAMLreturn(vres);
 }
 
-value camlidl_cudd_rivdd_cst(value vddtype, value vman, value vleaf)
+value camlidl_cudd_avdd_cst(value vddtype, value vman, value vleaf)
 {
   CAMLparam3(vddtype,vman,vleaf); CAMLlocal1(vres);
   int ddtype;
@@ -499,10 +499,10 @@ value camlidl_cudd_rivdd_cst(value vddtype, value vman, value vleaf)
   CAMLreturn(vres);
 }
 
-value camlidl_cudd_rivdd_inspect(value vddtype, value vno)
+value camlidl_cudd_avdd_inspect(value vddtype, value vno)
 {
   CAMLparam2(vddtype,vno); CAMLlocal4(vres,vthen,velse,val);
-  rdd__t no;
+  add__t no;
   int ddtype;
 
   ddtype = Int_val(vddtype);
@@ -513,7 +513,7 @@ value camlidl_cudd_rivdd_inspect(value vddtype, value vno)
     Field(vres,0) = val;
   }
   else {
-    rdd__t bthen,belse;
+    add__t bthen,belse;
 
     bthen.man = belse.man = no.man;
     bthen.node = cuddT(no.node);
@@ -528,7 +528,7 @@ value camlidl_cudd_rivdd_inspect(value vddtype, value vno)
   CAMLreturn(vres);
 }
 
-value camlidl_cudd_rivdd_is_eval_cst(value vddtype, value vno1, value vno2)
+value camlidl_cudd_avdd_is_eval_cst(value vddtype, value vno1, value vno2)
 {
   CAMLparam3(vddtype,vno1,vno2); CAMLlocal2(v,vres);
   int ddtype;
@@ -553,7 +553,7 @@ value camlidl_cudd_rivdd_is_eval_cst(value vddtype, value vno1, value vno2)
   CAMLreturn(vres);
 }
 
-value camlidl_cudd_rivdd_is_ite_cst(value vddtype, value vno1, value vno2, value vno3)
+value camlidl_cudd_avdd_is_ite_cst(value vddtype, value vno1, value vno2, value vno3)
 {
   CAMLparam4(vddtype,vno1,vno2,vno3); CAMLlocal2(v,vres);
   int ddtype;
@@ -639,7 +639,7 @@ value camlidl_cudd_bdd_vectorsupport(value _v_vec)
   CAMLreturn(_v_res);
 }
 
-value camlidl_cudd_rdd_vectorsupport2(value _v_vec1, value _v_vec2)
+value camlidl_cudd_add_vectorsupport2(value _v_vec1, value _v_vec2)
 {
   CAMLparam2(_v_vec1,_v_vec2); CAMLlocal2(_v_no,_v_res);
   DdNode **vec; /*in*/
@@ -651,7 +651,7 @@ value camlidl_cudd_rdd_vectorsupport2(value _v_vec1, value _v_vec2)
   size2 = Wosize_val(_v_vec2);
   size = size1+size2;
   if (size==0)
-    failwith ("Rdd.vectorsupport2 called with two empty arrays (annoying because unknown manager for true)");
+    failwith ("Add.vectorsupport2 called with two empty arrays (annoying because unknown manager for true)");
   vec = (DdNode**)malloc(size * sizeof(DdNode*));
   if (size1>0)
     _v_no = Field(_v_vec1,0);
@@ -666,14 +666,14 @@ value camlidl_cudd_rdd_vectorsupport2(value _v_vec1, value _v_vec2)
     camlidl_cudd_node_ml2c(_v_no, &_no);
     vec[index++] = _no.node;
     if (_no.man != _res.man)
-      failwith("Rdd.vectorsupport2 called with BDDs belonging to different managers !");
+      failwith("Add.vectorsupport2 called with BDDs belonging to different managers !");
   }
   for (i = 0; i<size2; i++) {
     _v_no = Field(_v_vec2, i);
     camlidl_cudd_node_ml2c(_v_no, &_no);
     vec[index++] = _no.node;
     if (_no.man != _res.man)
-      failwith("Rdd.vectorsupport2 called with BDDs belonging to different managers !");
+      failwith("Add.vectorsupport2 called with BDDs belonging to different managers !");
   }
   _res.node = Cudd_VectorSupport(_res.man->man, vec, size);
   free(vec);
@@ -713,7 +713,7 @@ value camlidl_cudd_bdd_vectorcompose(value _v_vec, value _v_no)
   CAMLreturn(_vres);
 }
 
-value camlidl_cudd_rdd_vectorcompose(value _v_vec, value _v_no)
+value camlidl_cudd_add_vectorcompose(value _v_vec, value _v_no)
 {
   CAMLparam2(_v_vec,_v_no); CAMLlocal2(_v,_vres);
   DdNode **vec; /*in*/
@@ -766,7 +766,7 @@ value camlidl_cudd_bdd_permute(value _v_no, value _v_permut)
   CAMLreturn(_vres);
 }
 
-value camlidl_cudd_rdd_permute(value _v_no, value _v_permut)
+value camlidl_cudd_add_permute(value _v_no, value _v_permut)
 {
   CAMLparam2(_v_no,_v_permut); CAMLlocal1(_vres);
   bdd__t no; /*in*/
@@ -854,7 +854,7 @@ value camlidl_cudd_bdd_iter_cube(value _v_closure, value _v_no)
   CAMLreturn(Val_unit);
 }
 
-value camlidl_cudd_rivdd_iter_cube(value _v_ddtype,
+value camlidl_cudd_avdd_iter_cube(value _v_ddtype,
 				   value _v_closure, value _v_no)
 {
   CAMLparam3(_v_ddtype,_v_closure,_v_no); CAMLlocal2(_v_array,_v_val);
@@ -1181,7 +1181,7 @@ value camlidl_cudd_pick_cubes_on_support(value _v_no1, value _v_no2, value _v_k)
 /* %======================================================================== */
 
 /* Guard of a given leaf */
-value camlidl_cudd_rivdd_guard_of_leaf(value _v_ddtype, value _v_no, value _v_leaf)
+value camlidl_cudd_avdd_guard_of_leaf(value _v_ddtype, value _v_no, value _v_leaf)
 {
   CAMLparam3(_v_ddtype,_v_no,_v_leaf);
   CAMLlocal1(_vres);
@@ -1204,7 +1204,7 @@ value camlidl_cudd_rivdd_guard_of_leaf(value _v_ddtype, value _v_no, value _v_le
 }
 
 /* List of nodes below a optional level */
-value camlidl_cudd_rivdd_nodes_below_level(value _v_ddtype, value _v_no, value _v_olevel, value _v_omax)
+value camlidl_cudd_avdd_nodes_below_level(value _v_ddtype, value _v_no, value _v_olevel, value _v_omax)
 {
   CAMLparam4(_v_ddtype,_v_no,_v_olevel,_v_omax);
   CAMLlocal2(res,v);
@@ -1246,8 +1246,8 @@ value camlidl_cudd_rivdd_nodes_below_level(value _v_ddtype, value _v_no, value _
   CAMLreturn(res);
 }
 
-/* List of leaves of an rdd, idd or vdd. */
-value camlidl_cudd_rivdd_leaves(value _v_ddtype, value _v_no)
+/* List of leaves of an add or vdd. */
+value camlidl_cudd_avdd_leaves(value _v_ddtype, value _v_no)
 {
   CAMLparam2(_v_ddtype,_v_no); CAMLlocal1(res);
   int ddtype;
@@ -1293,8 +1293,8 @@ value camlidl_cudd_rivdd_leaves(value _v_ddtype, value _v_no)
   CAMLreturn(res);
 }
 
-/* Pick a leaf in an rdd, idd, vdd. */
-value camlidl_cudd_rivdd_pick_leaf(value _v_ddtype, value _v_no)
+/* Pick a leaf in an add or vdd. */
+value camlidl_cudd_avdd_pick_leaf(value _v_ddtype, value _v_no)
 {
   CAMLparam2(_v_ddtype,_v_no); CAMLlocal1(res);
   int ddtype;
