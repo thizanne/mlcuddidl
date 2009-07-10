@@ -28,7 +28,6 @@ type 'a mtbdd =
   | Leaf of 'a
   | Ite of int * 'a Vdd.t * 'a Vdd.t
 
-include Mapleaf
 include Vdd
 
 let dval_u = dval
