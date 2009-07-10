@@ -37,17 +37,14 @@ type 'a mtbdd =
   | Leaf of 'a unique        (** Terminal value *)
   | Ite of int * 'a t * 'a t (** Decision on CUDD variable *)
 
-(* signature of module Vdd slightly modified *)
-include Mapleaf
-
 external manager : 'a t -> Man.v Man.t = "camlidl_cudd_bdd_manager"
 external is_cst : 'a t -> bool = "camlidl_cudd_bdd_is_cst"
 external topvar : 'a t -> int = "camlidl_cudd_bdd_topvar"
-external dthen : 'a t -> 'a t = "camlidl_cudd_rdd_dthen"
-external delse : 'a t -> 'a t = "camlidl_cudd_rdd_delse"
+external dthen : 'a t -> 'a t = "camlidl_cudd_add_dthen"
+external delse : 'a t -> 'a t = "camlidl_cudd_add_delse"
 external cofactors : int -> 'a t -> 'a t * 'a t
-  = "camlidl_cudd_rdd_cofactors"
-external cofactor : 'a t -> Man.v Bdd.t -> 'a t = "camlidl_cudd_rdd_cofactor"
+  = "camlidl_cudd_add_cofactors"
+external cofactor : 'a t -> Man.v Bdd.t -> 'a t = "camlidl_cudd_add_cofactor"
 let dval_u = Vdd.dval
 let dval t = get (dval_u t)
 let inspect t = match Vdd.inspect t with
@@ -59,19 +56,19 @@ external is_var_in : int -> 'a t -> bool = "camlidl_cudd_bdd_is_var_in"
 external vectorsupport : 'a t array -> Man.v Bdd.t
   = "camlidl_cudd_bdd_vectorsupport"
 external vectorsupport2 : Man.v Bdd.t array -> 'a t array -> Man.v Bdd.t
-  = "camlidl_cudd_rdd_vectorsupport2"
+  = "camlidl_cudd_add_vectorsupport2"
 let cst_u = Vdd.cst
 let cst cudd table x = Vdd.cst cudd (unique table x)
 let _background = Vdd._background
-external ite : Man.v Bdd.t -> 'a t -> 'a t -> 'a t = "camlidl_cudd_rdd_ite"
+external ite : Man.v Bdd.t -> 'a t -> 'a t -> 'a t = "camlidl_cudd_add_ite"
 external ite_cst : Man.v Bdd.t -> 'a t -> 'a t -> 'a t option
-  = "camlidl_cudd_rdd_ite_cst"
+  = "camlidl_cudd_add_ite_cst"
 external eval_cst : 'a t -> Man.v Bdd.t -> 'a t option
-  = "camlidl_cudd_rdd_eval_cst"
+  = "camlidl_cudd_add_eval_cst"
 external compose : int -> Man.v Bdd.t -> 'a t -> 'a t
-  = "camlidl_cudd_rdd_compose"
+  = "camlidl_cudd_add_compose"
 external vectorcompose : Man.v Bdd.t array -> 'a t -> 'a t
-  = "camlidl_cudd_rdd_vectorcompose"
+  = "camlidl_cudd_add_vectorcompose"
 external is_equal : 'a t -> 'a t -> bool = "camlidl_cudd_bdd_is_equal"
 external is_equal_when : 'a t -> 'a t -> Man.v Bdd.t -> bool
   = "camlidl_cudd_bdd_is_equal_when"
@@ -90,9 +87,9 @@ external nbpaths : 'a t -> float = "camlidl_cudd_bdd_nbpaths"
 external nbnonzeropaths : 'a t -> float = "camlidl_cudd_bdd_nbtruepaths"
 external nbminterms : int -> 'a t -> float = "camlidl_cudd_bdd_nbminterms"
 external density : int -> 'a t -> float = "camlidl_cudd_bdd_density"
-external nbleaves : 'a t -> int = "camlidl_cudd_rdd_nbleaves"
-external varmap : 'a t -> 'a t = "camlidl_cudd_rdd_varmap"
-external permute : 'a t -> int array -> 'a t = "camlidl_cudd_rdd_permute"
+external nbleaves : 'a t -> int = "camlidl_cudd_add_nbleaves"
+external varmap : 'a t -> 'a t = "camlidl_cudd_add_varmap"
+external permute : 'a t -> int array -> 'a t = "camlidl_cudd_add_permute"
 let iter_cube_u = Vdd.iter_cube
 let iter_cube f t =
   iter_cube_u 
@@ -101,9 +98,9 @@ let iter_cube f t =
 external iter_node : ('a t -> unit) -> 'a t -> unit
   = "camlidl_cudd_iter_node"
 external guard_of_node : 'a t -> 'a t -> Man.v Bdd.t
-  = "camlidl_cudd_rdd_guard_of_node"
+  = "camlidl_cudd_add_guard_of_node"
 external guard_of_nonbackground : 'a t -> Man.v Bdd.t
-  = "camlidl_cudd_rdd_guard_of_nonbackground"
+  = "camlidl_cudd_add_guard_of_nonbackground"
 let nodes_below_level = Vdd.nodes_below_level
 let guard_of_leaf_u = Vdd.guard_of_leaf
 let guard_of_leaf table dd leaf = guard_of_leaf_u dd (unique table leaf)
@@ -117,71 +114,14 @@ let guardleafs_u = Vdd.guardleafs
 let guardleafs t = 
   Array.map (fun (g,xu) -> (g,get xu)) (guardleafs_u t)
 external constrain : 'a t -> Man.v Bdd.t -> 'a t
-  = "camlidl_cudd_rdd_constrain"
+  = "camlidl_cudd_add_constrain"
 external tdconstrain : 'a t -> Man.v Bdd.t -> 'a t
-  = "camlidl_cudd_rdd_tdconstrain"
-external restrict : 'a t -> Man.v Bdd.t -> 'a t = "camlidl_cudd_rdd_restrict"
+  = "camlidl_cudd_add_tdconstrain"
+external restrict : 'a t -> Man.v Bdd.t -> 'a t = "camlidl_cudd_add_restrict"
 external tdrestrict : 'a t -> Man.v Bdd.t -> 'a t
-  = "camlidl_cudd_rdd_tdrestrict"
+  = "camlidl_cudd_add_tdrestrict"
 
-type ('a, 'b) op1 = ('a capsule, 'b capsule) Vdd.op1
-type ('a, 'b, 'c) op2 = ('a capsule, 'b capsule, 'c capsule) Vdd.op2
-type ('a, 'b) test2 = ('a capsule, 'b capsule) Vdd.test2
-type ('a, 'b, 'c, 'd) op3 = ('a capsule, 'b capsule, 'c capsule, 'd capsule) Vdd.op3
-type ('a, 'b) exist = ('a capsule, 'b) Vdd.exist
-type ('a, 'b, 'c, 'd) existop1 = ('a capsule, 'b capsule, 'c, 'd) Vdd.existop1
-type ('a, 'b) existand = ('a capsule, 'b) Vdd.existand
-type ('a, 'b, 'c, 'd) existandop1 = ('a capsule, 'b capsule, 'c, 'd) Vdd.existandop1
-type ('a, 'b) vectorcomposeop1 = ('a capsule, 'b) Vdd.vectorcomposeop1
-type auto = Vdd.auto
-type user = Vdd.user
-type 'a local = 'a Vdd.local
-type global = Vdd.global
-type 'a cache = 'a Vdd.cache
-type ('a, 'b) op = ('a, 'b) Vdd.op
-type ('a, 'b) mexist =
-    [ `Fun of ('a t -> 'a t -> 'a t option) option * ('a capsule -> 'a capsule -> 'a capsule)
-    | `Op of (('a, 'a, 'a) op2, 'b) op ]
-type ('a, 'b, 'c) mop1 = [ `Fun of 'a capsule -> 'b capsule | `Op of (('a, 'b) op1, 'c) op ]
-
-let global = Custom.global
-let auto = Custom.auto
-let user = Custom.user
-
-let register_op1 = Vdd.register_op1
-let register_op2 = Vdd.register_op2
-let register_test2 = Vdd.register_test2
-let register_op3 = Vdd.register_op3
-let register_exist = Vdd.register_exist
-let register_existop1 = Vdd.register_existop1
-let register_existand = Vdd.register_existand
-let register_existandop1 = Vdd.register_existandop1
-let op2_of_exist = Vdd.op2_of_exist
-let op2_of_existop1 = Vdd.op2_of_existop1
-let op2_of_existand = Vdd.op2_of_existand
-let op2_of_existandop1 = Vdd.op2_of_existandop1
-let op1_of_existop1 = Vdd.op1_of_existop1
-let op1_of_existandop1 = Vdd.op1_of_existandop1
-let flush_op = Vdd.flush_op
-let flush_allop = Vdd.flush_allop
-let apply_op1 = Vdd.apply_op1
-let apply_op2 = Vdd.apply_op2
-let apply_test2 = Vdd.apply_test2
-let apply_op3 = Vdd.apply_op3
-let apply_exist = Vdd.apply_exist
-let apply_existop1 = Vdd.apply_existop1
-let apply_existand = Vdd.apply_existand
-let apply_existandop1 = Vdd.apply_existandop1
-let map_op1 = Vdd.map_op1
-let map_op2 = Vdd.map_op2
-let map_test2 = Vdd.map_test2
-let map_op3 = Vdd.map_op3
-let map_exist = Vdd.map_exist
-let map_existop1 = Vdd.map_existop1
-let map_existand = Vdd.map_existand
-let map_existandop1 = Vdd.map_existandop1
-
-external transfer : 'a t -> Man.v Man.t -> 'a t = "camlidl_cudd_rdd_transfer"
+external transfer : 'a t -> Man.v Man.t -> 'a t = "camlidl_cudd_add_transfer"
 let print__minterm print_leaf fmt t =
   Vdd.print__minterm (fun fmt x -> print_leaf fmt x.content) fmt t
 let print_minterm print_id print_leaf fmt t =
