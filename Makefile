@@ -169,7 +169,7 @@ mlcuddidl.dvi: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 
 html: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 	mkdir -p html
-	$(OCAMLDOC) $(OCAMLINC) -html -d html -colorize-code -intro mlcuddidl.odoc man.mli bdd.mli add.mli mtbdd.mli custom.mli mapleaf.mli weakke.mli pWeakke.mli vdd.mli
+	$(OCAMLDOC) $(OCAMLINC) -html -d html -colorize-code -intro mlcuddidl.odoc $(MLMODULES:%=%.mli)
 
 dist: $(IDLMODULES:%=%.idl) macros.m4 $(MLSRC) $(CCSRC) Makefile Makefile.config.model README Changes test_mtbdd.ml example.ml session.ml mlcuddidl.odoc mlcuddidl.pdf html sedscript_c sedscript_caml
 	(cd ..; tar zcvf $(HOME)/mlcuddidl.tgz $(^:%=mlcuddidl/%))
@@ -180,7 +180,7 @@ homepage: html mlcuddidl.pdf
 		$(HOME)/web/mlxxxidl-forge/mlcuddidl
 	chmod -R ugoa+rx $(HOME)/web/mlxxxidl-forge/mlcuddidl
 	scp -r $(HOME)/web/mlxxxidl-forge/mlcuddidl johns:/home/wwwpop-art/people/bjeannet/mlxxxidl-forge
-	ssh johns chmod -R ugoa+rx /home/wwwpop-art/people/bjeannet/mlxxxidl-forge
+	ssh johns chmod -R ugoa+rx /home/wwwpop-art/people/bjeannet/mlxxxidl-forge/mlcuddidl
 
 
 #--------------------------------------------------------------

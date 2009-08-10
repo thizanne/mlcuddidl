@@ -1,7 +1,7 @@
+(** MTBDDs using a weak hashtable for unique constants *)
+
 (* This file is part of the MLCUDDIDL Library, released under LGPL license.
    Please read the COPYING file packaged in the distribution  *)
-
-(** MTBDDs using a weak hashtable for unique constants *)
 
 type 'a unique
   (** Type of unique representants of MTBDD leaves of type ['a].

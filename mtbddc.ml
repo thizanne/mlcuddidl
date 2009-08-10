@@ -1,4 +1,5 @@
-(** MTBDDs using a weak hashtable for unique constants *)
+(** MTBDDs using a weak hashtable for unique constants, version
+    for custom blocks with finalization function *)
 
 open Format
 
