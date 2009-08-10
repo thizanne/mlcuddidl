@@ -113,6 +113,8 @@ val combineleaf_array :
       is initialized with [default], to which one progressively
       add [combine acc (f (/\ tguard) tleaves)].  
 
+      The arrays are assumed to be non-empty.
+
       If for some [i], [tabsorbant.(i)=Some abs] and [absorbant
       tleaves.(i)=true], then [f (/\ tguard) tleaves] is assumed
       to return [default] (this allows optimisation).

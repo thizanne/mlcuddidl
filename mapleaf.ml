@@ -168,6 +168,7 @@ let combineleaf_array
     'c
     =
   let length = Array.length tvdd in
+  assert(length>=1);
   let cudd = Vdd.manager tvdd.(0) in
   let res = ref default in
 
