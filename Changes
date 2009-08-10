@@ -7,7 +7,7 @@ General: documentation and again (sorry) reorganizatioon
 
   * Annoying GC bug in Custom module solved (use of CUDD hashtables).
 
-  * Rdd renamed in Ad (to match CUDD names).
+  * Rdd renamed in Add (to match CUDD names).
 
   * Vdd and Mtbdd does not contain user operations, which are available only
     in Mapleaf and User modules.
