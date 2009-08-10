@@ -12,8 +12,10 @@ struct list_t {
 };
 typedef struct list_t list_t;
 
-/* Type of ternary apply operator. */
+/* Identifier of user operations, for use in tables */
 typedef void* DDAUX_IDOP;
+
+/* Type of unary, binary, ternary operations */
 typedef DdNode * (*DDAUX_AOP1)(DdManager *, DDAUX_IDOP pid, DdNode *);
 typedef DdNode * (*DDAUX_AOP2)(DdManager *, DDAUX_IDOP pid, DdNode *, DdNode *);
 typedef DdNode * (*DDAUX_AOP3)(DdManager *, DDAUX_IDOP pid, DdNode *, DdNode *, DdNode *);
@@ -60,14 +62,46 @@ DdNode* Cuddaux_addApplyVectorCompose(DdManager* dd, DD_MAOP op, DdNode* f, DdNo
 
 /* File cuddauxAddApply.c */
 /* f, g and h are ADDs */
-DdNode* Cuddaux_addApply1(DdManager* dd, DdHashTable** table, DDAUX_IDOP pid, DDAUX_AOP1 op, DdNode* f);
-DdNode* Cuddaux_addApply2(DdManager* dd, DdHashTable** table, DDAUX_IDOP pid, int commutative, DDAUX_AOP2 op, DdNode* f, DdNode* g);
-int Cuddaux_addTest2(DdManager* dd, DdHashTable** table, DDAUX_IDOP pid, int commutative, DDAUX_AOP2 op, DdNode* f, DdNode* g);
-DdNode* Cuddaux_addApply3(DdManager* dd, DdHashTable** table, DDAUX_IDOP pid, DDAUX_AOP3 op, DdNode* f, DdNode* g, DdNode* h);
-DdNode* Cuddaux_addAbstract(DdManager* dd, DdHashTable** table, DdHashTable** tableop, DDAUX_IDOP pid, DDAUX_AOP2 op, DdNode* f, DdNode* cube);
-DdNode* Cuddaux_addApplyAbstract(DdManager* dd, DdHashTable** table, DdHashTable** tableop, DdHashTable** tableop1, DDAUX_IDOP pid, DDAUX_IDOP pid1, DDAUX_AOP2 op, DDAUX_AOP1 op1, DdNode* f, DdNode* cube);
-DdNode* Cuddaux_addBddAndAbstract(DdManager* dd, DdHashTable** table, DdHashTable** tableop, DDAUX_IDOP pid, DDAUX_AOP2 op, DdNode* f, DdNode* g, DdNode* cube, DdNode* background);
-DdNode* Cuddaux_addApplyBddAndAbstract(DdManager* dd, DdHashTable** table, DdHashTable** tableop, DdHashTable** tableop1, DDAUX_IDOP pid, DDAUX_IDOP pid1, DDAUX_AOP2 op, DDAUX_AOP1 op1, DdNode* f, DdNode* g, DdNode* cube, DdNode* background);
+/* In all of the following functions,
+   if table==NULL, use global cache (exception: Apply3)
+   otherwise, if *table!=NULL, use the hashtable
+   otherwise, creates an hashtable and stores it in *table */
+DdNode* Cuddaux_addApply1(DdManager* dd, DdHashTable** table, 
+			  DDAUX_IDOP pid, DDAUX_AOP1 op, 
+			  DdNode* f);
+DdNode* Cuddaux_addApply2(DdManager* dd, DdHashTable** table, 
+			  DDAUX_IDOP pid, int commutative, DDAUX_AOP2 op, 
+			  DdNode* f, DdNode* g);
+int Cuddaux_addTest2(DdManager* dd, DdHashTable** table, 
+		     DDAUX_IDOP pid, int commutative, 
+		     DDAUX_AOP2 op, DdNode* f, DdNode* g);
+DdNode* 
+Cuddaux_addApply3(DdManager* dd, DdHashTable** table, 
+		  DDAUX_IDOP pid, DDAUX_AOP3 op, 
+		  DdNode* f, DdNode* g, DdNode* h);
+DdNode* 
+Cuddaux_addAbstract(DdManager* dd, 
+		    DdHashTable** table, DdHashTable** tableop, 
+		    DDAUX_IDOP pid, DDAUX_AOP2 op, 
+		    DdNode* f, DdNode* cube);
+DdNode*
+Cuddaux_addApplyAbstract(DdManager* dd, 
+			 DdHashTable** table, DdHashTable** tableop, DdHashTable** tableop1, 
+			 DDAUX_IDOP pid, DDAUX_IDOP pid1, 
+			 DDAUX_AOP2 op, DDAUX_AOP1 op1, 
+			 DdNode* f, DdNode* cube);
+DdNode* 
+Cuddaux_addBddAndAbstract(DdManager* dd, 
+			  DdHashTable** table, DdHashTable** tableop, 
+			  DDAUX_IDOP pid, DDAUX_AOP2 op, 
+			  DdNode* f, DdNode* g, 
+			  DdNode* cube, DdNode* background);
+DdNode* 
+Cuddaux_addApplyBddAndAbstract(DdManager* dd, 
+			       DdHashTable** table, DdHashTable** tableop, DdHashTable** tableop1, 
+			       DDAUX_IDOP pid, DDAUX_IDOP pid1, DDAUX_AOP2 op, DDAUX_AOP1 op1, 
+			       DdNode* f, DdNode* g, 
+			       DdNode* cube, DdNode* background);
 
 /* File cuddauxMisc.c */
 /* f is a BDD/ADD node */
