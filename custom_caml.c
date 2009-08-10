@@ -49,18 +49,6 @@ something like type 'a capsule = { val:'a }\n");
   CAMLreturn (res);
 }
 
-/* pour debugger test_mtbdd.ml */
-value camlidl_string_of_value(value arg)
-{
-  CAMLparam1(arg);
-  CAMLlocal1(res);
-  char str[10];
-
-  sprintf(str,"%d",arg);
-  res = caml_copy_string(str);
-  CAMLreturn(res);
-}
-
 /* ========================================================================= */
 /* Declarations */
 /* ========================================================================= */

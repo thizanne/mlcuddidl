@@ -28,8 +28,8 @@ ICFLAGS = \
 
 IDLMODULES = man bdd add vdd
 
-MLMODULES = man bdd custom add weakke pWeakke vdd mtbdd mtbddc mapleaf user 
-MLSRC = $(IDLMODULES:%=%.mli) $(IDLMODULES:%=%.ml) custom.ml custom.mli mapleaf.ml mapleaf.mli weakke.ml weakke.mli pWeakke.ml pWeakke.mli mtbdd.ml mtbdd.mli mtbddc.ml mtbddc.mli
+MLMODULES = man bdd custom add weakke pWeakke vdd mtbdd mtbddc mapleaf user
+MLSRC = $(MLMODULES:%=%.mli) $(MLMODULES:%=%.ml)
 MLINT = $(MLMODULES:%=%.cmi)
 MLOBJ = $(MLMODULES:%=%.cmo)
 MLOBJx = $(MLMODULES:%=%.cmx)
@@ -94,7 +94,7 @@ example.opt2: example.ml cudd.cmxa libcudd_caml.a
 	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd_debug -lmtr -lst -lutil -lepd" \
 	-cclib "-lasmrun"
 
-install: 
+install:
 	mkdir -p $(INCDIR) $(LIBDIR) $(BINDIR)
 	cp -f $(MLLIB_TOINSTALL) $(MLLIB_TOINSTALLx) $(LIBDIR)
 	cp -f $(CCINC_TOINSTALL) $(INCDIR)
@@ -108,7 +108,7 @@ distclean:
 
 mostlyclean: clean
 	/bin/rm -f $(IDLMODULES:%=%.ml) $(IDLMODULES:%=%.mli) $(IDLMODULES:%=%_caml.c) tmp/* html/*
-	/bin/rm -f mlcuddidl.?? mlcuddidl.??? mlcuddidl.info example example.opt *.tex *.dvi style.css ocamldoc.sty
+	/bin/rm -f mlcuddidl.?? mlcuddidl.??? mlcuddidl.info example example.opt mlcuddidl.tex ocamldoc.tex *.dvi style.css ocamldoc.sty
 
 clean:
 	/bin/rm -f cuddtop *.byte *.opt
@@ -116,12 +116,6 @@ clean:
 	/bin/rm -f *.[ao] *.cm[ioxa] *.cmxa *.opt *.opt2 *.annot
 	/bin/rm -f cmttb*
 	/bin/rm -fr html
-
-tar: $(IDLMODULES:%=%.idl) macros.m4 $(MLSRC) $(CCSRC) Makefile Makefile.config.model README Changes example.ml session.ml mlcuddidl.texi texinfo.tex sedscript_c sedscript_caml
-	(cd ..; tar zcvf $(HOME)/mlcuddidl.tgz $(^:%=mlcuddidl/%))
-
-dist: $(IDLMODULES:%=%.idl) macros.m4 $(MLSRC) $(CCSRC) Makefile Makefile.config.model README Changes test_mtbdd.ml session.ml mlcuddidl.odoc mlcuddidl.pdf html sedscript_c sedscript_caml
-	(cd ..; tar zcvf $(HOME)/mlcuddidl.tgz $(^:%=mlcuddidl/%))
 
 # CAML rules
 cudd.cma: cudd.cmo
@@ -164,7 +158,7 @@ mlcuddidl.pdf: mlcuddidl.dvi
 	$(DVIPDF) mlcuddidl.dvi
 mlcuddidl.dvi: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 	$(OCAMLDOC) $(OCAMLINC) \
--t "MLCUDDIDL: OCaml interface for CUDD library, version 2.1" \
+-t "MLCUDDIDL: OCaml interface for CUDD library, version 2.1.0, 10/08/09" \
 -latextitle 1,chapter -latextitle 2,section -latextitle 3,subsection -latextitle 4,subsubsection -latextitle 5,paragraph -latextitle 6,subparagraph \
 -latex -intro mlcuddidl.odoc -o ocamldoc.tex man.mli bdd.mli add.mli vdd.mli mtbdd.mli mtbddc.mli mapleaf.mli user.mli custom.mli weakke.mli pWeakke.mli
 	$(SED) -e 's/\\documentclass\[11pt\]{article}/\\documentclass[10pt,twosdie,a4paper]{book}\\usepackage{ae,fullpage,makeidx,fancyhdr}\\usepackage[ps2pdf]{hyperref}\\pagestyle{fancy}\\setlength{\\parindent}{0em}\\setlength{\\parskip}{0.5ex}\\sloppy\\makeindex\\author{Bertrand Jeannet}/' -e 's/\\end{document}/\\appendix\\printindex\\end{document}/' ocamldoc.tex >mlcuddidl.tex
@@ -176,6 +170,18 @@ mlcuddidl.dvi: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 html: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 	mkdir -p html
 	$(OCAMLDOC) $(OCAMLINC) -html -d html -colorize-code -intro mlcuddidl.odoc man.mli bdd.mli add.mli mtbdd.mli custom.mli mapleaf.mli weakke.mli pWeakke.mli vdd.mli
+
+dist: $(IDLMODULES:%=%.idl) macros.m4 $(MLSRC) $(CCSRC) Makefile Makefile.config.model README Changes test_mtbdd.ml example.ml session.ml mlcuddidl.odoc mlcuddidl.pdf html sedscript_c sedscript_caml
+	(cd ..; tar zcvf $(HOME)/mlcuddidl.tgz $(^:%=mlcuddidl/%))
+
+homepage: html mlcuddidl.pdf
+	hyperlatex index
+	cp -r index.html html mlcuddidl.pdf Changes \
+		$(HOME)/web/mlxxxidl-forge/mlcuddidl
+	chmod -R ugoa+rx $(HOME)/web/mlxxxidl-forge/mlcuddidl
+	scp -r $(HOME)/web/mlxxxidl-forge/mlcuddidl johns:/home/wwwpop-art/people/bjeannet/mlxxxidl-forge
+	ssh johns chmod -R ugoa+rx /home/wwwpop-art/people/bjeannet/mlxxxidl-forge
+
 
 #--------------------------------------------------------------
 # IMPLICIT RULES AND DEPENDENCIES
@@ -225,32 +231,6 @@ rebuild: macros.m4 sedscript_caml sedscript_c
 
 %.cmx: %.ml %.cmi
 	$(OCAMLOPT) $(OCAMLOPTFLAGS) $(OCAMLINC) -for-pack Cudd -c $<
-
-#cudd.ml: $(MLMODULES:%=%.ml)
-#	echo "" >$@
-#	for i in $(MLMODULES); do \
-#		echo "" >>$@; \
-#		echo "(*  ********************************************************************** *)" >>$@; \
-#		echo "(*  ********************************************************************** *)" >>$@; \
-#		echo "(*  ********************************************************************** *)" >>$@; \
-#		echo "" >>$@; \
-#		echo "$$i" | sed -e "s/\(.*\)/module \u\1 = struct/g" >>$@; \
-#		cat <$$i.ml | sed -e "s/^/  /g" >>$@; \
-#		echo "end" >>$@; \
-#	done
-#
-#cudd.mli: $(MLMODULES:%=%.mli)
-#	echo "" >$@
-#	for i in $(MLMODULES); do \
-#		echo "" >>$@; \
-#		echo "(*  ********************************************************************** *)" >>$@; \
-#		echo "(*  ********************************************************************** *)" >>$@; \
-#		echo "(*  ********************************************************************** *)" >>$@; \
-#		echo "" >>$@; \
-#		echo "$$i" | sed -e "s/\(.*\)/module \u\1 : sig/g" >>$@; \
-#		cat <$$i.mli | sed -e "s/^/  /g" >>$@; \
-#		echo "end" >>$@; \
-#	done
 
 #-----------------------------------
 # Dependencies
