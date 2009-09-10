@@ -45,7 +45,12 @@ Set Makefile.config from Makefile.config.model model.
 
 TWO IMPORTANT REMARKS:
 
-1. The CUDD Makefile does not provide an 'install' target.
+1. The CUDD Makefile does not provide an 'install' target, neither dynamic
+   libraries.
+
+   To help you, I provide a Makefile.cudd file:
+   * look at it and set the variables properly
+   * do 'make -f Makefile.cudd'
 
    - mlcuddidl expect to find .h files in
      $(MLCUDDIDL_PREFIX)/include and .a files
@@ -53,12 +58,9 @@ TWO IMPORTANT REMARKS:
 
    - It also expects to find cuddInt.h, which is located in the
      cudd subdirectory when the CUDD source distribution.
-   
-   Ensures this is the case
 
 2. The C compilation flags in XCFLAGS (processor, alignement)
-   should be the same than those with which CUDD and CUDDAUX are
-   compiled.
+   should be the same than those with which CUDD is compiled.
 
 make rebuild: requested only if download from subvsersion directory.
 	      regenerate C and OCaml files from .idl files
@@ -66,7 +68,7 @@ make rebuild: requested only if download from subvsersion directory.
 make all: build the bytecode and native versions of the interface
 make install: installs the two versions of the interface
 make cuddrun: builds a OCaml bytecode interpreter containing the
-              CUDD and CUDDAUX libraries
+              CUDD library
 make cuddtop: builds a OCaml toplevel containing the interface
 make test_mtbdd.byte: build bytecode version of test_mtbdd.ml
 make test_mtbdd.opt: build native-code version of test_mtbdd.ml

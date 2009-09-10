@@ -4,6 +4,7 @@ Then, type on shour shell the command:
 "cuddtop -I installation_path_of_lib" or
 "cuddtop" if in source directory, after compilation
 *)
+#load "cudd.cma"
 open Cudd;;
 
 let man = Man.make_d ~numVars:10 ();;

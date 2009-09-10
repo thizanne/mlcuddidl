@@ -30,7 +30,6 @@ IDLMODULES = man bdd add vdd
 
 MLMODULES = man bdd custom add weakke pWeakke vdd mtbdd mtbddc mapleaf user
 MLSRC = $(MLMODULES:%=%.mli) $(MLMODULES:%=%.ml)
-MLINT = $(MLMODULES:%=%.cmi)
 MLOBJ = $(MLMODULES:%=%.cmo)
 MLOBJx = $(MLMODULES:%=%.cmx)
 MLLIB_TOINSTALL = $(IDLMODULES:%=%.idl) cudd.cmi cudd.cma
@@ -43,8 +42,8 @@ CCMODULES = \
 
 CCSRC = cuddaux.h cuddauxInt.h cudd_caml.h $(CCMODULES:%=%.c)
 
-CCBIN_TOINSTALL = cuddtop
-CCLIB_TOINSTALL = libcudd_caml.a libcudd_caml_debug.a
+CCBIN_TOINSTALL = cuddtop cuddrun
+CCLIB_TOINSTALL = libcudd_caml.a libcudd_caml_debug.a libcudd_caml.so libcudd_caml_debug.so
 CCINC_TOINSTALL = cuddaux.h cuddauxInt.h cudd_caml.h
 
 #---------------------------------------
@@ -52,58 +51,58 @@ CCINC_TOINSTALL = cuddaux.h cuddauxInt.h cudd_caml.h
 #---------------------------------------
 
 # Global rules
-all: cudd.cmi cudd.cmo cudd.cmx cudd.cma cudd.cmxa libcudd_caml.a libcudd_caml_debug.a
+all: cudd.cmi cudd.cmo cudd.cmx cudd.cma cudd.cmxa libcudd_caml.a
+
+ifneq ($(HAS_SHARED),)
+all: libcudd_caml.so dllcudd_caml.so
+endif
+
+debug: libcudd_caml_debug.a
+ifneq ($(HAS_SHARED),)
+debug: libcudd_caml_debug.so dllcudd_caml_debug.so
+endif
 
 cuddtop: cudd.cma libcudd_caml.a
-	$(OCAMLMKTOP) -verbose $(OCAMLFLAGS) -o $@ -custom -cc "$(CC) -g" -ccopt -L. cudd.cma -noautolink \
-	-ccopt -L. -cclib -lcudd_caml_debug \
-	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
-	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd -lmtr -lst -lutil -lepd" \
-	-cclib "-lcamlrun"
+	$(OCAMLMKTOP) -verbose $(OCAMLFLAGS) -o $@ -ccopt -L. cudd.cma
+
 # Example of compilation command
 # If the library is installed somewhere, add a -I $(PATH) option
-example.byte: example.ml cudd.cma
-	$(OCAMLC) $(OCAMLFLAGS) $(OCAMLINC) -o $@ -custom -cc "$(CC)" \
+%.byte: %.ml cudd.cma
+	$(OCAMLC) $(OCAMLFLAGS) $(OCAMLINC) -o $@ -cc "$(CC)" \
 	cudd.cma example.ml
-example.opt: example.ml cudd.cmxa libcudd_caml.a
+%.opt: %.ml cudd.cmxa libcudd_caml.a
 	$(OCAMLOPT) $(OCAMLOPTFLAGS) $(OCAMLINC) -o $@ -cc "$(CC)" \
 	cudd.cmxa example.ml
 
 # Example of compilation command if the autolink feature is disabled
 # This may be useful for selecting debug version of libraries
-example.opt2: example.ml cudd.cmxa libcudd_caml.a
+%.opt2: %.ml cudd.cmxa libcudd_caml.a
 	$(OCAMLOPT) $(OCAMLOPTFLAGS) $(OCAMLINC) -o $@ -cc "$(CC)" -noautolink \
 	cudd.cmxa example.ml \
 	-ccopt -L$(MLCUDDIDL_PREFIX)/lib -cclib -lcudd_caml_debug \
 	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
 	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd -lmtr -lst -lutil -lepd"
-	-cclib "-lasmrun"
 
-%.byte: %.ml cudd.cma libcudd_caml_debug.a
-	$(OCAMLC) $(OCAMLFLAGS) $(OCAMLINC) -o $@ -cc "$(CC) -g" -custom -verbose -noautolink \
-	cudd.cma $*.ml \
-	-ccopt -L. -ccopt -L$(MLCUDDIDL_PREFIX)/lib -cclib -lcudd_caml_debug \
-	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
-	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd_debug -lmtr -lst -lutil -lepd" \
-	-cclib "-lcamlrun"
-%.opt: %.ml cudd.cmxa libcudd_caml_debug.a
-	$(OCAMLOPT) $(OCAMLOPTFLAGS) $(OCAMLINC) -o $@ -cc "$(CC)" -verbose -noautolink \
-	cudd.cmxa $*.ml \
-	-ccopt -L. -ccopt -L$(MLCUDDIDL_PREFIX)/lib -cclib -lcudd_caml_debug \
-	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
-	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd_debug -lmtr -lst -lutil -lepd" \
-	-cclib "-lasmrun"
-
+dist: $(IDLMODULES:%=%.idl) macros.m4 $(MLSRC) $(CCSRC) Makefile Makefile.config.model Makefile.cudd README Changes test_mtbdd.ml example.ml session.ml mlcuddidl.odoc mlcuddidl.pdf html sedscript_c sedscript_caml
+	(cd ..; tar zcvf $(HOME)/mlcuddidl.tgz $(^:%=mlcuddidl/%))
 install:
 	mkdir -p $(INCDIR) $(LIBDIR) $(BINDIR)
-	cp -f $(MLLIB_TOINSTALL) $(MLLIB_TOINSTALLx) $(LIBDIR)
-	cp -f $(CCINC_TOINSTALL) $(INCDIR)
-	for i in $(CCLIB_TOINSTALL); do if test -f $$i; then cp -f $$i $(LIBDIR); fi; done
-	for i in $(CCBIN_TOINSTALL); do if test -f $$i; then cp -f $$i $(BINDIR); fi; done
+	$(INSTALL) $(CCINC_TOINSTALL) $(INCDIR)
+	for i in $(CCLIB_TOINSTALL) $(MLLIB_TOINSTALL) $(MLLIB_TOINSTALLx); do \
+		if test -f $$i; then $(INSTALL) $$i $(LIBDIR); fi; \
+	done
+	for i in dllcudd_caml.so dllcudd_caml_debug.so; do \
+		if test -f $$i; then cp -f -d $$i $(LIBDIR); fi; \
+	done
+	for i in $(CCBIN_TOINSTALL); do \
+		if test -f $$i; then cp -f $$i $(BINDIR); fi; \
+	done
 
-distclean:
-	(cd $(INCDIR); /bin/rm -f $(CCINC_TOINSTALL))
-	(cd $(LIBDIR); /bin/rm -f $(CCLIB_TOINSTALL) $(LIB_TOINSTALLx) $(MLLIB_TOINSTALL) $(MLLIB_TOINSTALLx) )
+distclean: uninstall
+
+uninstall:
+	(cd $(INCDIR); /bin/rm -f cuddaux* cudd_caml*)
+	(cd $(LIBDIR); /bin/rm -f $(MLLIB_TOINSTALL) $(MLLIB_TOINSTALLx) libcudd_caml*.a libcudd_caml*.so dllcudd_caml*.so)
 	(cd $(BINDIR); /bin/rm -f $(CCBIN_TOINSTALL))
 
 mostlyclean: clean
@@ -118,32 +117,43 @@ clean:
 	/bin/rm -fr html
 
 # CAML rules
-cudd.cma: cudd.cmo
-	$(OCAMLC) $(OCAMLFLAGS) -a -o $@ $^ \
-	-ccopt -L$(MLCUDDIDL_PREFIX)/lib -cclib -lcudd_caml \
-	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
-	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd -lmtr -lst -lutil -lepd"
-cudd.cmxa: cudd.cmx
-	$(OCAMLOPT) $(OCAMLOPTFLAGS) -a -o $@ $^ \
-	-ccopt -L$(MLCUDDIDL_PREFIX)/lib -cclib -lcudd_caml \
-	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
-	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd -lmtr -lst -lutil -lepd"
-	$(RANLIB) cudd.a
+cudd.cma: cudd.cmo libcudd_caml.a
+	$(OCAMLMKLIB) -ocamlc "$(OCAMLC)" -verbose -o cudd -oc cudd_caml \
+	cudd.cmo -lcudd -lmtr -lst -lutil -lepd \
+	-L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
+	-Wl,-rpath,$(CUDD_PREFIX)/lib:$(CAMLIDL_PREFIX)/lib/ocaml
+cudd.cmxa: cudd.cmx libcudd_caml.a
+	$(OCAMLMKLIB) -ocamlopt "$(OCAMLOPT)" -verbose -o cudd -oc cudd_caml \
+	cudd.cmx -lcudd -lmtr -lst -lutil -lepd \
+	-L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
+	-Wl,-rpath,$(CUDD_PREFIX)/lib:$(CAMLIDL_PREFIX)/lib/ocaml
 
 cudd.cmo cudd.cmi: $(MLOBJ)
-	$(OCAMLC) $(OCAMLFLAGS) $(OCAMLINC) -pack -o $@ $(MLOBJ)
+	$(OCAMLC) $(OCAMLFLAGS) $(OCAMLINC) -pack -o cudd.cmo $(MLOBJ)
 
-cudd.cmx cudd.o: $(MLOBJx)
-	$(OCAMLOPT) $(OCAMLOPTFLAGS) -pack -o $@ $(MLOBJx)
-
+cudd.cmx: $(MLOBJx)
+	$(OCAMLOPT) $(OCAMLOPTFLAGS) -pack -o cudd.cmx $(MLOBJx)
 
 libcudd_caml.a: $(CCMODULES:%=%.o)
 	$(AR) rcs $@ $^
 	$(RANLIB) $@
-
 libcudd_caml_debug.a: $(CCMODULES:%=%_debug.o)
 	$(AR) rcs $@ $^
 	$(RANLIB) $@
+libcudd_caml.so: $(CCMODULES:%=%.o) 
+	$(CC) $(CFLAGS) -shared -o $@ $(CCMODULES:%=%.o) \
+	-lcudd -lmtr -lst -lutil -lepd -lcamlidl \
+	-L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
+	-Wl,-rpath,$(CUDD_PREFIX)/lib:$(CAMLIDL_PREFIX)/lib/ocaml
+libcudd_caml_debug.so: $(CCMODULES:%=%_debug.o)
+	$(CC) $(CFLAGS_DEBUG) -shared -o $@ $(CCMODULES:%=%_debug.o) \
+	-lcudd_debug -lmtr -lst -lutil -lepd -lcamlidl \
+	-L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
+	-Wl,-rpath,$(CUDD_PREFIX)/lib:$(CAMLIDL_PREFIX)/lib/ocaml
+dllcudd_caml.so: libcudd_caml.so
+	ln -s $^ $@
+dllcudd_caml_debug.so: libcudd_caml_debug.so
+	ln -s $^ $@
 
 # HTML and LATEX rules
 .PHONY: html
@@ -170,9 +180,6 @@ mlcuddidl.dvi: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 html: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 	mkdir -p html
 	$(OCAMLDOC) $(OCAMLINC) -html -d html -colorize-code -intro mlcuddidl.odoc $(MLMODULES:%=%.mli)
-
-dist: $(IDLMODULES:%=%.idl) macros.m4 $(MLSRC) $(CCSRC) Makefile Makefile.config.model README Changes test_mtbdd.ml example.ml session.ml mlcuddidl.odoc mlcuddidl.pdf html sedscript_c sedscript_caml
-	(cd ..; tar zcvf $(HOME)/mlcuddidl.tgz $(^:%=mlcuddidl/%))
 
 homepage: html mlcuddidl.pdf
 	hyperlatex index

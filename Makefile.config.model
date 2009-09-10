@@ -1,6 +1,17 @@
 # -*- mode: makefile -*-
 
 ######################################################################
+# HAS Flags
+######################################################################
+
+# If defined to non-empty value, generates dynamic libraries.
+# Do not forget to add -fPIC to CFLAGS and CFLAGS_DEBUG.
+
+# Use the Makefile.cudd to generated dynamic version of CUDD libraries.
+
+HAS_SHARED=1
+
+######################################################################
 # Directories
 ######################################################################
 
@@ -67,6 +78,7 @@ OCAMLLEX = $(CAML_PREFIX)/bin/ocamllex.opt
 OCAMLYACC = $(CAML_PREFIX)/bin/ocamlyacc
 OCAMLDOC = $(CAML_PREFIX)/bin/ocamldoc.opt
 OCAMLMKTOP = $(CAML_PREFIX)/bin/ocamlmktop
+OCAMLMKLIB = $(CAML_PREFIX)/bin/ocamlmklib
 
 CAMLIDL = $(CAMLIDL_PREFIX)/bin/camlidl
 
