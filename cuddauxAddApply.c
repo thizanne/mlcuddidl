@@ -91,7 +91,7 @@ Cuddaux_addApply1(DdManager * dd,
   DdNode *res;
   int tableNULL=(*table==NULL);
 
-  assert(dd->reordered == 0);
+  dd->reordered = 0;
   do {
     /* Reinitialize local cache after garbage collection  */
     if (dd->reordered == 1 && !tableNULL){
@@ -133,7 +133,7 @@ Cuddaux_addApply2(DdManager * dd,
   DdNode *res;
   int tableNULL=(*table==NULL);
 
-  assert(dd->reordered == 0);
+  dd->reordered = 0;
   do {
     /* Reinitialize local cache after garbage collection  */
     if (dd->reordered == 1 && !tableNULL){
@@ -175,7 +175,7 @@ Cuddaux_addTest2(DdManager * dd,
   int ret;
   int tableNULL=(*table==NULL);
 
-  assert(dd->reordered == 0);
+  dd->reordered = 0;
   do {
     /* Reinitialize local cache after garbage collection  */
     if (dd->reordered == 1 && !tableNULL){
@@ -218,7 +218,7 @@ Cuddaux_addApply3(DdManager * dd,
   DdNode *res;
   int tableNULL=(*table==NULL);
 
-  assert(dd->reordered == 0);
+  dd->reordered = 0;
   do {
     /* Reinitialize local cache after garbage collection  */
     if (dd->reordered == 1 && !tableNULL){
@@ -270,7 +270,7 @@ Cuddaux_addAbstract(DdManager * dd,
     dd->errorCode = CUDD_INVALID_ARG;
     return(NULL);
   }
-  assert(dd->reordered == 0);
+  dd->reordered = 0;
   do {
     /* Reinitialize local cache(s) after garbage collection  */
     if (dd->reordered == 1){
@@ -338,7 +338,7 @@ Cuddaux_addApplyAbstract(DdManager * dd,
     dd->errorCode = CUDD_INVALID_ARG;
     return(NULL);
   }
-  assert(dd->reordered == 0);
+  dd->reordered = 0;
   do {
     /* Reinitialize local cache(s) after garbage collection  */
     if (dd->reordered == 1){
@@ -417,7 +417,7 @@ Cuddaux_addBddAndAbstract(DdManager * dd,
     dd->errorCode = CUDD_INVALID_ARG;
     return(NULL);
   }
-  assert(dd->reordered == 0);
+  dd->reordered = 0;
   do {
     /* Reinitialize local cache(s) after garbage collection  */
     if (dd->reordered == 1){
@@ -481,7 +481,7 @@ Cuddaux_addApplyBddAndAbstract(DdManager * dd,
     dd->errorCode = CUDD_INVALID_ARG;
     return(NULL);
   }
-  assert(dd->reordered == 0);
+  dd->reordered = 0;
   do {
     if (dd->reordered == 1){
       if (!tableNULL){
