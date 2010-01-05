@@ -92,10 +92,10 @@ install:
 		if test -f $$i; then $(INSTALL) $$i $(LIBDIR); fi; \
 	done
 	for i in dllcudd_caml.so dllcudd_caml_debug.so; do \
-		if test -f $$i; then cp -f -d $$i $(LIBDIR); fi; \
+		if test -f $$i; then $(INSTALL) $$i $(LIBDIR); fi; \
 	done
 	for i in $(CCBIN_TOINSTALL); do \
-		if test -f $$i; then cp -f $$i $(BINDIR); fi; \
+		if test -f $$i; then $(INSTALL) $$i $(BINDIR); fi; \
 	done
 
 distclean: uninstall
@@ -140,15 +140,24 @@ libcudd_caml.a: $(CCMODULES:%=%.o)
 libcudd_caml_debug.a: $(CCMODULES:%=%_debug.o)
 	$(AR) rcs $@ $^
 	$(RANLIB) $@
-libcudd_caml.so: $(CCMODULES:%=%.o) 
-	$(CC) $(CFLAGS) -shared -o $@ $(CCMODULES:%=%.o) \
-	-lcudd -lmtr -lst -lutil -lepd -lcamlidl \
-	-L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
+
+mac: cudd.cmo $(CCMODULES:%=%.o)
+	$(OCAMLMKLIB) -v -ocamlc "$(OCAMLC)" -verbose -o cudd -oc cudd_caml \
+	$^ -L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
+	-lcudd -lmtr -lst -lepd -lutil \
+	-Wl,-rpath,$(CUDD_PREFIX)/lib:$(CAMLIDL_PREFIX)/lib/ocaml
+
+libcudd_caml.so: $(CCMODULES:%=%.o)
+	ln -sf $(CUDD_PREFIX)/lib/libutil.a libcuddutil.a
+	$(CC) -v $(CFLAGS) -shared -o $@ $(CCMODULES:%=%.o) \
+	-L. -L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
+	-lcudd -lmtr -lst -lcuddutil -lepd -lcamlidl \
 	-Wl,-rpath,$(CUDD_PREFIX)/lib:$(CAMLIDL_PREFIX)/lib/ocaml
 libcudd_caml_debug.so: $(CCMODULES:%=%_debug.o)
+	ln -sf $(CUDD_PREFIX)/lib/libutil.a libcuddutil.a
 	$(CC) $(CFLAGS_DEBUG) -shared -o $@ $(CCMODULES:%=%_debug.o) \
-	-lcudd_debug -lmtr -lst -lutil -lepd -lcamlidl \
 	-L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
+	-lcudd_debug -lmtr -lst -lcuddutil -lepd -lcamlidl \
 	-Wl,-rpath,$(CUDD_PREFIX)/lib:$(CAMLIDL_PREFIX)/lib/ocaml
 dllcudd_caml.so: libcudd_caml.so
 	ln -s $^ $@
