@@ -48,7 +48,7 @@ TWO IMPORTANT REMARKS:
 1. The CUDD Makefile does not provide an 'install' target, neither dynamic
    libraries.
 
-   To help you, I provide a Makefile.cudd file:
+   To help you for installation, I provide a Makefile.cudd file:
    * look at it and set the variables properly
    * do 'make -f Makefile.cudd'
 
@@ -58,6 +58,12 @@ TWO IMPORTANT REMARKS:
 
    - It also expects to find cuddInt.h, which is located in the
      cudd subdirectory when the CUDD source distribution.
+ 
+   - IMPORTANT: it expects that libutil.a (of CUDD) has been renamed in
+     libucddutil.a, to avoid name conflicts with standard /iusr/lib/libutil.a
+     libraries found on some systems (like MacOS X).
+
+     Makefile.cudd performs this renaming.
 
 2. The C compilation flags in XCFLAGS (processor, alignement)
    should be the same than those with which CUDD is compiled.

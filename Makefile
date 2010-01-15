@@ -81,7 +81,7 @@ cuddtop: cudd.cma libcudd_caml.a
 	cudd.cmxa example.ml \
 	-ccopt -L$(MLCUDDIDL_PREFIX)/lib -cclib -lcudd_caml_debug \
 	-ccopt -L$(CAMLIDL_PREFIX)/lib/ocaml -cclib -lcamlidl \
-	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd -lmtr -lst -lutil -lepd"
+	-ccopt -L$(CUDD_PREFIX)/lib -cclib "-lcudd -lmtr -lst -lcuddutil -lepd"
 
 dist: $(IDLMODULES:%=%.idl) macros.m4 $(MLSRC) $(CCSRC) Makefile Makefile.config.model Makefile.cudd README Changes test_mtbdd.ml example.ml session.ml mlcuddidl.odoc mlcuddidl.pdf html sedscript_c sedscript_caml
 	(cd ..; tar zcvf $(HOME)/mlcuddidl.tgz $(^:%=mlcuddidl/%))
@@ -107,7 +107,7 @@ uninstall:
 
 mostlyclean: clean
 	/bin/rm -f $(IDLMODULES:%=%.ml) $(IDLMODULES:%=%.mli) $(IDLMODULES:%=%_caml.c) tmp/* html/*
-	/bin/rm -f mlcuddidl.?? mlcuddidl.??? mlcuddidl.info example example.opt mlcuddidl.tex ocamldoc.tex *.dvi style.css ocamldoc.sty
+	/bin/rm -f mlcuddidl.?? mlcuddidl.??? mlcuddidl.info example example.opt mlcuddidl.tex ocamldoc.tex *.dvi style.css ocamldoc.sty index.html
 
 clean:
 	/bin/rm -f cuddtop *.byte *.opt
@@ -119,12 +119,12 @@ clean:
 # CAML rules
 cudd.cma: cudd.cmo libcudd_caml.a
 	$(OCAMLMKLIB) -ocamlc "$(OCAMLC)" -verbose -o cudd -oc cudd_caml \
-	cudd.cmo -lcudd -lmtr -lst -lutil -lepd \
+	cudd.cmo -lcudd -lmtr -lst -lcuddutil -lepd \
 	-L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
 	-Wl,-rpath,$(CUDD_PREFIX)/lib:$(CAMLIDL_PREFIX)/lib/ocaml
 cudd.cmxa: cudd.cmx libcudd_caml.a
 	$(OCAMLMKLIB) -ocamlopt "$(OCAMLOPT)" -verbose -o cudd -oc cudd_caml \
-	cudd.cmx -lcudd -lmtr -lst -lutil -lepd \
+	cudd.cmx -lcudd -lmtr -lst -lcuddutil -lepd \
 	-L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
 	-Wl,-rpath,$(CUDD_PREFIX)/lib:$(CAMLIDL_PREFIX)/lib/ocaml
 
@@ -144,19 +144,17 @@ libcudd_caml_debug.a: $(CCMODULES:%=%_debug.o)
 mac: cudd.cmo $(CCMODULES:%=%.o)
 	$(OCAMLMKLIB) -v -ocamlc "$(OCAMLC)" -verbose -o cudd -oc cudd_caml \
 	$^ -L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
-	-lcudd -lmtr -lst -lepd -lutil \
+	-lcudd -lmtr -lst -lepd -lcuddutil \
 	-Wl,-rpath,$(CUDD_PREFIX)/lib:$(CAMLIDL_PREFIX)/lib/ocaml
 
 libcudd_caml.so: $(CCMODULES:%=%.o)
-	ln -sf $(CUDD_PREFIX)/lib/libutil.a libcuddutil.a
 	$(CC) -v $(CFLAGS) -shared -o $@ $(CCMODULES:%=%.o) \
 	-L. -L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
 	-lcudd -lmtr -lst -lcuddutil -lepd -lcamlidl \
 	-Wl,-rpath,$(CUDD_PREFIX)/lib:$(CAMLIDL_PREFIX)/lib/ocaml
 libcudd_caml_debug.so: $(CCMODULES:%=%_debug.o)
-	ln -sf $(CUDD_PREFIX)/lib/libutil.a libcuddutil.a
 	$(CC) $(CFLAGS_DEBUG) -shared -o $@ $(CCMODULES:%=%_debug.o) \
-	-L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
+	-L. -L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
 	-lcudd_debug -lmtr -lst -lcuddutil -lepd -lcamlidl \
 	-Wl,-rpath,$(CUDD_PREFIX)/lib:$(CAMLIDL_PREFIX)/lib/ocaml
 dllcudd_caml.so: libcudd_caml.so
