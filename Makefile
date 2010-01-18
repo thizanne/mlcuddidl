@@ -112,7 +112,7 @@ mostlyclean: clean
 clean:
 	/bin/rm -f cuddtop *.byte *.opt
 	/bin/rm -f cuddaux.?? cuddaux.??? cuddaux.info
-	/bin/rm -f *.[ao] *.cm[ioxa] *.cmxa *.opt *.opt2 *.annot
+	/bin/rm -f *.[ao] *.so *.cm[ioxa] *.cmxa *.opt *.opt2 *.annot
 	/bin/rm -f cmttb*
 	/bin/rm -fr html
 
