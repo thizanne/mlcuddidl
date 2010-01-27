@@ -1,31 +1,10 @@
-* Files
-The basic distribution contain the following files:
-	README
-	Makefile Makefile.config.model
-	Changes
-        
-        sedscript_c sedscript_caml macros.m4
-
-        mlcuddidl.odoc
-
-	man.idl bdd.idl add.idl vdd.idl (zdd.idl)
-	man.mli man.ml
-	bdd.mli bdd.ml
-	add.mli add.ml
-	vdd.mli vdd.ml
-
-	weakke.mli pWeakke.mli custom.mli mapleaf.mli user.mli mtbdd.mli mtbddc.mli
-        weakke.ml  pWeakke.ml  custom.ml  mapleaf.ml  user.ml  mtbdd.ml  mtbddc.ml
-
-	session.ml example.ml test_mtbdd.ml
-
-	cudd_caml.h cudd_caml.c custom_caml.c
-  
-        cuddaux.h  cuddauxInt.h
-	cuddauxAddApply.c cuddauxAddIte.c cuddauxCompose.c cuddauxMisc.c
-	cuddauxAddCamlTable.c cuddauxBridge.c cuddauxGenCof.c cuddauxTDGenCof.c
-
-	mlcuddidl.dvi mlcuddidl.info ./html/*.html
+* About
+- Additional functions to CUDD library
+  (related files: cuddauxXXXX.(c|h))
+- Interface of CUDD and "CUDDAUX" to OCAML (BDDs, ADDs)
+  (A stands for Arithmetic: float OCaml values at the leaves)
+- V(alue)DD: MTBDD with any OCaml values at the leaves.
+- Higher order functions for VDDs
 
 * What's needed :
 - An ANSI C compiler (gcc is the only tested compiler)
@@ -52,18 +31,18 @@ TWO IMPORTANT REMARKS:
    * look at it and set the variables properly
    * do 'make -f Makefile.cudd'
 
-   - mlcuddidl expect to find .h files in
-     $(MLCUDDIDL_PREFIX)/include and .a files
-     $(MLCUDDIDL_PREFIX)/lib.
+   Makefile.cudd ensures the following points:
 
-   - It also expects to find cuddInt.h, which is located in the
-     cudd subdirectory when the CUDD source distribution.
+   a. mlcuddidl expect to find .h files in
+      $(MLCUDDIDL_PREFIX)/include and .a files
+      $(MLCUDDIDL_PREFIX)/lib.
+
+   b. It also expects to find cuddInt.h, which is located in the
+      cudd subdirectory when the CUDD source distribution.
  
-   - IMPORTANT: it expects that libutil.a (of CUDD) has been renamed in
-     libucddutil.a, to avoid name conflicts with standard /iusr/lib/libutil.a
-     libraries found on some systems (like MacOS X).
-
-     Makefile.cudd performs this renaming.
+   c. IMPORTANT: it expects that libutil.a (of CUDD) has been renamed in
+      libucddutil.a, to avoid name conflicts with standard /iusr/lib/libutil.a
+      libraries found on some systems (like MacOS X).
 
 2. The C compilation flags in XCFLAGS (processor, alignement)
    should be the same than those with which CUDD is compiled.
