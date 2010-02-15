@@ -190,10 +190,8 @@ html: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 
 homepage: html mlcuddidl.pdf
 	hyperlatex index
-	cp -r index.html html mlcuddidl.pdf Changes \
-		$(HOME)/web/mlxxxidl-forge/mlcuddidl
-	chmod -R ugoa+rx $(HOME)/web/mlxxxidl-forge/mlcuddidl
-	scp -r $(HOME)/web/mlxxxidl-forge/mlcuddidl johns:/home/wwwpop-art/people/bjeannet/mlxxxidl-forge
+	scp -r index.html html mlcuddidl.pdf Changes \
+		johns:/home/wwwpop-art/people/bjeannet/mlxxxidl-forge/mlcuddidl
 	ssh johns chmod -R ugoa+rx /home/wwwpop-art/people/bjeannet/mlxxxidl-forge/mlcuddidl
 
 
@@ -222,7 +220,7 @@ rebuild: macros.m4 sedscript_caml sedscript_c
 		$(SED) -f sedscript_caml tmp/$${i}.ml >$${i}.ml; \
 		$(SED) -f sedscript_caml tmp/$${i}.mli >$${i}.mli; \
 	done
-	rm -fr tmp
+#	rm -fr tmp
 
 #-----------------------------------
 # C

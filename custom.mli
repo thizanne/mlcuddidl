@@ -72,7 +72,8 @@ type user
       they would act as hidden parameters that are not taken into
       account in the cache.
 
-      If such hidden parameters are modified, the cache should be cleared with {!flush_cache}
+      If such hidden parameters are modified, the cache should be
+      cleared with {!flush_op} or {!flush_allop}.
   *)
 type hash
 type cach
@@ -87,9 +88,9 @@ type global
   (** The operation on MTBDDs is memoized in the global cache.
 
       Same remark as for [user local] concerning free
-      variables.acting as hidden parameters. If hidden parameters
+      variables acting as hidden parameters. If hidden parameters
       are modified, the global cache should be cleared with
-      {!Man.flush_cache}.
+      {!Man.cache_flush}.
   *)
 
 (** {4 Caching policies} *)

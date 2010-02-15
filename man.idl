@@ -310,7 +310,7 @@ quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Free
 void ungroupall(man__t man)
      quote(call, "Cudd_FreeTree(man->man);");
 
-quote(MLI,"(** [Cuddaux_SetVarMap]/{{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SetVarMap}[Cudd_SetVarMap]}. Initializes the global mapping table, used by functions {!Bdd.varmap}, {!Rdd.varmap}, {!Idd.varmap}, ...  Convenient when the same mapping is applied several times, because the the different calls reuse the same cache. *)")
+quote(MLI,"(** [Cuddaux_SetVarMap]/{{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SetVarMap}[Cudd_SetVarMap]}. Initializes the global mapping table, used by functions {!Bdd.varmap}, {!Vdd.varmap}, {!Mtbdd.varmap}, {!Mtbddc.varmap},...  Convenient when the same mapping is applied several times, because the the different calls reuse the same cache. *)")
 void set_varmap(man__t man, [size_is(size)] int permut[], int size)
      quote(call,
 "{

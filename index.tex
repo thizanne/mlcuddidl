@@ -14,6 +14,7 @@
 \newcommand{\cudd}{\xlink{CUDD}{http://vlsi.colorado.edu/\~{}fabio/CUDD/cuddIntro.html}\xspace}
 \newcommand{\cuddaux}{\xlink{CUDDAUX}{../cuddaux/index.html}\xspace}
 \newcommand{\camlidl}{\xlink{CamlIDL}{http://caml.inria.fr/camlidl/}\xspace}
+\newcommand{\camlmod}[1]{\xlink{#1}{html/#1.html}\xspace}
 
 \title{MLCuddIDL}
 \date{}
@@ -36,17 +37,18 @@ implements some new functions. It is provided as a single module
 
 The interface is organized as follows:
 \begin{itemize}
-\item the module Man implements functions common to all the
+\item the module \camlmod{Man} implements functions common to all the
   other modules (initialization, variable ordering, ...) ;
-\item the module Bdd allows to manipulate ordinary BDDs (with
+\item the module \camlmod{Bdd} allows to manipulate ordinary BDDs (with
   complemented edge) ;
-\item the module Add allows to manipulate ADDs (Algebraic Decision
+\item the module \camlmod{Add} allows to manipulate ADDs (Algebraic Decision
   Diagrams), the leaves of which are reals ;
-\item the modules Mtbdd, Mtbddc, User and Mapleaf allows to
-  manipulate MTBDDs (Multi-Terminal Binary Decision Diagram), the
-  leaves of which are a user-defined OCaml datatype; the user can
-  define and register new operations, that will then take
-  advantage of caching techniques .
+\item the modules \camlmod{Mtbdd}, \camlmod{Mtbddc},
+  \camlmod{User} and \camlmod{Mapleaf} allows to manipulate MTBDDs
+  (Multi-Terminal Binary Decision Diagram), the leaves of which
+  are a user-defined OCaml datatype; the user can define and
+  register new operations, that will then take advantage of
+  caching techniques .
 \end{itemize}
 I did not (yet) interfaced ZDDs, but I could do it quite quickly
 is someone requests it.
@@ -68,7 +70,6 @@ LGPL
 \item An ANSI C compiler (only gcc with ansi option has been really
   tested)
 \item The \cudd BDD library
-\item The \cuddaux extension to CUDD
 \item The \ocaml system (of course !)
 \item The \camlidl stub code generator 
 \end{itemize}
@@ -76,14 +77,14 @@ LGPL
 \section{Download}
 
 \begin{itemize}
-\item \xlink{Tar-gzipped sources}{http://gforge.inria.fr/projects/mlxxxidl/}
+%\item \xlink{Tar-gzipped sources}{http://gforge.inria.fr/projects/mlxxxidl/}
 \item \xlink{Subversion repository}{http://gforge.inria.fr/plugins/scmsvn/viewcvs.php/?root=mlxxxidl}
 \end{itemize}
 
 \section{Documentation}
 \begin{itemize}
 \item \xlink{Changes}{Changes}
-\item \xlink{On-line}{html/mlcuddidl.html}
+\item \xlink{On-line}{html/index.html}
 \item \xlink{PDF}{mlcuddidl.pdf}
 \end{itemize}
 

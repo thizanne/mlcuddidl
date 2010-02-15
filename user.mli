@@ -42,7 +42,7 @@ val userhash : (user,hash) local cache
       account in the cache.
 
       If such hidden parameters are modified, the cache should be
-      cleared with {!flush_cache} *)
+      cleared with {!flush_op} or {!flush_allop} *)
 
 val global : global cache
   (** The operation on MTBDDs is memoized in CUDD global (regular)
@@ -51,7 +51,7 @@ val global : global cache
       Same remark as for [user local] concerning free
       variables acting as hidden parameters. If hidden parameters
       are modified, the global cache should be cleared with
-      {!Man.flush_cache}.
+      {!Man.cache_flush}.
   *)
 
 (*  ====================================================================== *)
