@@ -23,6 +23,8 @@ util/util.h \
 dddmp/dddmp.h
 
 install:
+	mkdir -p $(CUDD_PREFIX)/include
+	mkdir -p $(CUDD_PREFIX)/lib
 ifneq ($(HAS_SHARED),)
 	for i in $(LIBS); do ( \
 		rm -fr $(TMPDIR); mkdir $(TMPDIR); cd $(TMPDIR); \
