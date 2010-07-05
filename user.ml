@@ -38,9 +38,9 @@ let userhash = Custom.userhash
 
 type ('a, 'b) op = ('a, 'b) Custom.op
 
-type ('a, 'b) mexist = [ 
+type ('a, 'b) mexist = [
   | `Fun of ('a t -> 'a t -> 'a t option) option * ('a -> 'a -> 'a)
-  | `Op of (('a, 'a, 'a) op2, 'b) op 
+  | `Op of (('a, 'a, 'a) op2, 'b) op
 ]
 type ('a, 'b, 'c) mop1 = [
   | `Fun of 'a -> 'b
@@ -103,4 +103,3 @@ let map_exist mexist ~supp dd = Custom.map_exist ~ddtyp:_ddtyp mexist ~supp dd
 let map_existop1 mop1 mexist ~supp dd = Custom.map_existop1 ~ddtyp:_ddtyp mop1 mexist ~supp dd
 let map_existand ~bottom mexist ~supp bdd dd = Custom.map_existand ~ddtyp:_ddtyp ~bottom mexist ~supp bdd dd
 let map_existandop1 ~bottom mop1 mexist ~supp bdd dd = Custom.map_existandop1 ~ddtyp:_ddtyp ~bottom mop1 mexist ~supp bdd dd
-

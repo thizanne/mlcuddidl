@@ -64,6 +64,7 @@ AR = ar
 RANLIB = ranlib
 SED = sed
 M4 = m4
+INSTALL = install
 
 OCAMLC = $(CAML_PREFIX)/bin/ocamlc.opt
 OCAMLOPT = $(CAML_PREFIX)/bin/ocamlopt.opt

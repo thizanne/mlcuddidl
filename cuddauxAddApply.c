@@ -235,8 +235,8 @@ Cuddaux_addApply3(DdManager * dd,
 /**Function********************************************************************
 
   Synopsis:
-	       exist(ite(var,cube,false),ite(var,f+,f-)) = 
-	         op(exist(cube,f+),exist(cube,f-))
+	       exist(ite(var,cube,false),ite(var,f+,f-)) =
+		 op(exist(cube,f+),exist(cube,f-))
 	       exist(true,f) = f
 
   Assumptions:
@@ -299,9 +299,9 @@ Cuddaux_addAbstract(DdManager * dd,
 
   Synopsis:    exist(cube,op1(f))
 
-	       existapply(ite(var,cube,false),ite(var,f+,f-)) = 
-	         op(existapply(cube,f+),existapply(cube,f-))
-	       existapply(true,f) = op1 f 
+	       existapply(ite(var,cube,false),ite(var,f+,f-)) =
+		 op(existapply(cube,f+),existapply(cube,f-))
+	       existapply(true,f) = op1 f
 
 
   Assumptions:
@@ -369,7 +369,14 @@ Cuddaux_addApplyAbstract(DdManager * dd,
       }
     }
     dd->reordered = 0;
+    if (1){
+      fprintf(stderr,"cuddauxAddApplyAbstract Begin\n");
+      Cudd_PrintMinterm(dd, f);
+    }
     res = cuddauxAddApplyAbstractRecur(dd, *table, *tableop, *tableop1, pid, pid1, op, op1, f, cube);
+    if (1){
+      fprintf(stderr,"cuddauxAddApplyAbstract End\n");
+    }
   } while (dd->reordered == 1);
   return(res);
 } /* end of Cuddaux_addAbstract */
@@ -378,8 +385,8 @@ Cuddaux_addApplyAbstract(DdManager * dd,
 
   Synopsis:    exist(cube,ite(f,g,background))
 
-               existand(ite(var,cube,false),ite(var,f+,f-),ite(var,g+,g-)) =
-	         op(existand(cube,f+,g+),existand(cube,f-,g-)
+	       existand(ite(var,cube,false),ite(var,f+,f-),ite(var,g+,g-)) =
+		 op(existand(cube,f+,g+),existand(cube,f-,g-)
 
 	       existand(cube,true,g) = exist(cube,g)
 	       existand(cube,false,g) = background
@@ -1090,7 +1097,7 @@ cuddauxAddApplyAbstractRecur(DdManager * dd,
   while (topcube < top) {
     cube = cuddT(cube);
     if (cube == one) {
-      return G;
+      return cuddauxAddApply1Recur(dd,tableop1,pid1,op1,G);
     }
     topcube = dd->perm[cube->index];
   }
@@ -1395,6 +1402,8 @@ cuddauxAddApplyBddAndAbstractRecur(DdManager * dd,
   while (topcube < top) {
     cube = cuddT(cube);
     if (cube == one) {
+      G = cuddauxAddApply1Recur(dd,tableop1,pid1,op1,G);
+      if (G==background) return background;
       return cuddauxAddIteRecur(dd,f,G,background);
     }
     topcube = dd->perm[cube->index];
