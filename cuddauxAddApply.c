@@ -369,14 +369,7 @@ Cuddaux_addApplyAbstract(DdManager * dd,
       }
     }
     dd->reordered = 0;
-    if (1){
-      fprintf(stderr,"cuddauxAddApplyAbstract Begin\n");
-      Cudd_PrintMinterm(dd, f);
-    }
     res = cuddauxAddApplyAbstractRecur(dd, *table, *tableop, *tableop1, pid, pid1, op, op1, f, cube);
-    if (1){
-      fprintf(stderr,"cuddauxAddApplyAbstract End\n");
-    }
   } while (dd->reordered == 1);
   return(res);
 } /* end of Cuddaux_addAbstract */
