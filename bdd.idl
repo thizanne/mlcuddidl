@@ -433,23 +433,23 @@ quote(MLMLI,"(** {2  Quantifications} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
-quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddExistAbstract}[Cudd_bddExistAbstract]}. [exist supp bdd] quantifies existentially the set of variables defined by [supp] in the BDD. *)")
+quote(MLMLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddExistAbstract}[Cudd_bddExistAbstract]}. [exist supp bdd] quantifies existentially the set of variables defined by [supp] in the BDD. *)")
 bdd__t exist(bdd__t no1, bdd__t no2)
      NO_OF_MAN_NO21(Cudd_bddExistAbstract);
 
-quote(MLI,"(** [udd_bddUnivAbstract]. [forall supp bdd] quantifies universally the set of variables defined by [supp] in the BDD. *)")
+quote(MLMLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddUnivAbstract}[Cudd_bddUnivAbstract]. [forall supp bdd] quantifies universally the set of variables defined by [supp] in the BDD. *)")
 bdd__t forall(bdd__t no1, bdd__t no2)
      NO_OF_MAN_NO21(Cudd_bddUnivAbstract);
 
-quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddAndAbstract}[Cudd_bddAndAbstract]}. Simultaneous existential quantification and intersection of BDDs. Logically, [existand supp x y = exist supp (dand x y)]. *)")
+quote(MLMLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddAndAbstract}[Cudd_bddAndAbstract]}. Simultaneous existential quantification and intersection of BDDs. Logically, [existand supp x y = exist supp (dand x y)]. *)")
 bdd__t existand(bdd__t no1, bdd__t no2, bdd__t no3)
      NO_OF_MAN_NO231(Cudd_bddAndAbstract);
 
-quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddXorExistAbstract}[Cudd_bddXorExistAbstract]}. Simultaneous existential quantification and exclusive or of BDDs. Logically, [existxor supp x y = exist supp (xor x y)]. *)")
+quote(MLMLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddXorExistAbstract}[Cudd_bddXorExistAbstract]}. Simultaneous existential quantification and exclusive or of BDDs. Logically, [existxor supp x y = exist supp (xor x y)]. *)")
 bdd__t existxor(bdd__t no1, bdd__t no2, bdd__t no3)
      NO_OF_MAN_NO231(Cudd_bddXorExistAbstract);
 
-quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddBooleanDiff}[Cudd_bddBooleanDiff]}. Boolean difference of the BDD with respect to the variable. *)")
+quote(MLMLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddBooleanDiff}[Cudd_bddBooleanDiff]}. Boolean difference of the BDD with respect to the variable. *)")
 bdd__t booleandiff(bdd__t no, int index)
      quote(call, "
 Begin_roots1(_v_no);

@@ -251,7 +251,7 @@ val register_test2 :
       [reflexive] (default: [false]) allows similarly some
       optimization when test is reflexive: [test x x = true].
       This makes sense only if ['a='b] (the case will never
-      happens otherwise).
+      happen otherwise).
 
       [?special] (default: [None]) has the same semantics as for
       binary operations above.
@@ -438,12 +438,12 @@ val map_existop1 :
 type ('a,'b) existand
   (** Type of combined quantification and and operation.
 
-      [existand ~bottom op supp bdd f] is equivalent to [exist
-      supp (ite bdd f bottom)]. 
+      [existand ~bottom op2 supp bdd f] is equivalent to [exist
+      op2 supp (ite bdd f bottom)]. 
 
       The leaf
-      operation [op:'a -> 'a -> 'a] is assumed to be commutative,
-      idempotent ([op f f=f]), and also [op f bottom = f].
+      operation [op2:'a -> 'a -> 'a] is assumed to be commutative,
+      idempotent ([op2 f f=f]), and also [op2 f bottom = f].
   *)
 
 val register_existand :
@@ -468,10 +468,10 @@ type ('a,'b,'c,'d) existandop1
   (** Type of unary operation, conjunction and quantification  
 
       [existandop1 ~bottom op op1 supp bdd f] is equivalent to
-      [exist supp (ite bdd (op1 f) bottom))].
+      [exist op2 supp (ite bdd (op1 f) bottom))].
 
-      The leaf operation [op:'b -> 'b -> 'b] is assumed to be
-      commutative, idempotent ([op f f=f]), and also [op f bottom
+      The leaf operation [op2:'b -> 'b -> 'b] is assumed to be
+      commutative, idempotent ([op2 f f=f]), and also [op2 f bottom
       = f].  
   *)
 

@@ -54,7 +54,7 @@ DdNode* Cuddaux_addTDSimplify(DdManager* dd, DdNode* phi);
 /* f is an ADD, g a BDD */
 DdNode* Cuddaux_addCompose(DdManager* dd, DdNode* f, DdNode* g, int v);
 DdNode* Cuddaux_addVarMap(DdManager* dd, DdNode* f);
-int Cuddaux_SetVarMap(DdManager *manager, int* array);
+int Cuddaux_SetVarMap(DdManager *manager, int* array, size_t size);
 /* f is an ADD, vector an array of BDDs */
 DdNode* Cuddaux_addVectorCompose(DdManager* dd, DdNode* f, DdNode** vector);
 /* f is an ADD, vector an array of BDDs, op an operator applied to leaves */

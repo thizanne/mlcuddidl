@@ -1,5 +1,16 @@
 
 -------------
+MLCuddIDL 2.2.0:
+-------------
+
+General
+
+Improvements:
+  * vectorcompose and permute operations are more robust to non-expert users:
+    if the provided arrays are smaller than the number of variables in the
+    manager, they are automatically extended. This prevents core dumps...
+
+-------------
 MLCuddIDL 2.1.0:
 -------------
 

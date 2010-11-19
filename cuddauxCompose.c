@@ -114,7 +114,7 @@ Cuddaux_addCompose(
 
 ******************************************************************************/
 int
-Cuddaux_SetVarMap(DdManager *dd, int* array)
+Cuddaux_SetVarMap(DdManager *dd, int* array, size_t size)
 {
   int i;
 
@@ -128,10 +128,11 @@ Cuddaux_SetVarMap(DdManager *dd, int* array)
     }
     dd->memused += sizeof(int) * dd->maxSize;
   }
-  for (i = 0; i < dd->size; i++) {
+  if (size>dd->maxSize) size=dd->maxSize;
+  for (i = 0; i < size; i++) {
     dd->map[i] = array[i];
   }
-  for (i = dd->size; i<dd->maxSize; i++){
+  for (i = size; i<dd->maxSize; i++){
     dd->map[i] = i;
   }
   return(1);

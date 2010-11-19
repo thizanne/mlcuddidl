@@ -693,18 +693,22 @@ value camlidl_cudd_bdd_vectorcompose(value _v_vec, value _v_no)
   int size; /*in*/
   bdd__t no; /*in*/
   bdd__t _res;
-  int i;
+  int i, maxsize;
 
   camlidl_cudd_node_ml2c(_v_no, &no);
   size = Wosize_val(_v_vec);
-  vec = (DdNode**)malloc(size * sizeof(DdNode*));
-  for (i = 0; i<size; i++) {
+  maxsize = (size>no.man->man->size) ? size : no.man->man->size;
+  vec = (DdNode**)malloc(maxsize * sizeof(DdNode*));
+  for (i=0; i<size; i++) {
     bdd__t _no;
     _v = Field(_v_vec, i);
     camlidl_cudd_node_ml2c(_v, &_no);
     if (_no.man != no.man)
       failwith("Bdd.vectorcompose called with BDDs belonging to different managers !");
     vec[i] = _no.node;
+  }
+  for (i=size; i<maxsize; i++){
+    vec[i] = Cudd_bddIthVar(no.man->man, i);
   }
   _res.man = no.man;
   _res.node = Cudd_bddVectorCompose(no.man->man, no.node, vec);
@@ -720,11 +724,12 @@ value camlidl_cudd_add_vectorcompose(value _v_vec, value _v_no)
   int size; /*in*/
   bdd__t no; /*in*/
   bdd__t _res;
-  int i;
+  int i,maxsize;
 
   camlidl_cudd_node_ml2c(_v_no, &no);
   size = Wosize_val(_v_vec);
-  vec = (DdNode**)malloc(size * sizeof(DdNode*));
+  maxsize = (size>no.man->man->size) ? size : no.man->man->size;
+  vec = (DdNode**)malloc(maxsize * sizeof(DdNode*));
   for (i = 0; i<size; i++) {
     bdd__t _no;
     _v = Field(_v_vec, i);
@@ -733,7 +738,10 @@ value camlidl_cudd_add_vectorcompose(value _v_vec, value _v_no)
       failwith("Bdd.vectorcompose called with BDDs belonging to different managers !");
     vec[i] = _no.node;
   }
-  _res.man = no.man;
+   for (i=size; i<maxsize; i++){
+    vec[i] = Cudd_bddIthVar(no.man->man, i);
+  }
+ _res.man = no.man;
   _res.node = Cuddaux_addVectorCompose(no.man->man, no.node, vec);
   _vres = camlidl_cudd_node_c2ml(&_res);
   free(vec);
@@ -750,14 +758,18 @@ value camlidl_cudd_bdd_permute(value _v_no, value _v_permut)
   bdd__t no; /*in*/
   int *permut; /*in*/
   bdd__t _res;
-  mlsize_t i,size;
+  int i,size, maxsize;
 
   camlidl_cudd_node_ml2c(_v_no, &no);
   size = Wosize_val(_v_permut);
-  permut = malloc(size * sizeof(int));
+  maxsize = (size>no.man->man->size) ? size : no.man->man->size;
+  permut = malloc(maxsize * sizeof(int));  
   for (i=0; i < size; i++) {
     value v = Field(_v_permut, i);
     permut[i] = Int_val(v);
+  }
+  for (i=size; i<maxsize; i++){
+    permut[i] = i;
   }
   _res.man = no.man;
   _res.node = Cudd_bddPermute(no.man->man,no.node,permut);
@@ -772,14 +784,18 @@ value camlidl_cudd_add_permute(value _v_no, value _v_permut)
   bdd__t no; /*in*/
   int *permut; /*in*/
   bdd__t _res;
-  mlsize_t i,size;
+  int i,size,maxsize;
 
   camlidl_cudd_node_ml2c(_v_no, &no);
   size = Wosize_val(_v_permut);
-  permut = malloc(size * sizeof(int));
+  maxsize = (size>no.man->man->size) ? size : no.man->man->size;
+  permut = malloc(maxsize * sizeof(int));  
   for (i=0; i < size; i++) {
     value v = Field(_v_permut, i);
     permut[i] = Int_val(v);
+  }
+  for (i=size; i<maxsize; i++){
+    permut[i] = i;
   }
   _res.man = no.man;
   _res.node = Cudd_addPermute(no.man->man,no.node,permut);

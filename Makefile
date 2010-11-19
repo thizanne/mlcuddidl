@@ -72,7 +72,7 @@ cuddtop: cudd.cma libcudd_caml.a
 	cudd.cma example.ml
 %.opt: %.ml cudd.cmxa libcudd_caml.a
 	$(OCAMLOPT) $(OCAMLOPTFLAGS) $(OCAMLINC) -o $@ -cc "$(CC)" \
-	cudd.cmxa example.ml
+	cudd.cmxa example.ml -I . -I $(CUDD_PREFIX)/lib -I $(CAMLIDL_PREFIX)/lib/ocaml
 
 # Example of compilation command if the autolink feature is disabled
 # This may be useful for selecting debug version of libraries
@@ -151,7 +151,8 @@ libcudd_caml.so: $(CCMODULES:%=%.o)
 	$(CC) -v $(CFLAGS) -shared -o $@ $(CCMODULES:%=%.o) \
 	-L. -L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
 	-lcudd -lmtr -lst -lcuddutil -lepd -lcamlidl \
-	-Wl,-rpath,$(CUDD_PREFIX)/lib:$(CAMLIDL_PREFIX)/lib/ocaml
+
+#	-Wl,-rpath,$(CUDD_PREFIX)/lib:$(CAMLIDL_PREFIX)/lib/ocaml
 libcudd_caml_debug.so: $(CCMODULES:%=%_debug.o)
 	$(CC) $(CFLAGS_DEBUG) -shared -o $@ $(CCMODULES:%=%_debug.o) \
 	-L. -L$(CUDD_PREFIX)/lib -L$(CAMLIDL_PREFIX)/lib/ocaml \
