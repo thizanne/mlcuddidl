@@ -135,7 +135,7 @@ Cuddaux_addCamlConst(DdManager * unique,
 
  Cuddaux_addCamlConst_exit:
   if (0){
-    printf("Adding value %d, %f, pos=%d, node=%x\n",
+    printf("Adding value %ld, %f, pos=%d, node=%p\n",
 	   value, Double_val(value),pos,looking
 	   );
   }
@@ -173,7 +173,7 @@ int Cuddaux_addCamlPreGC(DdManager* unique, const char* s, void* data)
       if (node->ref == 0) {
 	value value = ((struct cuddauxDdNode *)node)->type.value;
 	if (0){
-	  printf("Removing value %d, %f, pos=%d, node=%x\n",
+	  printf("Removing value %ld, %f, pos=%d, node=%p\n",
 		 value, Double_val(value),j,node
 		 );
 	}
