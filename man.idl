@@ -195,12 +195,12 @@ man__t _make(boolean caml, int numVars, int numVarsZ, int numSlots,int cacheSize
    _res = (man__t)malloc(sizeof(struct man__t));
    _res->man = Cudd_Init(numVars, numVarsZ, numSlots, cacheSize, maxMemory);
    _res->count = 0;
+   res = Cudd_AddHook(_res->man,camlidl_cudd_garbage,CUDD_PRE_GC_HOOK);
    if (caml){
      res = Cudd_AddHook(_res->man,Cuddaux_addCamlPreGC, CUDD_PRE_GC_HOOK);
      if (res!=1)
        failwith(\"Man.make_caml: unable to add the caml garbage collection hook Cuddaux_addCamlPreGC\");
    }
-   res = Cudd_AddHook(_res->man,camlidl_cudd_garbage,CUDD_PRE_GC_HOOK);
    if (res!=1)
      failwith(\"Man.make: unable to add the garbage collection hook\");
    res = Cudd_AddHook(_res->man,camlidl_cudd_reordering,CUDD_PRE_REORDERING_HOOK);
