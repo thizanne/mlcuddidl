@@ -2,7 +2,6 @@
 
 open Format
 
-
 type 'a table = 'a PWeakke.t
 
 type 'a unique = 'a
@@ -19,7 +18,10 @@ let make_table
 external copy_shr : 'a -> 'a = "camlidl_cudd_custom_copy_shr"
 
 let unique (table:'a table) (elt:'a) : 'a unique =
-  PWeakke.merge_map table elt copy_shr
+  if Obj.is_int (Obj.repr elt) then
+    elt
+  else
+    PWeakke.merge_map table elt copy_shr
 
 let get (leaf:'a unique) : 'a = leaf
 

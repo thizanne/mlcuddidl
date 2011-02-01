@@ -2,16 +2,16 @@
 
 (** Same inerface as {!Weakke}. *)
 
-type 'a compare = 'a Weakke.compare = { 
-  hash : 'a -> int; 
-  equal : 'a -> 'a -> bool; 
+type 'a compare = 'a Weakke.compare = {
+  hash : 'a -> int;
+  equal : 'a -> 'a -> bool;
 }
 
-type 'a t = { 
+type 'a t = {
   compare : 'a compare;
   hashtbl : 'a Weakke.t
 }
-  
+
 val create : ('a -> int) -> ('a -> 'a -> bool) -> int -> 'a t
 val clear : 'a t -> unit
 val merge : 'a t -> 'a -> 'a
@@ -31,4 +31,3 @@ val print :
   ?last:(unit, Format.formatter, unit) format ->
   (Format.formatter -> 'a -> unit) ->
   Format.formatter -> 'a t -> unit
-

@@ -1,8 +1,7 @@
 open Format;;
 open Cudd;;
 
-external string_of_value : 'a -> string = "camlidl_string_of_value"
-let print_value fmt v = pp_print_string fmt (string_of_value v)
+let print_value fmt v = pp_print_int fmt (Obj.magic v);;
 
 let mand = Man.make_d ();;
 Man.set_background mand (-.1000000000.0);;

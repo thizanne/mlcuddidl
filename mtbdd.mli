@@ -5,10 +5,10 @@
 
 type 'a unique
   (** Type of unique representants of MTBDD leaves of type ['a].
-      
+
       For technical reason, type ['a] should not be implemented as
       a custom block with finalization function. (This is checked
-      and the program aborts with an error message). 
+      and the program aborts with an error message).
 
       Use {!Mtbddc} module if your type does not fulfill this
       requirement.  [Mtbddc] modules automatically encapsulate the
@@ -37,7 +37,7 @@ val make_table : hash:('a -> int) -> equal:('a -> 'a -> bool) -> 'a table
 
 val unique : 'a table -> 'a -> 'a unique
   (** Building a unique constant *)
-val get : 'a unique -> 'a 
+val get : 'a unique -> 'a
   (** Type conversion (no computation) *)
 
 (** Public type for exploring the abstract type [t] *)
@@ -103,7 +103,7 @@ external ite : Man.v Bdd.t -> 'a t -> 'a t -> 'a t = "camlidl_cudd_add_ite"
 external ite_cst : Man.v Bdd.t -> 'a t -> 'a t -> 'a t option = "camlidl_cudd_add_ite_cst"
 external eval_cst : 'a t -> Man.v Bdd.t -> 'a t option = "camlidl_cudd_add_eval_cst"
 external compose : int -> Man.v Bdd.t -> 'a t -> 'a t = "camlidl_cudd_add_compose"
-external vectorcompose: Man.v Bdd.t array -> 'a t -> 'a t = "camlidl_cudd_add_vectorcompose"
+val vectorcompose: ?memo:Memo.t -> Man.v Bdd.t array -> 'a t -> 'a t
 
 (* ====================================================== *)
 (** {2 Logical tests} *)
@@ -134,7 +134,7 @@ external nbleaves : 'a t -> int = "camlidl_cudd_add_nbleaves"
 (* ====================================================== *)
 
 external varmap : 'a t -> 'a t = "camlidl_cudd_add_varmap"
-external permute : 'a t -> int array -> 'a t = "camlidl_cudd_add_permute"
+val permute : ?memo:Memo.t -> 'a t -> int array -> 'a t
 
 (* ====================================================== *)
 (** {2 Iterators} *)
@@ -152,7 +152,7 @@ external iter_node: ('a t -> unit) -> 'a t -> unit = "camlidl_cudd_iter_node"
 
 external guard_of_node : 'a t -> 'a t -> Man.v Bdd.t = "camlidl_cudd_add_guard_of_node"
 external guard_of_nonbackground : 'a t -> Man.v Bdd.t = "camlidl_cudd_add_guard_of_nonbackground"
-val nodes_below_level: ?max:int -> 'a t -> int option -> 'a t array 
+val nodes_below_level: ?max:int -> 'a t -> int option -> 'a t array
 
 (** Guard of the given leaf *)
 val guard_of_leaf_u : 'a t -> 'a unique -> Man.v Bdd.t
@@ -214,4 +214,3 @@ val print:
   (Format.formatter -> Man.v Bdd.t -> unit) ->
   (Format.formatter -> 'a -> unit) ->
   Format.formatter -> 'a t -> unit
-

@@ -12,9 +12,9 @@
 
 \newcommand{\ocaml}{\xlink{OCaml}{http://www.caml.org}\xspace}
 \newcommand{\cudd}{\xlink{CUDD}{http://vlsi.colorado.edu/\~{}fabio/CUDD/cuddIntro.html}\xspace}
-\newcommand{\cuddaux}{\xlink{CUDDAUX}{../cuddaux/index.html}\xspace}
 \newcommand{\camlidl}{\xlink{CamlIDL}{http://caml.inria.fr/camlidl/}\xspace}
 \newcommand{\camlmod}[1]{\xlink{#1}{html/#1.html}\xspace}
+\newcommand{\findlib}{\xlink{FINDLIB}{http://projects.camlcity.org/projects/findlib.html}\xspace}
 
 \title{MLCuddIDL}
 \date{}
@@ -58,24 +58,25 @@ blocks). In addition, the garbage collectors of CUDD and OCaml are
 synchronized: the OCaml garbage collector is requested to perform a
 "full major" cycle before any CUDD garbage collection (in order to
 allow the later to be more efficient). Serialization and
-deserialization operations are not implemented. 
+deserialization operations are not implemented.
 
 Feel free to ask me any feature you need and which is not implemented !
 
-\section{License} 
+\section{License}
 LGPL
 
 \section{Requirements}
 \begin{itemize}
 \item An ANSI C compiler (only gcc with ansi option has been really
   tested)
-\item The \cudd BDD library
 \item The \ocaml system (of course !)
-\item The \camlidl stub code generator 
+\item The \camlidl stub code generator
+\item The \findlib OCaml library manager
 \end{itemize}
 
 \section{Download}
 
+Current version 2.2.0
 \begin{itemize}
 %\item \xlink{Tar-gzipped sources}{http://gforge.inria.fr/projects/mlxxxidl/}
 \item \xlink{Subversion repository}{http://gforge.inria.fr/plugins/scmsvn/viewcvs.php/?root=mlxxxidl}

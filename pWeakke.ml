@@ -11,9 +11,9 @@ type 'a t = {
 }
 
 let create (hash:'a -> int) (equal:'a -> 'a -> bool) n =  {
-  compare = { 
+  compare = {
     hash=(fun x -> (hash x) land max_int);
-    equal=equal 
+    equal=equal
   };
   hashtbl = Weakke.create n
 }
@@ -29,8 +29,6 @@ let remove t data = Weakke.Compare.remove t.compare t.hashtbl data
 let mem t data = Weakke.Compare.mem t.compare t.hashtbl data
 let find_all t data = Weakke.Compare.find_all t.compare t.hashtbl data
 let stats t = Weakke.stats t.hashtbl
-let print ?first ?sep ?last print_data fmt t = 
+let print ?first ?sep ?last print_data fmt t =
   Weakke.print
     ?first ?sep ?last print_data fmt t.hashtbl
-    
-

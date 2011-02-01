@@ -21,7 +21,7 @@ typedef [abstract,c2ml(camlidl_cudd_bdd_c2ml),ml2c(camlidl_cudd_node_ml2c)] stru
 
 quote(MLMLI,"
 (** Public type for exploring the abstract type [t] *)
-type 'a bdd = 
+type 'a bdd =
 | Bool of bool             (** Terminal value *)
 | Ite of int * 'a t * 'a t (** Decision on CUDD variable *)\n
 
@@ -29,9 +29,6 @@ type dt = Man.d t
 type vt = Man.v t
   (** Shortcuts *)
 ")
-
-quote(MLI,"(** Dummy value (useful in some cases) *)")
-quote(MLI,"val dummy : Man.d t")
 
 /* ====================================================================== */
 /* Extractors */
@@ -60,7 +57,7 @@ quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_T}[C
 bdd__t dthen(bdd__t no)
      quote(call, "
 if (Cudd_IsConstant(no.node))
-  failwith (\"Bdd.dthen: constant BDD\")
+  caml_invalid_argument (\"Bdd.dthen: constant BDD\")
 ;
 _res.man = no.man;
 _res.node = Cudd_T(no.node);
@@ -71,7 +68,7 @@ quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_E}[C
 bdd__t delse(bdd__t no)
      quote(call, "
 if (Cudd_IsConstant(no.node))
-  failwith (\"Bdd.delse: constant BDD\")
+  caml_invalid_argument (\"Bdd.delse: constant BDD\")
 ;
 _res.man = no.man;
 _res.node = Cudd_E(no.node);
@@ -176,8 +173,6 @@ bdd__t newvar(man__t man)
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddNewVarAtLevel}[Cudd_bddNewVarAtLevel]}. Returns the BDD equivalent to the variable of the next unused index and sets its level. *)")
 bdd__t newvar_at_level(man__t man, int level)
      quote(call, "Begin_roots1(_v_man); _res.man = man; _res.node = Cudd_bddNewVarAtLevel(man->man,level); End_roots();");
-quote(ML,"let dummy = dtrue Man.dummy")
-
 
 /* ====================================================================== */
 /* Logical tests */
@@ -262,25 +257,25 @@ int size(bdd__t no) quote(call, "_res = Cudd_DagSize(no.node);");
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountPath}[Cudd_CountPath]}. Number of paths in the BDD from the root to the leaves. *)")
 double nbpaths(bdd__t no)
 quote(call,
-"_res = Cudd_CountPath(no.node); 
-if (_res==(double)CUDD_OUT_OF_MEM){ 
-  failwith(\"Bdd.nbpaths returned CUDD_OUT_OF_MEM\"); 
+"_res = Cudd_CountPath(no.node);
+if (_res==(double)CUDD_OUT_OF_MEM){
+  caml_failwith(\"Bdd.nbpaths returned CUDD_OUT_OF_MEM\");
 }");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountPathsToNonZero}[Cudd_CountPathsToNonZero]}. Number of paths in the BDD from the root to the true leaf. *)")
 double nbtruepaths(bdd__t no)
 quote(call,
-"_res = Cudd_CountPathsToNonZero(no.node); 
-if (_res==(double)CUDD_OUT_OF_MEM){ 
-  failwith(\"Bdd.nbtruepaths returned CUDD_OUT_OF_MEM\"); 
+"_res = Cudd_CountPathsToNonZero(no.node);
+if (_res==(double)CUDD_OUT_OF_MEM){
+  caml_failwith(\"Bdd.nbtruepaths returned CUDD_OUT_OF_MEM\");
 }");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountMinterm}[Cudd_CountMinterm]}. Number of minterms  of the BDD assuming that it depends on the given number of variables. *)")
 double nbminterms(int nvar, bdd__t no)
 quote(call,
-"_res = Cudd_CountMinterm(no.man->man,no.node,nvar); 
-if (_res==(double)CUDD_OUT_OF_MEM){ 
-  failwith(\"Bdd.nbminterms returned CUDD_OUT_OF_MEM\"); 
+"_res = Cudd_CountMinterm(no.man->man,no.node,nvar);
+if (_res==(double)CUDD_OUT_OF_MEM){
+  caml_failwith(\"Bdd.nbminterms returned CUDD_OUT_OF_MEM\");
 }");
 
 quote(MLI,"(**
@@ -289,9 +284,9 @@ of the BDD, which is the ratio of the number of minterms to the number of
 nodes. The BDD is assumed to depend on [nvars] variables. *)")
 double density(int nvar, bdd__t no)
 quote(call,
-"_res = Cudd_Density(no.man->man,no.node,nvar); 
-if (_res==(double)CUDD_OUT_OF_MEM){ 
-  failwith(\"Bdd.density returned CUDD_OUT_OF_MEM\"); 
+"_res = Cudd_Density(no.man->man,no.node,nvar);
+if (_res==(double)CUDD_OUT_OF_MEM){
+  caml_failwith(\"Bdd.density returned CUDD_OUT_OF_MEM\");
 }");
 
 /* ====================================================================== */
@@ -360,11 +355,32 @@ _res.node = Cudd_bddCompose(no1.man->man, no2.node, no1.node, var);
 End_roots();
 ");
 
-quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddVectorCompose}[Cudd_bddVectorCompose]}. [vectorcompose table bdd]
-performs a parallel substitution of every variable [var] present in the
-manager by [table.(var)] in [bdd]. The size of [table]
-should be at least {!Man.get_bddvar_nb}. *)")
-quote(MLMLI,"external vectorcompose: 'a t array -> 'a t -> 'a t = \"camlidl_bdd_vectorcompose\"")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddVectorCompose}[Cudd_bddVectorCompose]}.
+[vectorcompose table bdd] performs a parallel substitution of every variable
+[var] present in the manager by [table.(var)] in [bdd]. The size of [table]
+should be at least {!Man.get_bddvar_nb}. You can optionnally control the
+memoization policy, see {!Memo}. *)
+val vectorcompose : ?memo:Memo.t -> 'a t array -> 'a t -> 'a t
+")
+
+quote(ML,"
+external _vectorcompose : 'a t array -> 'a t -> 'a t = \"camlidl_bdd_vectorcompose\"
+external _vectorcompose_memo : Memo.t -> 'a t array -> 'a t -> 'a t = \"camlidl_bdd_vectorcompose_memo\"
+let vectorcompose ?memo tbdd bdd =
+  match memo with
+  | Some(memo) ->
+      let arity = match memo with
+	| Memo.Global -> 1
+	| Memo.Cache x -> Cache.arity x
+	| Memo.Hash x -> Hash.arity x
+      in
+      if arity<>1 then
+	raise (Invalid_argument \"Cudd.Bdd.vectorcompose_memo: memo.arity<>1\")
+      ;
+      _vectorcompose_memo memo tbdd bdd
+  | None ->
+      _vectorcompose tbdd bdd
+")
 
 quote(MLI,"\n(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddIntersect}[Cudd_bddIntersect]}. Returns a BDD included in the intersection of the arguments. *)")
 bdd__t intersect(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddIntersect);
@@ -383,15 +399,37 @@ bdd__t varmap(bdd__t no) NO_OF_MAN_NO(Cudd_bddVarMap)
      quote(call, "
 Begin_roots1(_v_no);
 if (no.man->man->map == NULL){
-  failwith(\"Bdd.varmap: empty table, Man.set_varmap has not been called !\");
+  caml_failwith(\"Bdd.varmap: empty table, Man.set_varmap has not been called !\");
 _res.man = no.man;
 _res.node = Cudd_bddVarMap(no.man->man,no.node);
 End_roots();
 ");
 
-quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddPermute}[Cudd_bddPermute]}. Permutes the variables as it is specified by
-[permut] (same format as in {!Man.set_varmap}). *)")
-quote(MLMLI,"external permute : 'a t -> int array -> 'a t = \"camlidl_bdd_permute\"")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddPermute}[Cudd_bddPermute]}.
+Permutes the variables as it is specified by [permut] (same format as in
+{!Man.set_varmap}). You can optionnally control the memoization policy, see
+{!Memo}. *)
+val permute : ?memo:Memo.t -> 'a t -> int array -> 'a t
+")
+
+quote(ML,"
+external _permute : 'a t -> int array -> 'a t = \"camlidl_bdd_permute\"
+external _permute_memo : Memo.t -> 'a t -> int array -> 'a t = \"camlidl_bdd_permute_memo\"
+let permute ?memo bdd permut =
+  match memo with
+  | Some memo ->
+      let arity = match memo with
+	| Memo.Global -> 1
+	| Memo.Cache x -> Cache.arity x
+	| Memo.Hash x -> Hash.arity x
+      in
+      if arity<>1 then
+	raise (Invalid_argument \"Cudd.Bdd.permute: memo.arity<>1\")
+      ;
+      _permute_memo memo bdd permut
+  | None ->
+      _permute bdd permut
+")
 
 /* ====================================================================== */
 /* Iterators */
@@ -437,7 +475,7 @@ quote(MLMLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bd
 bdd__t exist(bdd__t no1, bdd__t no2)
      NO_OF_MAN_NO21(Cudd_bddExistAbstract);
 
-quote(MLMLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddUnivAbstract}[Cudd_bddUnivAbstract]. [forall supp bdd] quantifies universally the set of variables defined by [supp] in the BDD. *)")
+quote(MLMLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_bddUnivAbstract}[Cudd_bddUnivAbstract]}. [forall supp bdd] quantifies universally the set of variables defined by [supp] in the BDD. *)")
 bdd__t forall(bdd__t no1, bdd__t no2)
      NO_OF_MAN_NO21(Cudd_bddUnivAbstract);
 

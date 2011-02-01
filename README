@@ -1,66 +1,43 @@
-* About
+* About:
+  This code provides an OCaml interface to the CUDD BDD library.
+  It includes higher-order functions for performing user-defined functions on
+  BDDs while taking advantage of CUDD internals (caches and hashtables).
+
+* Contains:
+- The CUDD BDDs library (http://vlsi.colorado.edu/software.html),
+  version 2.4.2
 - Additional functions to CUDD library
   (related files: cuddauxXXXX.(c|h))
-- Interface of CUDD and "CUDDAUX" to OCAML (BDDs, ADDs)
+- Interface of CUDD to OCAML (BDDs, ADDs)
   (A stands for Arithmetic: float OCaml values at the leaves)
-- V(alue)DD: MTBDD with any OCaml values at the leaves.
+- VDD: MTBDD with any OCaml values at the leaves.
+  (V stands for Ocaml Values)
 - Higher order functions for VDDs
 
 * What's needed :
+- FINDLIB (http://projects.camlcity.org/projects/findlib.html)
 - An ANSI C compiler (gcc is the only tested compiler)
 - GNU MAKE
-- The CUDD BDDs library (http://vlsi.colorado.edu/software.html),
-  version 2.4.1 or higher
 - OBJECTIVE CAML 3.0 or higher (http://caml.inria.fr)
 - CAMLIDL 1.05 (http://caml.inria.fr/camlidl)
 
-- GREP, SED, M4 if you want to regenerate files from .idl files
-
-* This code provides an interface to user's functions of the CUDD
-library. It generates five ML modules: Man, Bdd, Add, Vdd, Mtbdd.
+- GREP, GNU SED, GNU M4
 
 * To build,
 Set Makefile.config from Makefile.config.model model.
 
-TWO IMPORTANT REMARKS:
+A VERY IMPORTANT REMARK:
 
-1. The CUDD Makefile does not provide an 'install' target, neither dynamic
-   libraries.
+* Set properly the C compilation flags XCFLAGS (processor, alignement)
 
-   To help you for installation, I provide a Makefile.cudd file:
-   * look at it and set the variables properly
-   * do 'make -f Makefile.cudd'
-
-   Makefile.cudd ensures the following points:
-
-   a. mlcuddidl expect to find .h files in
-      $(MLCUDDIDL_PREFIX)/include and .a files
-      $(MLCUDDIDL_PREFIX)/lib.
-
-   b. It also expects to find cuddInt.h, which is located in the
-      cudd subdirectory when the CUDD source distribution.
- 
-   c. IMPORTANT: it expects that libutil.a (of CUDD) has been renamed in
-      libucddutil.a, to avoid name conflicts with standard /iusr/lib/libutil.a
-      libraries found on some systems (like MacOS X).
-
-2. The C compilation flags in XCFLAGS (processor, alignement)
-   should be the same than those with which CUDD is compiled.
-
-make rebuild: requested only if download from subvsersion directory.
-	      regenerate C and OCaml files from .idl files
-              (require m4, sed)
 make all: build the bytecode and native versions of the interface
-make install: installs the two versions of the interface
-make cuddrun: builds a OCaml bytecode interpreter containing the
-              CUDD library
-make cuddtop: builds a OCaml toplevel containing the interface
-make test_mtbdd.byte: build bytecode version of test_mtbdd.ml
-make test_mtbdd.opt: build native-code version of test_mtbdd.ml
+make install: installs using FINDLIB and its conventions (package name: cudd)
+make uninstall: uninstalls
+make (example|test_mtbdd).byte: build bytecode version of test_mtbdd.ml
+make (example|test_mtbdd).opt: build native-code version of test_mtbdd.ml
 make clean: normal clean
-make mostylclean: delete also generated files (from .idl files)
-make rebuild: regenerate C and OCaml files from .idl files
-              (require m4, sed)
+make mostylclean: delete also generated files (from .idl files) and CUDD files
+
 make mlcuddidl.dvi:
 make mlcuddidl.pdf:
 make html:

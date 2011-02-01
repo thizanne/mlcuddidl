@@ -17,11 +17,10 @@ import "bdd.idl";
 
 /* For nodes that need Garbage collection */
 typedef [abstract,c2ml(camlidl_cudd_node_c2ml),ml2c(camlidl_cudd_node_ml2c)] struct node__t vdd__t;
-typedef [abstract,c2ml(camlidl_cudd_leaf_c2ml),ml2c(camlidl_cudd_leaf_ml2c)] struct vdd__leaf vdd__leaf;
 
 quote(MLMLI,"
 (** Public type for exploring the abstract type [t] *)
-type +'a vdd = 
+type +'a vdd =
 | Leaf of 'a         (** Terminal value *)
 | Ite of int * 'a t * 'a t (** Decision on CUDD variable *)\n	\
 
@@ -30,11 +29,11 @@ type +'a vdd =
 quote(MLI,"
 (** We refer to the module {!Add} for the description of the interface, as
 it is nearly identical to {!Add}, except that real leaves are replaced by
-OCaml leaves. 
+OCaml leaves.
 
 IMPORTANT NOTE: this is an internal module, which assumes that leaves are
-either immediate values (booleans, integers, constant sums), 
-or values allocated with caml_alloc_shr (that can 
+either immediate values (booleans, integers, constant sums),
+or values allocated with caml_alloc_shr (that can
 be moved only during a memory compaction).
 
 The only case where you may use directly {!Vdd} without worrying is when the
@@ -45,30 +44,6 @@ Otherwise, use module {!Mtbdd} or {!Mtbddc} to be safe, and also to ensure
 that you do not have two constant MTBDDs pointing to different but
 semantically equivalent values.
  *)
-")
-
-/* ====================================================================== */
-/* Internal use */
-/* ====================================================================== */
-quote(ML,"")
-quote(ML,"(*  ====================================================== *)")
-quote(ML,"(** {2 For internal use} *)")
-quote(ML,"(*  ====================================================== *)")
-
-quote(ML,"
-type _internal_ddtype = int (* 0:ADD, 1:IDD, 2:VDD *)
-let _internal_ddtype = 2
-external _internal_dval : _internal_ddtype -> 'a t -> 'a = \"camlidl_cudd_avdd_dval\"
-external _internal_inspect: _internal_ddtype -> 'a t -> 'a vdd = \"camlidl_cudd_avdd_inspect\"
-external _internal_cst : _internal_ddtype -> Man.v Man.t -> 'a -> 'a t = \"camlidl_cudd_avdd_cst\"
-external _internal_is_eval_cst : _internal_ddtype -> 'a t -> Man.v Bdd.t -> 'a option = \"camlidl_cudd_avdd_is_eval_cst\"
-external _internal_is_ite_cst : _internal_ddtype -> Man.v Bdd.t -> 'a t -> 'a t -> 'a option = \"camlidl_cudd_avdd_is_ite_cst\"
-
-external _internal_iter_cube: _internal_ddtype -> (Man.tbool array -> 'a -> unit) -> 'a t -> unit = \"camlidl_cudd_avdd_iter_cube\"
-external _internal_nodes_below_level: _internal_ddtype -> 'a t -> int option -> int option -> 'a t array = \"camlidl_cudd_avdd_nodes_below_level\"
-external _internal_guard_of_leaf : _internal_ddtype -> 'a t -> 'a -> Man.v Bdd.t = \"camlidl_cudd_avdd_guard_of_leaf\"
-external _internal_leaves: _internal_ddtype -> 'a t -> 'a array = \"camlidl_cudd_avdd_leaves\"
-external _internal_pick_leaf : _internal_ddtype -> 'a t -> 'a = \"camlidl_cudd_avdd_pick_leaf\"
 ")
 
 /* ********************************************************************** */
@@ -87,14 +62,8 @@ external dthen : 'a t -> 'a t = \"camlidl_add_dthen\"
 external delse : 'a t -> 'a t = \"camlidl_add_delse\"
 external cofactors : int -> 'a t -> 'a t * 'a t = \"camlidl_cudd_add_cofactors\"
 external cofactor : 'a t -> Man.v Bdd.t -> 'a t = \"camlidl_add_cofactor\"
-")
-quote(MLI,"
-val dval : 'a t -> 'a
-val inspect : 'a t -> 'a vdd
-")
-quote(ML,"
-let dval dd = _internal_dval _internal_ddtype dd
-let inspect dd = _internal_inspect _internal_ddtype dd
+external dval : 'a t -> 'a = \"camlidl_cudd_avdd_dval\"
+external inspect: 'a t -> 'a vdd = \"camlidl_cudd_avdd_inspect\"
 ")
 
 /* ********************************************************************** */
@@ -120,21 +89,43 @@ quote(MLMLI,"(** {2 Classical operations} *)")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"")
 
+quote(MLMLI,"
+external cst : Man.v Man.t -> 'a -> 'a t = \"camlidl_cudd_avdd_cst\"
+")
 quote(MLI,"
-val cst : Man.v Man.t -> 'a -> 'a t
-
-(** Be cautious, it is basically of type {Add.t}, so not type safe (if you use  {!nodes_below_level}, etc...: you can try to retrieve a constant value of some type and the C [double] of the background value will be treated as a C [value].*)val _background : Man.v Man.t -> 'a t
+\n
+(** Be cautious, it is not type safe (if you use  {!nodes_below_level}, etc...: you can try to retrieve a constant value of some type and [()] value of the background value will be treated as another type.*)
+val _background : Man.v Man.t -> 'a t
 ")
 quote(ML,"
-let cst man leaf = _internal_cst _internal_ddtype man leaf
-let _background man : 'a t =  Obj.magic (Add.background (Obj.magic man))
-  (** Be cautious, it is basically of type {Add.t}, so not type safe (if you use  {!nodes_below_level}, etc...: you can try to retrieve a constant value of some type and the C [double] of the background value will be treated as a C [value].*)")
+let _background man : 'a t =  cst man (Obj.magic ())
+(** Be cautious, it is not type safe (if you use  {!nodes_below_level}, etc...: you can try to retrieve a constant value of some type and [()] value of the background value will be treated as another type.*)
+")
 quote(MLMLI,"
 external ite : Man.v Bdd.t -> 'a t -> 'a t -> 'a t = \"camlidl_add_ite\"
 external ite_cst : Man.v Bdd.t -> 'a t -> 'a t -> 'a t option = \"camlidl_cudd_add_ite_cst\"
 external eval_cst : 'a t -> Man.v Bdd.t -> 'a t option = \"camlidl_cudd_add_eval_cst\"
-external compose : int -> Man.v Bdd.t -> 'a t -> 'a t = \"camlidl_add_compose\"
-external vectorcompose: Man.v Bdd.t array -> 'a t -> 'a t = \"camlidl_add_vectorcompose\"
+external compose : int -> Bdd.vt -> 'a t -> 'a t = \"camlidl_add_compose\"
+")
+
+quote(MLI,"val vectorcompose : ?memo:Memo.t -> Bdd.vt array -> 'a t -> 'a t")
+quote(ML,"
+external _vectorcompose: Bdd.vt array -> 'a t -> 'a t = \"camlidl_add_vectorcompose\"
+external _vectorcompose_memo : Memo.t -> Bdd.vt array -> 'a t -> 'a t = \"camlidl_add_vectorcompose_memo\"
+let vectorcompose ?memo tbdd add =
+  match memo with
+  | Some(memo) ->
+      let arity = match memo with
+	| Memo.Global -> 1
+	| Memo.Cache x -> Cache.arity x
+	| Memo.Hash x -> Hash.arity x
+      in
+      if arity<>1 then
+	raise (Invalid_argument \"Cudd.Add.vectorcompose_memo: memo.arity<>1\")
+      ;
+      _vectorcompose_memo memo tbdd add
+  | None ->
+      _vectorcompose tbdd add
 ")
 
 /* ********************************************************************** */
@@ -147,14 +138,8 @@ quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"
 external is_equal : 'a t -> 'a t -> bool = \"camlidl_bdd_is_equal\"
 external is_equal_when : 'a t -> 'a t -> Man.v Bdd.t -> bool = \"camlidl_bdd_is_equal_when\"
-")
-quote(MLI,"
-val is_eval_cst : 'a t -> Man.v Bdd.t -> 'a option
-val is_ite_cst : Man.v Bdd.t -> 'a t -> 'a t -> 'a option
-")
-quote(ML,"
-let is_eval_cst dd bdd = _internal_is_eval_cst _internal_ddtype dd bdd
-let is_ite_cst bdd dd1 dd2 = _internal_is_ite_cst _internal_ddtype bdd dd1 dd2
+external is_eval_cst : 'a t -> Man.v Bdd.t -> 'a option = \"camlidl_cudd_avdd_is_eval_cst\"
+external is_ite_cst : Man.v Bdd.t -> 'a t -> 'a t -> 'a option = \"camlidl_cudd_avdd_is_ite_cst\"
 ")
 
 /* ********************************************************************** */
@@ -182,8 +167,30 @@ quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
 external varmap : 'a t -> 'a t = \"camlidl_add_varmap\"
-external permute : 'a t -> int array -> 'a t = \"camlidl_add_permute\"
 ")
+
+quote(MLI,"\n(** Variant with controllable memoization policy. *)")
+quote(MLI,"val permute : ?memo:Memo.t -> 'a t -> int array -> 'a t")
+quote(ML,"
+external _permute : 'a t -> int array -> 'a t = \"camlidl_add_permute\"
+external _permute_memo : Memo.t -> 'a t -> int array -> 'a t = \"camlidl_add_permute_memo\"
+let permute ?memo vdd permut =
+  match memo with
+  | Some memo ->
+      let arity = match memo with
+	| Memo.Global -> 1
+	| Memo.Cache x -> Cache.arity x
+	| Memo.Hash x -> Hash.arity x
+      in
+      if arity<>1 then
+	raise (Invalid_argument \"Cudd.Vdd.permute: memo.arity<>1\")
+      ;
+      _permute_memo memo vdd permut
+  | None ->
+      _permute vdd permut
+")
+
+
 
 /* ********************************************************************** */
 /* Iterators */
@@ -192,11 +199,8 @@ quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"(** {2 Iterators} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
-quote(MLI,"
-val iter_cube : (Man.tbool array -> 'a -> unit) -> 'a t -> unit
-")
-quote(ML,"let iter_cube f dd = _internal_iter_cube _internal_ddtype f dd")
 quote(MLMLI, "
+external iter_cube: (Man.tbool array -> 'a -> unit) -> 'a t -> unit = \"camlidl_cudd_avdd_iter_cube\"
 external iter_node: ('a t -> unit) -> 'a t -> unit = \"camlidl_cudd_iter_node\"
 ")
 
@@ -215,25 +219,28 @@ external guard_of_nonbackground : 'a t -> Man.v Bdd.t = \"camlidl_add_guard_of_n
 quote(MLI,"
 (** [Cuddaux_NodesBelowLevel]. [nodes_below_level ?max f olevel] returns all (if [max=None]), otherwise at most [Some max] nodes pointed by the ADD, indexed by a variable of level greater or equal than [level], and encountered first in the top-down exploration (i.e., whenever a node is collected, its sons are not collected). If [olevel=None], then only constant nodes are collected. *)
 val nodes_below_level: ?max:int -> 'a t -> int option -> 'a t array
+")
+quote(ML,"
+external _nodes_below_level: 'a t -> int option -> int option -> 'a t array = \"camlidl_cudd_avdd_nodes_below_level\"
+let nodes_below_level ?max vdd olevel = _nodes_below_level vdd olevel max
+")
 
+quote(MLMLI,"
 (** Guard of the given leaf *)
-val guard_of_leaf : 'a t -> 'a -> Man.v Bdd.t
+external guard_of_leaf : 'a t -> 'a -> Man.v Bdd.t = \"camlidl_cudd_avdd_guard_of_leaf\"
 
 (** Returns the set of leaf values (excluding the background value) *)
-val leaves: 'a t -> 'a array
+external leaves: 'a t -> 'a array = \"camlidl_cudd_avdd_leaves\"
 
 (** Picks (but not randomly) a non background leaf. Return [None] if the only leaf is the background leaf. *)
-val pick_leaf : 'a t -> 'a
+external pick_leaf : 'a t -> 'a = \"camlidl_cudd_avdd_pick_leaf\"
+")
 
+quote(MLI,"
 (** Returns the set of leaf values together with their guard in the ADD *)
 val guardleafs : 'a t -> (Man.v Bdd.t * 'a) array
 ")
 quote(ML,"
-let nodes_below_level ?max vdd olevel =
-  _internal_nodes_below_level _internal_ddtype vdd olevel max
-let guard_of_leaf dd leaf = _internal_guard_of_leaf _internal_ddtype dd leaf
-let leaves dd = _internal_leaves _internal_ddtype dd
-let pick_leaf dd = _internal_pick_leaf _internal_ddtype dd
 let guardleafs (vdd:'a t) : (Man.v Bdd.t * 'a) array =
   let tab = leaves vdd in
   Array.map (fun leaf -> (guard_of_leaf vdd leaf,leaf)) tab

@@ -3,7 +3,19 @@
 MLCuddIDL 2.2.0:
 -------------
 
-General
+Distribution:
+  * Uses findlib and findlib conventions
+  * Now includes CUDD 2.4.2
+  * Groups mlcuddidl and CUDD libraries in a single library libcuddcaml
+
+General:
+  * VDDs and MTBDDs:
+    - New interface for user-defined operations, see module User.
+  * Local caches and hashtables
+    - New modules Cache, Hash, Memo
+    - Possibility to create local caches or hashtables and to control their
+      use, in functions Xdd.permute, Xdd.vectorcompose, and user-defined
+      operations.
 
 Improvements:
   * vectorcompose and permute operations are more robust to non-expert users:

@@ -9,8 +9,8 @@ type 'a capsule = private {
 }
 type 'a unique
   (** Type of unique representants of MTBDD leaves of type ['a].
-      
-      Use this module rather than {!Mtbdd} when ['a] is implemented as a 
+
+      Use this module rather than {!Mtbdd} when ['a] is implemented as a
       a custom block with finalization function. *)
 
 type 'a t = 'a unique Vdd.t
@@ -36,7 +36,7 @@ val make_table : hash:('a -> int) -> equal:('a -> 'a -> bool) -> 'a table
 
 val unique : 'a table -> 'a -> 'a unique
   (** Building a unique constant *)
-val get : 'a unique -> 'a 
+val get : 'a unique -> 'a
   (** Type conversion (no computation) *)
 
 (** Public type for exploring the abstract type [t] *)
@@ -151,7 +151,7 @@ external iter_node: ('a t -> unit) -> 'a t -> unit = "camlidl_cudd_iter_node"
 
 external guard_of_node : 'a t -> 'a t -> Man.v Bdd.t = "camlidl_cudd_add_guard_of_node"
 external guard_of_nonbackground : 'a t -> Man.v Bdd.t = "camlidl_cudd_add_guard_of_nonbackground"
-val nodes_below_level: ?max:int -> 'a t -> int option -> 'a t array 
+val nodes_below_level: ?max:int -> 'a t -> int option -> 'a t array
 
 (** Guard of the given leaf *)
 val guard_of_leaf_u : 'a t -> 'a unique -> Man.v Bdd.t
@@ -213,4 +213,3 @@ val print:
   (Format.formatter -> Man.v Bdd.t -> unit) ->
   (Format.formatter -> 'a -> unit) ->
   Format.formatter -> 'a t -> unit
-

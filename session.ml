@@ -196,6 +196,7 @@ let z = Bdd.nxor x y;;
 let z = Bdd.xor x y;;
 Bdd.pick_cubes_on_support z (Bdd.cube_of_minterm man [|Man.True;Man.True;Man.True;Man.True|]) 2;;
 
+let op1 = User.make_op1 (+.);;
 
 (* essai des Add *)
 
@@ -212,12 +213,29 @@ let add1 = Add.ite f.(0) cst.(0) cst.(1);;
 let add2 = Add.ite f.(1) cst.(2) cst.(4);;
 
 let adda = Add.add add1 add2;;
-let addb = Add.map_op2 
-  ~bottom1:(fun x -> None)
-  ~bottom2:(fun x -> None) 
-  ~neutral1:(fun x -> false) 
-  ~neutral2:(fun x -> false) 
-  ~commutative:true (fun x y -> Gc.compact (); x +. y)  add1 add2;;
+type pid = Custom.pid
+type memo = Custom.memo =
+  | Global
+  | Cache of Cache.t
+  | Hash of Hash.t
+type common = Custom.common = {
+  pid: pid;
+  arity: int;
+  memo: memo;
+}
+
+let op1 = Add.make_op1 (fun x -> x +.1.0);;
+
+
+Add.apply_op1 op1 adda;;
+let add = 
+  Add.map_op1 (fun x -> x+.1.0) add1
+;;
+let addb = 
+  Add.map_op2 
+    ~commutative:true 
+    (fun x y -> Gc.compact (); x +. y)  add1 add2
+;;
 
 let g = Array.init 6 (fun i -> Bdd.ite var.(i) var.(i+1) (Bdd.dor var.(i+2) var.(i+3)));;
 let h = Array.init 6 (fun i -> Bdd.dand f.(i) f.(i+1));;

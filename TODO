@@ -4,3 +4,4 @@
    idem pour les fonctions permute 
 3. variante des fonctions varmap, permute, substitute de plus haut niveau
    (prenant des paires, pas besoin de remplir pour tous les indices)
+4. Inliner fonctions c2ml et ml2c quand elles sont simples

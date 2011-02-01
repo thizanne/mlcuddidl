@@ -39,7 +39,7 @@
 #include "util.h"
 #include "st.h"
 
-#include "cuddauxInt.h"
+#include "cuddaux.h"
 
 /*---------------------------------------------------------------------------*/
 /* Definition of exported functions                                          */

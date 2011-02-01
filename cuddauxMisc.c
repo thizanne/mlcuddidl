@@ -17,7 +17,7 @@
 		<li> Cuddaux_ClassifySupport()
 		<li> Cuddaux_IsVarIn()
 		<li> Cuddaux_NodesBelowLevel()
-		<li> list_free()
+		<li> cuddaux_list_free()
 		<li> Cuddaux_addGuardOfNode()
 		</ul>
 	    Internal procedures included in this module:
@@ -29,7 +29,7 @@
 	    Static procedures included in this module:
 		<ul>
 		<li> cuddauxNodesBelowLevelRecur()
-		<li> list_add
+		<li> cuddaux_list_add
 		</ul>
 		]
 
@@ -47,13 +47,13 @@
 #include "util.h"
 #include "st.h"
 
-#include "cuddauxInt.h"
+#include "cuddaux.h"
 
-static int list_add(list_t** const plist, DdNode* node);
+static int cuddaux_list_add(cuddaux_list_t** const plist, DdNode* node);
 static int cuddauxNodesBelowLevelRecur(DdManager* manager, DdNode* F, int level,
-				       list_t** plist, st_table* visited,
+				       cuddaux_list_t** plist, st_table* visited,
 				       size_t max, size_t *psize,
-				       int take_background);
+				       bool take_background);
 
 
 /*---------------------------------------------------------------------------*/
@@ -190,7 +190,7 @@ Cuddaux_ClassifySupport(
   SeeAlso     []
 
 ******************************************************************************/
-int
+bool
 Cuddaux_IsVarIn(DdManager* dd, DdNode* f, DdNode* var)
 {
   assert(Cudd_Regular(var));
@@ -227,16 +227,16 @@ Cuddaux_IsVarIn(DdManager* dd, DdNode* f, DdNode* var)
   SeeAlso     []
 
 ******************************************************************************/
-list_t*
-Cuddaux_NodesBelowLevel(DdManager* manager, DdNode* f, int level, size_t max, size_t* psize, int take_background)
+cuddaux_list_t*
+Cuddaux_NodesBelowLevel(DdManager* manager, DdNode* f, int level, size_t max, size_t* psize, bool take_background)
 {
-  list_t* res = 0;
+  cuddaux_list_t* res = 0;
   st_table* visited;
 
   visited = st_init_table(st_ptrcmp,st_ptrhash);
   if (visited==NULL) return NULL;
   *psize = 0;
-  cuddauxNodesBelowLevelRecur(manager, Cudd_Regular(f), level, &res, visited, max, psize,take_background);
+  cuddauxNodesBelowLevelRecur(manager, Cudd_Regular(f), level, &res, visited, max, psize, take_background);
   if (res==NULL) *psize=0;
   assert (max>0 ? *psize<=max : 1);
   st_free_table(visited);
@@ -254,9 +254,9 @@ Cuddaux_NodesBelowLevel(DdManager* manager, DdNode* f, int level, size_t max, si
   SeeAlso     []
 
 ******************************************************************************/
-void list_free(list_t* list)
+void cuddaux_list_free(cuddaux_list_t* list)
 {
-  list_t* p;
+  cuddaux_list_t* p;
   while (list!=0){
     p = list;
     list = list->next;
@@ -498,9 +498,9 @@ cuddauxAddGuardOfNodeRecur(DdManager* manager, DdNode* f, DdNode* h)
 ******************************************************************************/
 static int
 cuddauxNodesBelowLevelRecur(DdManager* manager, DdNode* F, int level,
-			    list_t** plist, st_table* visited,
+			    cuddaux_list_t** plist, st_table* visited,
 			    size_t max, size_t* psize,
-			    int take_background)
+			    bool take_background)
 {
   int topF,res;
 
@@ -517,12 +517,12 @@ cuddauxNodesBelowLevelRecur(DdManager* manager, DdNode* F, int level,
     }
   }
   else {
-    res = list_add(plist,F);
+    res = cuddaux_list_add(plist,F);
     (*psize)++;
     if (res==0) return 0;
   }
   if (st_add_direct(visited, (char *) F, NULL) == ST_OUT_OF_MEM){
-    list_free(*plist);
+    cuddaux_list_free(*plist);
     return 0;
   }
   return 1;
@@ -542,9 +542,9 @@ cuddauxNodesBelowLevelRecur(DdManager* manager, DdNode* F, int level,
 
 ******************************************************************************/
 static int
-list_add(list_t** const plist, DdNode* node)
+cuddaux_list_add(cuddaux_list_t** const plist, DdNode* node)
 {
-  list_t* nlist = (list_t*)malloc(sizeof(list_t));
+  cuddaux_list_t* nlist = (cuddaux_list_t*)malloc(sizeof(cuddaux_list_t));
   if (nlist==NULL) return(0);
   nlist->node = node;
   nlist->next = *plist;

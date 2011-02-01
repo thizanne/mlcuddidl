@@ -34,7 +34,7 @@ let unique (table:'a table) (elt:'a) : 'a capsule =
 let get (leaf:'a capsule) : 'a = leaf.content
 
 (** Public type for exploring the abstract type [t] *)
-type 'a mtbdd = 
+type 'a mtbdd =
   | Leaf of 'a unique        (** Terminal value *)
   | Ite of int * 'a t * 'a t (** Decision on CUDD variable *)
 
@@ -75,7 +75,7 @@ external is_equal_when : 'a t -> 'a t -> Man.v Bdd.t -> bool
   = "camlidl_cudd_bdd_is_equal_when"
 let is_eval_cst_u = Vdd.is_eval_cst
 let is_ite_cst_u = Vdd.is_ite_cst
-let is_eval_cst t bdd = 
+let is_eval_cst t bdd =
   match is_eval_cst_u t bdd with
   | None -> None
   | Some x -> Some (get x)
@@ -93,7 +93,7 @@ external varmap : 'a t -> 'a t = "camlidl_cudd_add_varmap"
 external permute : 'a t -> int array -> 'a t = "camlidl_cudd_add_permute"
 let iter_cube_u = Vdd.iter_cube
 let iter_cube f t =
-  iter_cube_u 
+  iter_cube_u
     (fun minterm xu -> f minterm (get xu))
     t
 external iter_node : ('a t -> unit) -> 'a t -> unit
@@ -112,7 +112,7 @@ let leaves t = Array.map get (leaves_u t)
 let pick_leaf_u = Vdd.pick_leaf
 let pick_leaf t = get (pick_leaf_u t)
 let guardleafs_u = Vdd.guardleafs
-let guardleafs t = 
+let guardleafs t =
   Array.map (fun (g,xu) -> (g,get xu)) (guardleafs_u t)
 external constrain : 'a t -> Man.v Bdd.t -> 'a t
   = "camlidl_cudd_add_constrain"

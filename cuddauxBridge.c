@@ -41,7 +41,7 @@
 #include "util.h"
 #include "st.h"
 
-#include "cuddauxInt.h"
+#include "cuddaux.h"
 
 /**AutomaticStart*************************************************************/
 

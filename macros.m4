@@ -18,12 +18,12 @@ dnl ===========================================================================
 dnl
 define([[CHECK_MAN2]],
 [[if (no1.man!=no2.man){ \
-  failwith(\"Dd: binary function called with nodes belonging to different managers !\"); \
+  caml_invalid_argument(\"Dd: binary function called with nodes belonging to different managers !\"); \
 }]])dnl
 dnl
 define([[CHECK_MAN3]],
 [[if (no1.man!=no2.man || no1.man!=no3.man){ \
-  failwith(\"Dd: ternary function called with nodes belonging to different managers !\"); \
+  caml_invalid_argument(\"Dd: ternary function called with nodes belonging to different managers !\"); \
 }]])dnl
 dnl
 dnl ===========================================================================
@@ -123,7 +123,7 @@ value camlidl_bdd_$1(value _v_no)
   res = $2(no.man->man,no.node,&tab);
   switch(res){
   case 0:
-    failwith(\"Bdd.$1: decomposition function failed (probably CUDD_OUT_OF_MEM)\");
+    caml_failwith(\"Bdd.$1: decomposition function failed (probably CUDD_OUT_OF_MEM)\");
     break;
   case 1:
     _v_res = Val_int(0);

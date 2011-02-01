@@ -1,3 +1,9 @@
+(*
+#load "cudd.cma";;
+
+#install_printer Bdd.print__minterm;;
+#install_printer Add.print__minterm;;
+*)
 open Format;;
 open Cudd;;
 
@@ -19,7 +25,7 @@ let idz = 2;;
 let idw = 3;;
 
 (* Correspondance function *)
-let print_id fmt id = 
+let print_id fmt id =
   Format.pp_print_string fmt
     (match id with
     | 0 -> "x"
@@ -84,21 +90,103 @@ Array.iter
   f
 ;;
   *)
-  
+
 let add1 = Add.ite f.(0) cst.(0) cst.(1);;
 let add2 = Add.ite f.(1) cst.(2) cst.(4);;
 
+(* Addition *)
 let adda = Add.add add1 add2;;
-let addb = Add.map_op2 
+let addb = Add.map_op2
+  ~memo:(Memo.Cache(Cache.create 3))
   ~idempotent:false
-  ~commutative:true 
-  (fun x y -> Gc.compact (); x +. y) 
+  ~commutative:true
+  (fun x y -> Gc.compact (); x +. y)
   add1 add2;;
+
+assert(adda=addb);;
+
+let adda = Add.map_op1 (fun x -> x *. 2.0) adda;;
+let addb = Add.map_op1 (fun x -> x *. 2.0) addb;;
+assert(adda=addb);;
+
+let opN =
+  (begin fun tbdd tadd ->
+    let cst = Array.fold_left (fun res add -> res && Add.is_cst add) true tadd in
+    if cst then
+      let res = Array.fold_left (fun res add -> res +. Add.dval add) 0.0 tadd in
+      Some(Add.cst man res)
+    else
+      None
+  end)
+let addc =
+  Add.map_opN
+    opN
+    [||] [| add1; add2; add1; add2 |]
+;;
+assert(adda=addc);;
+let addd =
+  Add.map_opN
+    ~memo:(Memo.Cache(Cache.create 4))
+    opN
+    [||] [| add1; add2; add1; add2 |]
+;;
+assert(adda=addd);;
+
+(* Existential quantification (through addition) *)
+let op2 = Add.make_op2 ~commutative:true (+.);;
+let exist = Add.make_exist op2;;
+let supp = Bdd.dand var.(1) var.(2);;
+let addc = Add.apply_exist exist ~supp adda;;
+Add.clear_op2 op2;;
+Add.clear_exist exist;;
+
+let opG = Add.make_opG
+  ~ite:(fun index dthen delse ->
+    if Bdd.is_var_in index supp
+    then Add.apply_op2 op2 dthen delse
+    else Add.ite var.(index) dthen delse)
+  0 1
+  (fun tbdd tadd ->
+    if Add.is_cst tadd.(0) then Some(tadd.(0)) else None)
+;;
+let addd = Add.apply_opG opG [||] [|adda|];;
+assert(addc=addd);;
+let opG = Add.make_opG
+  ~ite:(fun index dthen delse ->
+    if Bdd.is_var_in index supp
+    then Add.add dthen delse
+    else Add.ite var.(index) dthen delse)
+  0 1
+  (fun tbdd tadd ->
+    if Add.is_cst tadd.(0) then Some(tadd.(0)) else None)
+;;
+let adde = Add.apply_opG opG [||] [|adda|];;
+assert(addc=adde);;
+
+(* Existential quantification and operation (through addition) *)
+let addc = Add.apply_exist exist ~supp (Add.add adda addb);;
+let opG = Add.make_opG
+  ~ite:(fun index dthen delse ->
+    if Bdd.is_var_in index supp
+    then Add.apply_op2 op2 dthen delse
+    else Add.ite var.(index) dthen delse)
+  0 2
+  (fun tbdd tadd ->
+    if Add.is_cst tadd.(0) && Add.is_cst tadd.(1)
+    then Some(Add.cst man ((Add.dval tadd.(0))+.(Add.dval tadd.(1))))
+    else None)
+;;
+let addd = Add.apply_opG opG [||] [|adda;addb|];;
+assert(addc=addd);;
+
+
+
+
 
 let g = Array.init 6 (fun i -> Bdd.ite var.(i) var.(i+1) (Bdd.dor var.(i+2) var.(i+3)));;
 let h = Array.init 6 (fun i -> Bdd.dand f.(i) f.(i+1));;
 
-let make_add bdd index depth = 
+let make_add bdd index depth =
   let res = ref (Add.ite bdd.(index) cst.(index) cst.(0)) in
   for i=0 to depth-1 do
     res := Add.ite bdd.(index+i) cst.(index+i) !res
@@ -118,13 +206,9 @@ let testop bdd opa opb =
   ()
 ;;
 
-printf "Here 2@.";;
-
 testop f Add.add (Add.map_op2 ~commutative:true (+.));;
 testop g Add.add (Add.map_op2 ~commutative:true (+.));;
 testop h Add.add (Add.map_op2 ~commutative:true (+.));;
-printf "Here 3@.";;
-testop f Add.mul (Add.map_op2 ~commutative:true (fun x y -> Gc.compact (); Man.garbage_collect man; x *. y));;
-printf "Here 4@.";;
-testop g Add.mul (Add.map_op2 ~commutative:true (fun x y -> Gc.compact (); Man.garbage_collect man; x *. y));;
-testop h Add.mul (Add.map_op2 ~commutative:true (fun x y -> Gc.compact (); Man.garbage_collect man; x *. y));;
+testop f Add.mul (Add.map_op2 ~commutative:true (fun x y -> Gc.compact (); ignore (Man.garbage_collect man); x *. y));;
+testop g Add.mul (Add.map_op2 ~commutative:true (fun x y -> Gc.compact (); ignore (Man.garbage_collect man); x *. y));;
+testop h Add.mul (Add.map_op2 ~commutative:true (fun x y -> Gc.compact (); ignore (Man.garbage_collect man); x *. y));;

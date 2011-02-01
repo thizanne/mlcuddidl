@@ -84,16 +84,9 @@ type dt = d t
 type vt = v t
   (** Shortcuts *)
 
-type tbool = False | True | Top 
+type tbool = False | True | Top
   (** Ternary Boolean type, used to defines minterms where [Top] means [True]
       or [False] *)
-")
-
-quote(MLI,"\n
-(** ``Dummy'' objet of type [d t]. It can be practical to put default values
-before initialization in an object. It refers to a real manager, but it is
-created with tiny memory constraints: don't use it !*)
-val dummy : d t
 ")
 
 quote(MLI,"
@@ -192,20 +185,21 @@ man__t _make(boolean caml, int numVars, int numVarsZ, int numSlots,int cacheSize
    if (numSlots<=0) numSlots = CUDD_UNIQUE_SLOTS;
    if (cacheSize<=0) cacheSize = CUDD_CACHE_SLOTS;
    if (maxMemory<0) maxMemory = 0;
-   _res = (man__t)malloc(sizeof(struct man__t));
+   _res = (struct CuddauxMan*)malloc(sizeof(struct CuddauxMan));
    _res->man = Cudd_Init(numVars, numVarsZ, numSlots, cacheSize, maxMemory);
    _res->count = 0;
+   _res->caml = caml;
    res = Cudd_AddHook(_res->man,camlidl_cudd_garbage,CUDD_PRE_GC_HOOK);
+   if (res!=1)
+     caml_failwith(\"Man.make: unable to add the garbage collection hook\");
    if (caml){
      res = Cudd_AddHook(_res->man,Cuddaux_addCamlPreGC, CUDD_PRE_GC_HOOK);
      if (res!=1)
-       failwith(\"Man.make_caml: unable to add the caml garbage collection hook Cuddaux_addCamlPreGC\");
+       caml_failwith(\"Man.make_caml: unable to add the caml garbage collection hook Cuddaux_addCamlPreGC\");
    }
-   if (res!=1)
-     failwith(\"Man.make: unable to add the garbage collection hook\");
    res = Cudd_AddHook(_res->man,camlidl_cudd_reordering,CUDD_PRE_REORDERING_HOOK);
    if (res!=1)
-     failwith(\"Man.make: unable to add the reordering hook\");
+     caml_failwith(\"Man.make: unable to add the reordering hook\");
 }
 ");
 
@@ -234,7 +228,7 @@ boolean debugcheck(man__t man)
 "_res = Cudd_DebugCheck(man->man);
  fflush(man->man->err);
  if (_res == CUDD_OUT_OF_MEM)
-   failwith(\"Dd.debugcheck returned CUDD_OUT_OF_MEM\");
+   caml_failwith(\"Dd.debugcheck returned CUDD_OUT_OF_MEM\");
 ");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CheckKeys}[Cudd_CheckKeys]}. *)")
@@ -264,7 +258,7 @@ void reduce_heap(man__t man, enum reorder heuristic, int minsize)
      quote(call,
 "{
   int ok = Cudd_ReduceHeap(man->man,heuristic,minsize);
-  if (ok==0) failwith(\"Man.reduce_heap failed\");
+  if (ok==0) caml_failwith(\"Man.reduce_heap failed\");
 }");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ShuffleHeap}[Cudd_ShuffleHeap]}. Reorder variables according to the given permutation. *)")
@@ -272,7 +266,7 @@ void shuffle_heap(man__t man, int permut[])
      quote(call,
 "{
   int ok = Cudd_ShuffleHeap(man->man,permut);
-  if (ok==0) failwith(\"Man.shuffle_heap failed\");
+  if (ok==0) caml_failwith(\"Man.shuffle_heap failed\");
 }");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddAllDet.html#cuddGarbageCollect}[cuddGarbageCollect]}. Force a garbage collection (with cache clearing) *)")
@@ -320,7 +314,7 @@ void set_varmap(man__t man, [size_is(size)] int permut[], int size)
      quote(call,
 "{
   int ok = Cuddaux_SetVarMap(man->man,permut,size);
-  if (ok==0) failwith(\"Man.set_varmap failed\");
+  if (ok==0) caml_failwith(\"Man.set_varmap failed\");
 }");
 
 /* ====================================================================== */
@@ -572,11 +566,5 @@ void print_info(man__t man)
 
 quote(ML,"
 let _ = set_gc 1000000 Gc.full_major (fun () -> ())
-
-let (dummy:d t) =
-  let res = make_d ~numVars:0 ~numVarsZ:0 ~numSlots:1 ~cacheSize:1 () in
-  set_max_mem res 1;
-  set_max_live res 4;
-  set_max_cache_hard res 1;
-  res
+let _ = Callback.register_exception \"invalid argument exception\" (Invalid_argument \"\")
 ")

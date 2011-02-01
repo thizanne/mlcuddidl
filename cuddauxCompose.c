@@ -46,7 +46,7 @@
 #include "util.h"
 #include "st.h"
 
-#include "cuddauxInt.h"
+#include "cuddaux.h"
 
 /*---------------------------------------------------------------------------*/
 /* Definition of exported functions                                          */
@@ -95,7 +95,7 @@ Cuddaux_addCompose(
   Description [Registers with the manager a variable mapping (permutation) described
   by the array permut. There should be an entry in array permut
   for each variable in the manager. The i-th entry of permut holds the
-  index of the variable that is to substitute the i-th variable. 
+  index of the variable that is to substitute the i-th variable.
   This variable mapping is then used by
   functions like Cudd_bddVarMap.  This function is convenient for
   those applications that perform the same mapping several times.
@@ -114,7 +114,7 @@ Cuddaux_addCompose(
 
 ******************************************************************************/
 int
-Cuddaux_SetVarMap(DdManager *dd, int* array, size_t size)
+Cuddaux_SetVarMap(DdManager *dd, int* array, int size)
 {
   int i;
 
@@ -174,6 +174,77 @@ Cuddaux_addVarMap(
 
 /**Function********************************************************************
 
+  Synopsis    [Composes an BDD with a vector of BDDs.]
+
+  Description [Given a vector of BDDs, creates a new BDD by
+  substituting the BDDs for the variables of the BDD f.  There
+  should be an entry in vector for each variable in the manager.
+  If no substitution is sought for a given variable, the corresponding
+  projection function should be specified in the vector.
+  This function implements simultaneous composition.
+  Returns a pointer to the resulting BDD if successful; NULL
+  otherwise.]
+
+  SideEffects [None]
+
+  SeeAlso     [Cudd_addVectorCompose Cudd_addNonSimCompose Cudd_addPermute
+  Cudd_addCompose Cudd_bddVectorCompose]
+
+******************************************************************************/
+DdNode*
+Cuddaux_bddVectorComposeCommon(struct common* common,
+			       DdNode * f,
+			       DdNode ** vector)
+{
+  DdNode *res;
+  DdManager* dd = common->man->man;
+  int i, deepest;
+
+  do {
+    dd->reordered = 0;
+    if (cuddauxCommonReinit(common)==NULL) return NULL;
+    /* Find deepest real substitution. */
+    for (deepest = dd->size - 1; deepest >= 0; deepest--) {
+      i = dd->invperm[deepest];
+      if (vector[i] != dd->vars[i]) {
+	break;
+      }
+    }
+    /* Recursively solve the problem. */
+    res = cuddauxBddVectorComposeRecur(common,f,vector,deepest);
+  } while (dd->reordered == 1);
+  return(res);
+} /* end of Cuddaux_bddVectorComposeCommon */
+
+DdNode*
+Cuddaux_bddPermuteCommon(struct common* common,
+			 DdNode* f,
+			 int* permut)
+{
+  DdManager* dd = common->man->man;
+  const int size = dd->size;
+  DdNode** vector;
+  DdNode* res;
+  int i;
+
+  vector = malloc(dd->size*sizeof(DdNode*));
+  for (i=0; i<size;i++){
+    int j = permut[i];
+    if (j<0 || j>=size){
+      fprintf(stderr,"mlcuddidl: error, permutation contains a not yet existing BDD index %d\n",j);
+      free(vector);
+      dd->errorCode = CUDD_INVALID_ARG;
+      return NULL;
+    }
+    vector[i] = dd->vars[j];
+  }
+  res = Cuddaux_bddVectorComposeCommon(common,f,vector);
+  free(vector);
+  return res;
+}
+
+/**Function********************************************************************
+
   Synopsis    [Composes an ADD with a vector of BDDs.]
 
   Description [Given a vector of BDDs, creates a new ADD by
@@ -187,27 +258,22 @@ Cuddaux_addVarMap(
 
   SideEffects [None]
 
-  SeeAlso     [Cudd_addVectorCompose Cudd_addNonSimCompose Cudd_addPermute 
+  SeeAlso     [Cudd_addVectorCompose Cudd_addNonSimCompose Cudd_addPermute
   Cudd_addCompose Cudd_bddVectorCompose]
 
 ******************************************************************************/
 DdNode *
-Cuddaux_addVectorCompose(
-  DdManager * dd,
-  DdNode * f,
-  DdNode ** vector)
+Cuddaux_addVectorComposeCommon(struct common* common,
+			       DdNode * f,
+			       DdNode ** vector)
 {
-  DdHashTable		*table;
-  DdNode		*res;
-  int			deepest;
-  int                 i;
+  DdNode *res;
+  DdManager* dd = common->man->man;
+  int i, deepest;
 
   do {
     dd->reordered = 0;
-    /* Initialize local cache. */
-    table = cuddHashTableInit(dd,1,2);
-    if (table == NULL) return(NULL);
-
+    if (cuddauxCommonReinit(common)==NULL) return NULL;
     /* Find deepest real substitution. */
     for (deepest = dd->size - 1; deepest >= 0; deepest--) {
       i = dd->invperm[deepest];
@@ -215,55 +281,63 @@ Cuddaux_addVectorCompose(
 	break;
       }
     }
-  
     /* Recursively solve the problem. */
-    res = cuddauxAddVectorComposeRecur(dd,table,f,vector,deepest);
-    if (res != NULL) cuddRef(res);
-
-    /* Dispose of local cache. */
-    cuddHashTableQuit(table);
+    res = cuddauxAddVectorComposeRecur(common,f,vector,deepest);
   } while (dd->reordered == 1);
-  
-  if (res != NULL) cuddDeref(res);
   return(res);
-
 } /* end of Cudd_addVectorCompose */
 
-/**Function********************************************************************
+DdNode*
+Cuddaux_addPermuteCommon(struct common* common,
+			 DdNode* f,
+			 int* permut)
+{
+  DdManager* dd = common->man->man;
+  const int size = dd->size;
+  DdNode** vector;
+  DdNode* res;
+  int i;
 
-  SideEffects [None]
+  vector = malloc(dd->size*sizeof(DdNode*));
+  for (i=0; i<size;i++){
+    int j = permut[i];
+    if (j<0 || j>=size){
+      fprintf(stderr,"mlcuddidl: error, permutation contains a not yet existing BDD index %d\n",j);
+      free(vector);
+      dd->errorCode = CUDD_INVALID_ARG;
+      return NULL;
+    }
+    vector[i] = dd->vars[j];
+  }
+  res = Cuddaux_addVectorComposeCommon(common,f,vector);
+  free(vector);
+  return res;
+}
 
-******************************************************************************/
 DdNode *
-Cuddaux_addApplyVectorCompose(
+Cuddaux_addVectorCompose(
   DdManager * dd,
-  DD_MAOP op,  
   DdNode * f,
   DdNode ** vector)
 {
-  DdHashTable		*table;
-  DdNode		*res;
-  int			deepest;
-  int                 i;
+  struct CuddauxMan man;
+  struct common common;
+  DdNode* res;
+  man.man = dd;
+  man.count = 16;
+  man.caml = false;
+  common.pid = 0;
+  common.arity = 1;
+  common.memo.discr = Hash;
+  common.memo.u.hash = NULL;
+  common.man = &man;
 
-  do {
-    dd->reordered = 0;
-    /* Initialize local cache. */
-    table = cuddHashTableInit(dd,1,2);
-    if (table == NULL) return(NULL);
-  
-    /* Recursively solve the problem. */
-    res = cuddauxAddApplyVectorComposeRecur(dd,table,op,f,vector);
-    if (res != NULL) cuddRef(res);
-
-    /* Dispose of local cache. */
-    cuddHashTableQuit(table);
-  } while (dd->reordered == 1);
-  
-  if (res != NULL) cuddDeref(res);
-  return(res);
-
-} /* end of Cudd_addApplyVectorCompose */
+  res = Cuddaux_addVectorComposeCommon(&common,f,vector);
+  if (res!=NULL) cuddRef(res);
+  cuddauxCommonClear(&common);
+  if (res!=NULL) cuddDeref(res);
+  return res;
+}
 
 /*---------------------------------------------------------------------------*/
 /* Definition of internal functions                                          */
@@ -296,7 +370,7 @@ cuddauxAddComposeRecur(
   topf = cuddI(dd,f->index);
 
   /* Terminal case. Subsumes the test for constant f. */
-  if (topf > v) 
+  if (topf > v)
     return(f);
   if (topf == v) {
     /* Compose. */
@@ -324,7 +398,7 @@ cuddauxAddComposeRecur(
   }
   else {
     f1 = f0 = f;
-  } 
+  }
   if (topg == top){
     index = G->index;
     g1 = cuddT(G);
@@ -332,11 +406,11 @@ cuddauxAddComposeRecur(
     if (Cudd_IsComplement(g)){
       g1 = Cudd_Not(g1);
       g0 = Cudd_Not(g0);
-    }    
+    }
   }
   else {
     g1 = g0 = g;
-  } 
+  }
   /* Recursive step. */
   t = cuddauxAddComposeRecur(dd, f1, g1, proj);
   if (t == NULL) return(NULL);
@@ -358,9 +432,9 @@ cuddauxAddComposeRecur(
   cuddDeref(e);
 
   cuddCacheInsert(dd,DDAUX_ADD_COMPOSE_RECUR_TAG,f,g,proj,r);
-  
+
   return(r);
-  
+
 } /* end of cuddauxAddComposeRecur */
 
 /*---------------------------------------------------------------------------*/
@@ -385,7 +459,7 @@ cuddauxAddVarMapRecur(DdManager *manager, DdNode* f)
   DdNode        *T, *E;
   DdNode        *res;
   int           index;
-  
+
   /* Check for terminal case of constant node. */
   if (cuddIsConstant(f)) {
     return(f);
@@ -394,9 +468,9 @@ cuddauxAddVarMapRecur(DdManager *manager, DdNode* f)
   /* If problem already solved, look up answer and return. */
   if (f->ref != 1 &&
       (res = cuddCacheLookup1(manager,Cuddaux_addVarMap,f)) != NULL) {
-        return res;
+	return res;
       }
-  
+
   /* Split and recur on children of this node. */
   T = cuddauxAddVarMapRecur(manager,cuddT(f));
   if (T == NULL) return(NULL);
@@ -423,7 +497,7 @@ cuddauxAddVarMapRecur(DdManager *manager, DdNode* f)
   Cudd_RecursiveDeref(manager, T);
   Cudd_RecursiveDeref(manager, E);
   cuddDeref(res);
-  
+
   /* Do not keep the result if the reference count is only 1, since
   ** it will not be visited again.
   */
@@ -446,29 +520,29 @@ cuddauxAddVarMapRecur(DdManager *manager, DdNode* f)
 ******************************************************************************/
 DdNode*
 cuddauxAddVectorComposeRecur(
-  DdManager * dd /* DD manager */,
-  DdHashTable * table /* computed table */,
-  DdNode * f /* ADD in which to compose */,
-  DdNode ** vector /* functions to substitute */,
-  int  deepest /* depth of deepest substitution */)
+			     struct common* common,
+			     DdNode * f /* ADD in which to compose */,
+			     DdNode ** vector /* functions to substitute */,
+			     int  deepest /* depth of deepest substitution */)
 {
-  DdNode	*T,*E;
-  DdNode	*res;
+  DdManager* dd = common->man->man;
+  DdNode *T,*E;
+  DdNode *res;
 
   /* If we are past the deepest substitution, return f. */
   if (cuddI(dd,f->index) > deepest) {
     return(f);
   }
 
-  if ((res = cuddHashTableLookup1(table,f)) != NULL) {
-    return(res);
-  }
+  /* Check cache. */
+  res = cuddauxCommonLookup1(common,f);
+  if (res != NULL) return res;
 
   /* Split and recur on children of this node. */
-  T = cuddauxAddVectorComposeRecur(dd,table,cuddT(f),vector,deepest);
+  T = cuddauxAddVectorComposeRecur(common,cuddT(f),vector,deepest);
   if (T == NULL)  return(NULL);
   cuddRef(T);
-  E = cuddauxAddVectorComposeRecur(dd,table,cuddE(f),vector,deepest);
+  E = cuddauxAddVectorComposeRecur(common,cuddE(f),vector,deepest);
   if (E == NULL) {
     Cudd_RecursiveDeref(dd, T);
     return(NULL);
@@ -487,26 +561,14 @@ cuddauxAddVectorComposeRecur(
   cuddRef(res);
   Cudd_RecursiveDeref(dd, T);
   Cudd_RecursiveDeref(dd, E);
-
-  /* Do not keep the result if the reference count is only 1, since
-  ** it will not be visited again
-  */
-  if (f->ref != 1) {
-    ptrint fanout = (ptrint) f->ref;
-    cuddSatDec(fanout);
-    if (!cuddHashTableInsert1(table,f,res,fanout)) {
-      Cudd_RecursiveDeref(dd, res);
-      return(NULL);
-    }
-  }
   cuddDeref(res);
-  return(res);
-    
+
+  return cuddauxCommonInsert1(common,f,res);
 } /* end of cuddauxAddVectorComposeRecur */
 
 /**Function********************************************************************
 
-  Synopsis    [Performs the recursive step of Cuddaux_addApplyVectorCompose.]
+  Synopsis    [Performs the recursive step of Cuddaux_bddVectorCompose.]
 
   Description []
 
@@ -515,61 +577,57 @@ cuddauxAddVectorComposeRecur(
   SeeAlso     []
 
 ******************************************************************************/
-DdNode*
-cuddauxAddApplyVectorComposeRecur(
-  DdManager * dd /* DD manager */,
-  DdHashTable * table /* computed table */,
-  DD_MAOP op,
-  DdNode * f /* ADD in which to compose */,
-  DdNode ** vector /* functions to substitute */)
+DdNode *
+cuddauxBddVectorComposeRecur(
+			     struct common* common,
+			     DdNode * f /* BDD in which to compose */,
+			     DdNode ** vector /* functions to be composed */,
+			     int deepest /* depth of the deepest substitution */)
 {
-  DdNode	*T,*E;
+  DdManager* dd = common->man->man;
+  DdNode	*F,*T,*E;
   DdNode	*res;
 
-  if (f->ref != 1 && (res = cuddHashTableLookup1(table,f)) != NULL) {
-    return(res);
-  }
-  if (cuddIsConstant(f)){
-    res = (*op)(dd,f);
-    cuddRef(res);
-  }
-  else {
-    /* Split and recur on children of this node. */
-    T = cuddauxAddApplyVectorComposeRecur(dd,table,op,cuddT(f),vector);
-    if (T == NULL)  return(NULL);
-    cuddRef(T);
-    E = cuddauxAddApplyVectorComposeRecur(dd,table,op,cuddE(f),vector);
-    if (E == NULL) {
-      Cudd_RecursiveDeref(dd, T);
-      return(NULL);
-    }
-    cuddRef(E);
+  statLine(dd);
+  F = Cudd_Regular(f);
 
-    /* Retrieve the 0-1 ADD for the current top variable and call
-    ** cuddauxAddIteRecur with the T and E we just created.
-    */
-    res = cuddauxAddIteRecur(dd,vector[f->index],T,E);
-    if (res == NULL) {
-      Cudd_RecursiveDeref(dd, T);
-      Cudd_RecursiveDeref(dd, E);
-      return(NULL);
-    }
-    cuddRef(res);
-    Cudd_RecursiveDeref(dd, T);
-    Cudd_RecursiveDeref(dd, E);
+  /* If we are past the deepest substitution, return f. */
+  if (cuddI(dd,F->index) > deepest) {
+    return(f);
   }
-    /* Do not keep the result if the reference count is only 1, since
-    ** it will not be visited again
-    */
-  if (f->ref != 1) {
-    ptrint fanout = (ptrint) f->ref;
-    cuddSatDec(fanout);
-    if (!cuddHashTableInsert1(table,f,res,fanout)) {
-      Cudd_RecursiveDeref(dd, res);
-      return(NULL);
-    }
+
+  /* If problem already solved, look up answer and return. */
+  res = cuddauxCommonLookup1(common,F);
+  if (res != NULL){
+    return(Cudd_NotCond(res,F != f));
   }
+
+  /* Split and recur on children of this node. */
+  T = cuddauxBddVectorComposeRecur(common,cuddT(F),vector, deepest);
+  if (T == NULL) return(NULL);
+  cuddRef(T);
+  E = cuddauxBddVectorComposeRecur(common,cuddE(F),vector, deepest);
+  if (E == NULL) {
+    Cudd_IterDerefBdd(dd, T);
+    return(NULL);
+  }
+  cuddRef(E);
+
+  /* Call cuddBddIteRecur with the BDD that replaces the current top
+  ** variable and the T and E we just created.
+  */
+  res = cuddBddIteRecur(dd,vector[F->index],T,E);
+  if (res == NULL) {
+    Cudd_IterDerefBdd(dd, T);
+    Cudd_IterDerefBdd(dd, E);
+    return(NULL);
+  }
+  cuddRef(res);
+  Cudd_IterDerefBdd(dd, T);
+  Cudd_IterDerefBdd(dd, E);
   cuddDeref(res);
-  return(res);
-    
-} /* end of cuddauxAddApplyVectorComposeRecur */
+
+  res = cuddauxCommonInsert1(common,f,res);
+  res = Cudd_NotCond(res,F != f);
+  return res;
+} /* end of cuddauxBddVectorComposeRecur */
