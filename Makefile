@@ -56,7 +56,7 @@ FILES_TOINSTALL = META \
 	cudd-2.4.2/util/util.h \
 	cuddaux.h cudd_caml.h \
 	$(IDLMODULES:%=%.idl) \
-	cudd_ocamldoc.ml cudd_ocamldoc.mli \
+	cudd_ocamldoc.mli \
 	cudd.cmi cudd.cma \
 	cudd.cmx cudd.cmxa cudd.a \
 	cudd.d.cmxa cudd.d.a \
@@ -108,7 +108,7 @@ distclean: mostlyclean
 clean:
 	/bin/rm -f cuddtop *.byte *.opt
 	/bin/rm -f cuddaux.?? cuddaux.??? cuddaux.info
-	/bin/rm -f *.[ao] *.so *.cm[ioxa] *.cmxa *.opt *.opt2 *.annot
+	/bin/rm -f *.[ao] *.so *.cm[ioxa] *.cmxa *.opt *.opt2 *.annot cudd_ocamldoc.mli
 	/bin/rm -f cmttb*
 	/bin/rm -fr html
 
@@ -136,10 +136,6 @@ cudd.cmx: $(MLMODULES:%=%.cmx)
 cudd.p.cmx:  $(MLMODULES:%=%.p.cmx)
 	$(OCAMLOPT) $(OCAMLOPTFLAGS_PROF) -p -pack -o $@ $^
 
-cudd_ocamldoc.mli: $(MLMODULES:%=%.mli)
-	ocamlpack -o cudd_ocamldoc -title "Interface to CUDD library" -intf $(MLMODULES)
-cudd_ocamldoc.ml: $(MLMODULES:%=%.ml)
-	ocamlpack -o cudd_ocamldoc -title "Interface to CUDD library" -impl $(MLMODULES)
 
 # C rules
 libcuddcaml.a: cudd-2.4.2/libcuddall.a $(CCMODULES:%=%.o)
@@ -174,13 +170,19 @@ cudd-2.4.2/libcuddall.d.a:
 # HTML and LATEX rules
 .PHONY: html
 
+cudd_ocamldoc.mli: $(MLMODULES:%=%.mli) introduction.odoc
+	$(OCAMLPACK) -o cudd_ocamldoc -title "Interface to CUDD library" -intro introduction.odoc -intf $(MLMODULES)
+
 mlcuddidl.pdf: mlcuddidl.dvi
 	$(DVIPDF) mlcuddidl.dvi
-mlcuddidl.dvi: mlcuddidl.odoc $(MLMODULES:%=%.mli)
-	$(OCAMLDOC) $(OCAMLINC) \
--t "MLCUDDIDL: OCaml interface for CUDD library, version 2.1.0, 10/08/09" \
--latextitle 1,chapter -latextitle 2,section -latextitle 3,subsection -latextitle 4,subsubsection -latextitle 5,paragraph -latextitle 6,subparagraph \
--latex -intro mlcuddidl.odoc -o ocamldoc.tex $(MLMODULES:%=%.mli)
+mlcuddidl.dvi: cudd_ocamldoc.mli
+	mkdir -p tmp
+	cp cudd_ocamldoc.mli tmp/cudd.mli
+	(cd tmp; $(OCAMLC) $(OCAMLINC) -c cudd.mli)
+	$(OCAMLDOC) $(OCAMLINC) -I tmp \
+-t "MLCUDDIDL: OCaml interface for CUDD library, version 2.2.0, 01/02/11" \
+-latextitle 1,part -latextitle 2,chapter -latextitle 3,section -latextitle 4,subsection -latextitle 5,subsubsection -latextitle 6,paragraph -latextitle 7,subparagraph \
+-latex -o ocamldoc.tex tmp/cudd.mli
 	$(SED) -e 's/\\documentclass\[11pt\]{article}/\\documentclass[10pt,twosdie,a4paper]{book}\\usepackage{ae,fullpage,makeidx,fancyhdr}\\usepackage[ps2pdf]{hyperref}\\pagestyle{fancy}\\setlength{\\parindent}{0em}\\setlength{\\parskip}{0.5ex}\\sloppy\\makeindex\\author{Bertrand Jeannet}/' -e 's/\\end{document}/\\appendix\\printindex\\end{document}/' ocamldoc.tex >mlcuddidl.tex
 	$(LATEX) mlcuddidl
 	$(MAKEINDEX) mlcuddidl
@@ -190,9 +192,12 @@ mlcuddidl.dvi: mlcuddidl.odoc $(MLMODULES:%=%.mli)
 dot: $(MLMODULES:%=%.ml)
 	$(OCAMLDOC) -dot -dot-reduce -o cudd.dot $(MLMODULES:%=%.ml)
 
-html: mlcuddidl.odoc $(MLMODULES:%=%.mli)
+html: mlcuddidl.odoc cudd_ocamldoc.mli
+	mkdir -p tmp
+	cp cudd_ocamldoc.mli tmp/cudd.mli
+	(cd tmp; $(OCAMLC) $(OCAMLINC) -c cudd.mli)
 	mkdir -p html
-	$(OCAMLDOC) $(OCAMLINC) -html -d html -colorize-code -intro mlcuddidl.odoc $(MLMODULES:%=%.mli)
+	$(OCAMLDOC) $(OCAMLINC) -I tmp -html -d html -colorize-code -intro mlcuddidl.odoc tmp/cudd.mli
 
 homepage: html mlcuddidl.pdf
 	hyperlatex index

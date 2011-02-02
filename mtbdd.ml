@@ -1,4 +1,4 @@
-(** MTBDDs using a weak hashtable for unique constants *)
+(** MTBDDs with OCaml values *)
 
 open Format
 

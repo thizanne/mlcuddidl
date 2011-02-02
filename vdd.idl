@@ -51,7 +51,7 @@ semantically equivalent values.
 /* ********************************************************************** */
 quote(MLMLI,"")
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {2 Extractors} *)")
+quote(MLMLI,"(** {3 Extractors} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
@@ -70,7 +70,7 @@ external inspect: 'a t -> 'a vdd = \"camlidl_cudd_avdd_inspect\"
 /* Supports */
 /* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {2 Supports} *)")
+quote(MLMLI,"(** {3 Supports} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
@@ -85,7 +85,7 @@ external vectorsupport2 : Man.v Bdd.t array -> 'a t array -> Man.v Bdd.t = \"cam
 /* Classical operations */
 /* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {2 Classical operations} *)")
+quote(MLMLI,"(** {3 Classical operations} *)")
 quote(MLMLI,"(* ====================================================== *)")
 quote(MLMLI,"")
 
@@ -132,7 +132,7 @@ let vectorcompose ?memo tbdd add =
 /* Logical tests */
 /* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {2 Logical tests} *)")
+quote(MLMLI,"(** {3 Logical tests} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
@@ -146,7 +146,7 @@ external is_ite_cst : Man.v Bdd.t -> 'a t -> 'a t -> 'a option = \"camlidl_cudd_
 /* Structural information */
 /* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {2 Structural information} *)")
+quote(MLMLI,"(** {3 Structural information} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
@@ -162,7 +162,7 @@ external nbleaves : 'a t -> int = \"camlidl_add_nbleaves\"
 /* Variable Mapping */
 /* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {2 Variable mapping} *)")
+quote(MLMLI,"(** {3 Variable mapping} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
@@ -196,7 +196,7 @@ let permute ?memo vdd permut =
 /* Iterators */
 /* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {2 Iterators} *)")
+quote(MLMLI,"(** {3 Iterators} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI, "
@@ -208,7 +208,7 @@ external iter_node: ('a t -> unit) -> 'a t -> unit = \"camlidl_cudd_iter_node\"
 /* Leaves and guards */
 /* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {2 Leaves and guards} *)")
+quote(MLMLI,"(** {3 Leaves and guards} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
@@ -251,7 +251,7 @@ let guardleafs (vdd:'a t) : (Man.v Bdd.t * 'a) array =
 /* ********************************************************************** */
 quote(MLMLI,"")
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {2 Minimizations} *)")
+quote(MLMLI,"(** {3 Minimizations} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
@@ -265,14 +265,14 @@ external tdrestrict : 'a t -> Man.v Bdd.t -> 'a t = \"camlidl_add_tdrestrict\"
 /* Conversions */
 /* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {2 Conversions} *)")
+quote(MLMLI,"(** {3 Conversions} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 /* ********************************************************************** */
 /* User operations */
 /* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {2 User operations} *)")
+quote(MLMLI,"(** {3 User operations} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
@@ -287,7 +287,7 @@ Two options:
 /* Miscellaneous */
 /* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {2 Miscellaneous} *)")
+quote(MLMLI,"(** {3 Miscellaneous} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
@@ -298,7 +298,7 @@ external transfer : 'a t -> Man.v Man.t -> 'a t = \"camlidl_add_transfer\"
 /* Printing */
 /* ********************************************************************** */
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {2 Printing} *)")
+quote(MLMLI,"(** {3 Printing} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLI,"

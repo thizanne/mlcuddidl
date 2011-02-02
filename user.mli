@@ -10,11 +10,11 @@
     cache should be cleared with {!Man.flush}. *)
 
 (*  ********************************************************************** *)
-(** {2 Types and values} *)
+(** {3 Types and values} *)
 (*  ********************************************************************** *)
 
 (*  ====================================================================== *)
-(** {3 Type of registered operations} *)
+(** {4 Type of registered operations} *)
 (*  ====================================================================== *)
 
 (** Identifiers of closures used in shared memoization tables *)
@@ -34,7 +34,7 @@ val newpid : unit -> Custom.pid
 val make_common : ?memo:Memo.t -> int -> common
 
 (*  ********************************************************************** *)
-(** {2 Unary operations} *)
+(** {3 Unary operations} *)
 (*  ********************************************************************** *)
 
 type ('a,'b) op1 = ('a,'b) Custom.op1 = private {
@@ -47,7 +47,7 @@ val make_op1 : ?memo:Memo.t -> ('a -> 'b) -> ('a, 'b) op1
 val apply_op1 : ('a, 'b) op1 -> 'a Vdd.t -> 'b Vdd.t
 
 
-(** {4 Example:}
+(** {5 Example:}
 
     Assuming [type t = bool Vdd.t], and corresponding diagrams
     [bdd:t] and [bdd2:t] (with type [bool], it is safe to use
@@ -84,7 +84,7 @@ val apply_op1 : ('a, 'b) op1 -> 'a Vdd.t -> 'b Vdd.t
 *)
 
 (*  ********************************************************************** *)
-(** {2 Binary operations} *)
+(** {3 Binary operations} *)
 (*  ********************************************************************** *)
 
 type ('a,'b,'c) op2 = ('a,'b,'c) Custom.op2 = private {
@@ -125,7 +125,7 @@ val make_op2 :
   *)
 val apply_op2 : ('a, 'b, 'c) op2 -> 'a Vdd.t -> 'b Vdd.t -> 'c Vdd.t
 
-(** {4 Example:}
+(** {5 Example:}
 
     Assuming as for unary operation example [type t = bool Vdd.t]
     and corresponding diagrams [bdd1:t] and [bdd2:t].
@@ -142,7 +142,7 @@ val apply_op2 : ('a, 'b, 'c) op2 -> 'a Vdd.t -> 'b Vdd.t -> 'c Vdd.t
 *)
 
 (*  ********************************************************************** *)
-(** {2 Ternary operations} *)
+(** {3 Ternary operations} *)
 (*  ********************************************************************** *)
 
 type ('a,'b,'c,'d) op3 = ('a,'b,'c,'d) Custom.op3 = private {
@@ -161,7 +161,7 @@ val apply_op3 :
   (** Combine the two previous operations.
       if [?memo=None], then a hash table is used, and cleared at the end. *)
 
-(** {4 Example:}
+(** {5 Example:}
 
     Still assuming [type t = bool Vdd.t]
     and corresponding diagrams [bdd1:t], [bdd2:t], [bdd3:t].
@@ -177,7 +177,7 @@ val apply_op3 :
 *)
 
 (*  ********************************************************************** *)
-(** {2 Nary operations} *)
+(** {3 Nary operations} *)
 (*  ********************************************************************** *)
 
 (** N-ary operation *)
@@ -212,7 +212,7 @@ val make_opG :
 val apply_opG : ('a, 'b) opG -> Bdd.vt array -> 'a Vdd.t array -> 'b Vdd.t
 
 (*  ********************************************************************** *)
-(** {2 Binary tests} *)
+(** {3 Binary tests} *)
 (*  ********************************************************************** *)
 
 type ('a,'b) test2 = ('a,'b) Custom.test2 = private {
@@ -248,7 +248,7 @@ val make_test2 :
 val apply_test2 : ('a, 'b) test2 -> 'a Vdd.t -> 'b Vdd.t -> bool
 
 (*  ********************************************************************** *)
-(** {2 Quantification} *)
+(** {3 Quantification} *)
 (*  ********************************************************************** *)
 
 type 'a exist = 'a Custom.exist = private {
@@ -265,7 +265,7 @@ val make_exist : ?memo:Memo.t -> ('a, 'a, 'a) op2 -> 'a exist
 
 val apply_exist : 'a exist -> supp:Bdd.vt -> 'a Vdd.t -> 'a Vdd.t
 
-(** {4 Example:}
+(** {5 Example:}
 
     Still assuming [type t = bool Vdd.t]
     and corresponding diagrams [bdd:t]
@@ -282,7 +282,7 @@ let res = apply_exist exist ~supp bdd;;
 *)
 
 (*  ********************************************************************** *)
-(** {2 Quantification combined with intersection} *)
+(** {3 Quantification combined with intersection} *)
 (*  ********************************************************************** *)
 
 type 'a existand = 'a Custom.existand = private {
@@ -304,7 +304,7 @@ val apply_existand :
     commutative, idempotent, and also [op2 f bottom = f]. *)
 
 (*  ********************************************************************** *)
-(** {2 Quantification combined with unary operation} *)
+(** {3 Quantification combined with unary operation} *)
 (*  ********************************************************************** *)
 
 type ('a,'b) existop1 = ('a,'b) Custom.existop1 = private {
@@ -329,7 +329,7 @@ val apply_existop1 :
 *)
 
 (*  ********************************************************************** *)
-(** {2 Quantification combined with intersection and unary operation} *)
+(** {3 Quantification combined with intersection and unary operation} *)
 (*  ********************************************************************** *)
 
 type ('a,'b) existandop1 = ('a,'b) Custom.existandop1 = private {
@@ -355,7 +355,7 @@ val apply_existandop1 :
    commutative, idempotent, and also [op2 f bottom = f]. *)
 
 (*  ********************************************************************** *)
-(** {2 Clearing memoization tables} *)
+(** {3 Clearing memoization tables} *)
 (*  ********************************************************************** *)
 
 val clear_common	: common -> unit
@@ -372,7 +372,7 @@ val clear_existop1	: ('a, 'b) existop1	-> unit
 val clear_existandop1	: ('a, 'b) existandop1	-> unit
 
 (*  ********************************************************************** *)
-(** {2 Map operations} *)
+(** {3 Map operations} *)
 (*  ********************************************************************** *)
 
 (** These operations combine [make_opXXX] and [apply_opXXX]

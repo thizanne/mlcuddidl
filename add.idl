@@ -31,7 +31,7 @@ type add =
 /* ====================================================================== */
 quote(ML,"")
 quote(ML,"(*  ====================================================== *)")
-quote(ML,"(** {2 For internal use} *)")
+quote(ML,"(** {3 For internal use} *)")
 quote(ML,"(*  ====================================================== *)")
 
 quote(ML,"
@@ -43,7 +43,7 @@ quote(ML,"
 /* ====================================================================== */
 quote(MLMLI,"")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Extractors} *)")
+quote(MLMLI,"(** {3 Extractors} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 
 quote(MLMLI,"
@@ -97,7 +97,7 @@ external inspect: t -> add = \"camlidl_cudd_avdd_inspect\"
 /* ====================================================================== */
 quote(MLMLI,"")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Supports} *)")
+quote(MLMLI,"(** {3 Supports} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 
 quote(MLMLI,"
@@ -127,7 +127,7 @@ external vectorsupport2 : Bdd.dt array -> t array -> Bdd.dt = \"camlidl_add_vect
 /* Classical operations */
 /* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Classical operations} *)")
+quote(MLMLI,"(** {3 Classical operations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
@@ -223,7 +223,7 @@ let vectorcompose ?memo tbdd add =
 /* Variable Mapping */
 /* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Variable mapping} *)")
+quote(MLMLI,"(** {3 Variable mapping} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
@@ -269,7 +269,7 @@ let permute ?memo add permut =
 /* ====================================================================== */
 quote(MLMLI,"")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Logical tests} *)")
+quote(MLMLI,"(** {3 Logical tests} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 
 quote(MLMLI,"
@@ -291,7 +291,7 @@ external is_ite_cst : Bdd.dt -> t -> t -> float option = \"camlidl_cudd_avdd_is_
 /* Structural information */
 /* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Structural information} *)")
+quote(MLMLI,"(** {3 Structural information} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 
 quote(MLMLI,"
@@ -323,7 +323,7 @@ if (_res==CUDD_OUT_OF_MEM){ \
 /* Iterators */
 /* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Iterators} *)")
+quote(MLMLI,"(** {3 Iterators} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 
 quote(MLMLI,"
@@ -340,7 +340,7 @@ external iter_node: (t -> unit) -> t -> unit = \"camlidl_cudd_iter_node\"
 /* Leaves and guards */
 /* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Leaves and guards} *)")
+quote(MLMLI,"(** {3 Leaves and guards} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
@@ -390,7 +390,7 @@ let guardleafs add =
 /* ====================================================================== */
 quote(MLMLI,"")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Minimizations} *)")
+quote(MLMLI,"(** {3 Minimizations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
@@ -405,7 +405,7 @@ add__t tdrestrict(add__t no1, bdd__dt no2) NO_OF_MAN_NO12(Cuddaux_addTDRestrict)
 /* Conversions */
 /* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Conversions} *)")
+quote(MLMLI,"(** {3 Conversions} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
@@ -446,7 +446,7 @@ End_roots();
 /* Quantifications */
 /* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Quantifications} *)")
+quote(MLMLI,"(** {3 Quantifications} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
@@ -495,7 +495,7 @@ add__t forall(bdd__t no1, add__t no2)
 /* Algebraic operations */
 /* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Algebraic operations} *)")
+quote(MLMLI,"(** {3 Algebraic operations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
@@ -540,7 +540,7 @@ add__t log(add__t no) APPLYUNOP(Cudd_addLog);
 /* Matrix Operations */
 /* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Matrix operations} *)")
+quote(MLMLI,"(** {3 Matrix operations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 
 quote(MLMLI,"
@@ -567,11 +567,11 @@ MATMUL(camlidl_add_triangle,Cudd_addTriangle)
 /* User Operations */
 /* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 User operations} *)")
+quote(MLMLI,"(** {3 User operations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {3 By decomposition into guards and leaves} *)")
+quote(MLMLI,"(** {4 By decomposition into guards and leaves} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLI,"
@@ -624,7 +624,7 @@ let mapleaf2
 ")
 
 quote(MLMLI,"(* ====================================================== *)")
-quote(MLMLI,"(** {3 By using CUDD cache} *)")
+quote(MLMLI,"(** {4 By using CUDD cache} *)")
 quote(MLMLI,"(* ====================================================== *)")
 
 quote(MLMLI,"
@@ -634,7 +634,7 @@ open Custom
 ")
 
 quote(MLMLI,"
-(** {4 Type of operations} *)
+(** {5 Type of operations} *)
 
 type op1 = (float, float) Custom.op1
 type op2 = (float, float, float) Custom.op2
@@ -659,7 +659,7 @@ type existandop1 = (float,float) Custom.existandop1
 ")
 
 quote(MLI,"
-(** {4 Making operations} *)
+(** {5 Making operations} *)
 val make_op1 : ?memo:Memo.t -> (float -> float) -> op1
 val make_op2 :
   ?memo:Memo.t ->
@@ -693,7 +693,7 @@ val make_existop1 : ?memo:Memo.t -> op1:op1 -> op2 -> existop1
 val make_existandop1 :
   ?memo:Memo.t -> op1:op1 -> bottom:float -> op2 -> existandop1
 
-(** {4 Clearing memoization tables} *)
+(** {5 Clearing memoization tables} *)
 
 val clear_op1 : op1 -> unit
 val clear_op2 : op2 -> unit
@@ -706,7 +706,7 @@ val clear_existand : existand -> unit
 val clear_existop1 : existop1 -> unit
 val clear_existandop1 : existandop1 -> unit
 
-(** {4 Applying operations} *)
+(** {5 Applying operations} *)
 
 val apply_op1 : op1 -> t -> t
 val apply_op2 : op2 -> t -> t -> t
@@ -719,7 +719,7 @@ val apply_existand : existand -> supp:Bdd.dt -> Bdd.dt -> t -> t
 val apply_existop1 : existop1 -> supp:Bdd.dt -> t -> t
 val apply_existandop1 : existandop1 -> supp:Bdd.dt -> Bdd.dt -> t -> t
 
-(** {4 Map functions} *)
+(** {5 Map functions} *)
 
 val map_op1 : ?memo:Memo.t -> (float -> float) -> t -> t
 val map_op2 :
@@ -847,7 +847,7 @@ let clear_existandop1 = User.clear_existandop1
 /* Miscellaneous */
 /* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Miscellaneous} *)")
+quote(MLMLI,"(** {3 Miscellaneous} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 
@@ -864,7 +864,7 @@ End_roots();
 /* Printing */
 /* ====================================================================== */
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Printing} *)")
+quote(MLMLI,"(** {3 Printing} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"")
 

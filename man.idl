@@ -134,7 +134,7 @@ let string_of_error = function
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Global settings} *)")
+quote(MLMLI,"(** {3 Global settings} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -170,7 +170,7 @@ void srandom(long int seed)
 
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Managers} *)")
+quote(MLMLI,"(** {3 Managers} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -241,7 +241,7 @@ int check_keys(man__t man)
 
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Variables, Reordering and Mapping} *)")
+quote(MLMLI,"(** {3 Variables, Reordering and Mapping} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -322,13 +322,13 @@ void set_varmap(man__t man, [size_is(size)] int permut[], int size)
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Parameters} *)")
+quote(MLMLI,"(** {3 Parameters} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ------------------------------------------------------ *)")
-quote(MLMLI,"(** {3 RDDs} *)")
+quote(MLMLI,"(** {4 RDDs} *)")
 quote(MLMLI,"(*  ------------------------------------------------------ *)")
 quote(MLMLI,"\n")
 
@@ -357,7 +357,7 @@ void   set_epsilon(man__dt man, double v) UNIT_OF_MAN_VAL(Cudd_SetEpsilon);
 
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ------------------------------------------------------ *)")
-quote(MLMLI,"(** {3 Cache related} *)")
+quote(MLMLI,"(** {4 Cache related} *)")
 quote(MLMLI,"(*  ------------------------------------------------------ *)")
 quote(MLMLI,"\n")
 
@@ -375,7 +375,7 @@ void   set_max_cache_hard(man__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetMaxCacheHar
 
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ------------------------------------------------------ *)")
-quote(MLMLI,"(** {3 Manager} *)")
+quote(MLMLI,"(** {4 Manager} *)")
 quote(MLMLI,"(*  ------------------------------------------------------ *)")
 quote(MLMLI,"\n")
 
@@ -399,7 +399,7 @@ void   set_max_mem(man__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetMaxMemory);
 
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ------------------------------------------------------ *)")
-quote(MLMLI,"(** {3 Reordering methods} *)")
+quote(MLMLI,"(** {4 Reordering methods} *)")
 quote(MLMLI,"(*  ------------------------------------------------------ *)")
 quote(MLMLI,"\n")
 
@@ -453,7 +453,7 @@ void   set_symmviolation(man__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetSymmviolatio
 
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ------------------------------------------------------ *)")
-quote(MLMLI,"(** {3 Dynamic reordering} *)")
+quote(MLMLI,"(** {4 Dynamic reordering} *)")
 quote(MLMLI,"(*  ------------------------------------------------------ *)")
 quote(MLMLI,"\n")
 
@@ -487,7 +487,7 @@ void   set_next_autodyn(man__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetNextReorderin
 
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Statistics} *)")
+quote(MLMLI,"(** {3 Statistics} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 

@@ -35,7 +35,7 @@ type vt = Man.v t
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Extractors} *)")
+quote(MLMLI,"(** {3 Extractors} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -91,7 +91,7 @@ quote(MLMLI,"external inspect: bdd__t -> 'a bdd = \"camlidl_bdd_inspect\"")
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2  Supports} *)")
+quote(MLMLI,"(** {3  Supports} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -126,7 +126,7 @@ quote(MLMLI, "external vectorsupport : 'a t array -> 'a t = \"camlidl_bdd_vector
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2  Manipulation of supports} *)")
+quote(MLMLI,"(** {3  Manipulation of supports} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -150,7 +150,7 @@ external list_of_support: 'a t -> int list = \"camlidl_cudd_list_of_support\"
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2  Constants and Variables} *)")
+quote(MLMLI,"(** {3  Constants and Variables} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -179,7 +179,7 @@ bdd__t newvar_at_level(man__t man, int level)
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2  Logical tests} *)")
+quote(MLMLI,"(** {3  Logical tests} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -247,7 +247,7 @@ boolean is_var_essential(int index, boolean phase, bdd__t no)
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2  Structural information} *)")
+quote(MLMLI,"(** {3  Structural information} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -294,7 +294,7 @@ if (_res==(double)CUDD_OUT_OF_MEM){
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2  Logical operations} *)")
+quote(MLMLI,"(** {3  Logical operations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -390,7 +390,7 @@ bdd__t intersect(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddIntersect);
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2  Variable mapping} *)")
+quote(MLMLI,"(** {3  Variable mapping} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -436,7 +436,7 @@ let permute ?memo bdd permut =
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2  Iterators} *)")
+quote(MLMLI,"(** {3  Iterators} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -467,7 +467,7 @@ external iter_prime: (Man.tbool array -> unit) -> 'a t -> 'a t -> unit = \"camli
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2  Quantifications} *)")
+quote(MLMLI,"(** {3  Quantifications} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -501,7 +501,7 @@ End_roots();
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2  Cubes} *)")
+quote(MLMLI,"(** {3  Cubes} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -540,7 +540,7 @@ external pick_cubes_on_support : 'a t -> 'a t -> int -> 'a t array = \"camlidl_c
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2  Minimizations} *)")
+quote(MLMLI,"(** {3  Minimizations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -572,7 +572,7 @@ bdd__t squeeze(bdd__t no1, bdd__t no2) NO_OF_MAN_NO12(Cudd_bddSqueeze);
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2  Approximations} *)")
+quote(MLMLI,"(** {3  Approximations} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -718,7 +718,7 @@ DECOMP(vardisjdecomp, Cudd_bddVarDisjDecomp)
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2  Miscellaneous} *)")
+quote(MLMLI,"(** {3  Miscellaneous} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 
@@ -745,7 +745,7 @@ quote(call, "CHECK_MAN2; _res = Cudd_bddCorrelationWeights(no1.man->man,no1.node
 /* ====================================================================== */
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2  Printing} *)")
+quote(MLMLI,"(** {3  Printing} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 

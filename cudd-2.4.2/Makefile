@@ -363,7 +363,7 @@ testmtr: build
 	make CC=$(CC) RANLIB=$(RANLIB) MFLAG= MNEMLIB= ICFLAGS="$(ICFLAGS)" XCFLAGS="$(XCFLAGS)" DDDEBUG="$(DDDEBUG)" MTRDEBUG="$(MTRDEBUG)" LDFLAGS="$(LDFLAGS)" PURE="$(PURE)" EXE="$(EXE)" testmtr$(EXE) )
 
 clean:
-	/bin/rm *.a
+	/bin/rm -f *.a
 	@for dir in mnemosyne $(DIRS) obj; do	\
 	    (cd $$dir;	\
 	     echo Cleaning $$dir ...; \
@@ -371,6 +371,7 @@ clean:
 	done
 
 distclean:
+	/bin/rm -f *.a
 	@for dir in mnemosyne $(DIRS) obj; do	\
 	    (cd $$dir;	\
 	     echo Cleaning $$dir ...; \

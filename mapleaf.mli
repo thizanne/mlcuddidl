@@ -13,7 +13,7 @@
 
 
 (*  ********************************************************************** *)
-(** {2 Global option} *)
+(** {3 Global option} *)
 (*  ********************************************************************** *)
 
 val restrict : bool ref
@@ -21,7 +21,7 @@ val restrict : bool ref
       MTBDDs using {!Mtbdd.restrict} or {!Mtbddc.restrict}. *)
 
 (*  ********************************************************************** *)
-(** {2 Functions of arity 1} *)
+(** {3 Functions of arity 1} *)
 (*  ********************************************************************** *)
 
 (** In the following documentation, the pair [guard,leaf] is
@@ -57,7 +57,7 @@ val combineleaf1 :
       iterates on guards and leaves.  *)
 
 (*  ********************************************************************** *)
-(** {2 Functions of arity 2} *)
+(** {3 Functions of arity 2} *)
 (*  ********************************************************************** *)
 
 (** In the following documentation, the pair [guard1,leaf1]
@@ -97,7 +97,7 @@ val combineleaf2 :
       iterates on guards and leaves.  *)
 
 (*  ********************************************************************** *)
-(** {2 Functions on arrays} *)
+(** {3 Functions on arrays} *)
 (*  ********************************************************************** *)
 
 (** In the following documentation, [tguard,tleaves] denotes
@@ -142,7 +142,7 @@ val combineleaf2_array :
       different. *)
 
 (*  ********************************************************************** *)
-(** {2 Internal functions} *)
+(** {3 Internal functions} *)
 (*  ********************************************************************** *)
 
 val combineretractive : Bdd.vt * 'a -> 'a Vdd.t -> 'a Vdd.t

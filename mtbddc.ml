@@ -1,5 +1,4 @@
-(** MTBDDs using a weak hashtable for unique constants, version
-    for custom blocks with finalization function *)
+(** MTBDDs with finalized OCaml values. *)
 
 open Format
 

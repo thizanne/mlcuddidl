@@ -1,5 +1,4 @@
-(** MTBDDs using a weak hashtable for unique constants, version
-    for custom blocks with finalization function *)
+(** MTBDDs with finalized OCaml values. *)
 
 (* This file is part of the MLCUDDIDL Library, released under LGPL license.
    Please read the COPYING file packaged in the distribution  *)
@@ -48,7 +47,7 @@ type 'a mtbdd =
     of the interface. *)
 
 (* ====================================================== *)
-(** {2 Extractors} *)
+(** {3 Extractors} *)
 (* ====================================================== *)
 
 external manager : 'a t -> Man.v Man.t = "camlidl_cudd_bdd_manager"
@@ -82,7 +81,7 @@ val inspect : 'a t -> 'a mtbdd
   (** Decompose the MTBDD *)
 
 (* ====================================================== *)
-(** {2 Supports} *)
+(** {3 Supports} *)
 (* ====================================================== *)
 
 external support : 'a t -> Man.v Bdd.t = "camlidl_cudd_bdd_support"
@@ -92,7 +91,7 @@ external vectorsupport : 'a t array -> Man.v Bdd.t = "camlidl_cudd_bdd_vectorsup
 external vectorsupport2 : Man.v Bdd.t array -> 'a t array -> Man.v Bdd.t = "camlidl_cudd_add_vectorsupport2"
 
 (* ====================================================== *)
-(** {2 Classical operations} *)
+(** {3 Classical operations} *)
 (* ====================================================== *)
 
 val cst_u : Man.v Man.t -> 'a unique -> 'a t
@@ -105,7 +104,7 @@ external compose : int -> Man.v Bdd.t -> 'a t -> 'a t = "camlidl_cudd_add_compos
 external vectorcompose: Man.v Bdd.t array -> 'a t -> 'a t = "camlidl_cudd_add_vectorcompose"
 
 (* ====================================================== *)
-(** {2 Logical tests} *)
+(** {3 Logical tests} *)
 (* ====================================================== *)
 
 external is_equal : 'a t -> 'a t -> bool = "camlidl_cudd_bdd_is_equal"
@@ -118,7 +117,7 @@ val is_eval_cst : 'a t -> Man.v Bdd.t -> 'a option
 val is_ite_cst : Man.v Bdd.t -> 'a t -> 'a t -> 'a option
 
 (* ====================================================== *)
-(** {2 Structural information} *)
+(** {3 Structural information} *)
 (* ====================================================== *)
 
 external size : 'a t -> int = "camlidl_cudd_bdd_size"
@@ -129,14 +128,14 @@ external density : int -> 'a t -> float = "camlidl_cudd_bdd_density"
 external nbleaves : 'a t -> int = "camlidl_cudd_add_nbleaves"
 
 (* ====================================================== *)
-(** {2 Variable mapping} *)
+(** {3 Variable mapping} *)
 (* ====================================================== *)
 
 external varmap : 'a t -> 'a t = "camlidl_cudd_add_varmap"
 external permute : 'a t -> int array -> 'a t = "camlidl_cudd_add_permute"
 
 (* ====================================================== *)
-(** {2 Iterators} *)
+(** {3 Iterators} *)
 (* ====================================================== *)
 
 val iter_cube_u : (Man.tbool array -> 'a unique -> unit) -> 'a t -> unit
@@ -146,7 +145,7 @@ val iter_cube : (Man.tbool array -> 'a -> unit) -> 'a t -> unit
 external iter_node: ('a t -> unit) -> 'a t -> unit = "camlidl_cudd_iter_node"
 
 (* ====================================================== *)
-(** {2 Leaves and guards} *)
+(** {3 Leaves and guards} *)
 (* ====================================================== *)
 
 external guard_of_node : 'a t -> 'a t -> Man.v Bdd.t = "camlidl_cudd_add_guard_of_node"
@@ -170,7 +169,7 @@ val guardleafs_u : 'a t -> (Man.v Bdd.t * 'a unique) array
 val guardleafs : 'a t -> (Man.v Bdd.t * 'a) array
 
 (* ====================================================== *)
-(** {2 Minimizations} *)
+(** {3 Minimizations} *)
 (* ====================================================== *)
 
 external constrain: 'a t -> Man.v Bdd.t -> 'a t = "camlidl_cudd_add_constrain"
@@ -179,11 +178,11 @@ external restrict: 'a t -> Man.v Bdd.t -> 'a t = "camlidl_cudd_add_restrict"
 external tdrestrict : 'a t -> Man.v Bdd.t -> 'a t = "camlidl_cudd_add_tdrestrict"
 
 (* ====================================================== *)
-(** {2 Conversions} *)
+(** {3 Conversions} *)
 (* ====================================================== *)
 
 (* ====================================================== *)
-(** {2 User operations} *)
+(** {3 User operations} *)
 (* ====================================================== *)
 
 (**
@@ -193,13 +192,13 @@ Two options:
 *)
 
 (* ====================================================== *)
-(** {2 Miscellaneous} *)
+(** {3 Miscellaneous} *)
 (* ====================================================== *)
 
 external transfer : 'a t -> Man.v Man.t -> 'a t = "camlidl_cudd_add_transfer"
 
 (* ====================================================== *)
-(** {2 Printing} *)
+(** {3 Printing} *)
 (* ====================================================== *)
 
 val print__minterm:

@@ -16,7 +16,7 @@ quote(C, "
 
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ====================================================== *)")
-quote(MLMLI,"(** {2 Variables, Reordering and Mapping} *)")
+quote(MLMLI,"(** {3 Variables, Reordering and Mapping} *)")
 quote(MLMLI,"(*  ====================================================== *)")
 quote(MLMLI,"\n")
 

@@ -23,15 +23,24 @@ _res->man = NULL;
 ");
 
 quote(MLI,"
+(** Internal table *)
 val table : t Weak.t ref
+
+(** [create ~size:n arity] create a hashtable of arity [arity], of the
+    optional size [n] *)
 val create : ?size:int -> int -> t
 ")
+
+quote(MLI,"(** Returns the arity of the hashtable *)")
 int arity(hash__t hash)
 quote(call,"_res = hash->arity;");
+
+quote(MLI,"(** Clears the content of the hashtable *)")
 void clear(hash__t hash)
   quote(call,"cuddauxHashClear(hash);");
 
 quote(MLI,"
+(** Clears the content of all created hashtables *)
 val clear_all : unit -> unit
 ")
 
@@ -41,11 +50,11 @@ let (table:t Weak.t ref) = ref (Weak.create 32)
 let create ?(size=2) arity =
   let hash = _create arity size in
   let index = ref 0 in
-  while 
+  while
     !index < Weak.length !table
-    && Weak.check !table !index 
-  do 
-    incr index 
+    && Weak.check !table !index
+  do
+    incr index
   done;
   if !index = Weak.length !table then begin
     let newtable = Weak.create (2* !index) in

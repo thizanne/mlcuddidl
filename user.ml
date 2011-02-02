@@ -1,7 +1,7 @@
 (** Custom operations for MTBDDs *)
 
 (*  ********************************************************************** *)
-(** {2 Types and values} *)
+(** {3 Types and values} *)
 (*  ********************************************************************** *)
 
 type pid = Custom.pid
@@ -70,7 +70,7 @@ type ('a,'b) existandop1 = ('a,'b) Custom.existandop1 = {
 }
 
 (*  ********************************************************************** *)
-(** {2 Miscellaneous} *)
+(** {3 Miscellaneous} *)
 (*  ********************************************************************** *)
 
 let newpid = Custom.newpid
@@ -105,7 +105,7 @@ let clear_existop1 op = clear_common op.commonexistop1
 let clear_existandop1 op = clear_common op.commonexistandop1
     
 (*  ********************************************************************** *)
-(** {2 Making operations} *)
+(** {3 Making operations} *)
 (*  ********************************************************************** *)
 
 let make_op1 ?memo op =
@@ -181,7 +181,7 @@ let make_existandop1 ?memo ~op1 ~bottom combine =
   { commonexistandop1=common; combineexistandop1=combine; existandop1=op1; bottomexistandop1=bottom }
 
 (*  ********************************************************************** *)
-(** {2 Applying operations} *)
+(** {3 Applying operations} *)
 (*  ********************************************************************** *)
 
 let apply_op1 = Custom.apply_op1
@@ -196,7 +196,7 @@ let apply_existop1 op ~supp = Custom._apply_existop1 op supp
 let apply_existandop1 op ~supp = Custom._apply_existandop1 op supp
 
 (*  ********************************************************************** *)
-(** {2 Map operations} *)
+(** {3 Map operations} *)
 (*  ********************************************************************** *)
 
 let map_op1 ?memo op d1 =

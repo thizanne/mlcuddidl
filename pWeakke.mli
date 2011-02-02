@@ -1,6 +1,6 @@
 (** Hash tables of weak pointers, parametrized polymorphic version. *)
 
-(** Same inerface as {!Weakke}. *)
+(** Same interface as {!Weakke}. *)
 
 type 'a compare = 'a Weakke.compare = {
   hash : 'a -> int;
