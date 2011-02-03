@@ -56,12 +56,15 @@ FILES_TOINSTALL = META \
 	cudd-2.4.2/util/util.h \
 	cuddaux.h cudd_caml.h \
 	$(IDLMODULES:%=%.idl) \
-	cudd_ocamldoc.mli \
 	cudd.cmi cudd.cma \
 	cudd.cmx cudd.cmxa cudd.a \
 	cudd.d.cmxa cudd.d.a \
 	cudd.p.cmx cudd.p.cmxa cudd.p.a \
 	$(CCLIB)
+
+ifneq ($(OCAMLPACK),)
+FILES_TOINSTALL += cudd_ocamldoc.mli
+endif
 
 #---------------------------------------
 # Rules
