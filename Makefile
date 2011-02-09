@@ -83,14 +83,12 @@ all: $(FILES_TOINSTALL)
 
 META: Makefile
 	/bin/rm -f META
-	echo "\n\
-description = \"Interface to CUDD BDD library, together with CUDD library\" \n\
-version = \"2.2.0\" \n\
-archive(byte) = \"cudd.cma\" \n\
-archive(native) = \"cudd.cmxa\" \n\
-archive(native,debug) = \"cudd.d.cmxa\" \n\
-archive(native,gprof) = \"cudd.p.cmxa\" \n\
-" >META
+	echo "description = \"Interface to CUDD BDD library, together with CUDD library\"" >META
+	echo "version = \"2.2.0\"" >>META
+	echo "archive(byte) = \"cudd.cma\"" >>META
+	echo "archive(native) = \"cudd.cmxa\"" >>META
+	echo "archive(native,debug) = \"cudd.d.cmxa\"" >>META
+	echo "archive(native,gprof) = \"cudd.p.cmxa\"" >>META
 
 install: $(FILES_TOINSTALL)
 	$(OCAMLFIND) remove $(PKG-NAME)
