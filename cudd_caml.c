@@ -832,7 +832,7 @@ value camlidl_cudd_abdd_vectorcompose(bool bdd, value _v_vec, value _v_no)
     _res.node = Cudd_bddVectorCompose(no.man->man, no.node, vec);
     _vres = camlidl_cudd_bdd_c2ml(&_res);
   } else {
-    _res.node = Cudd_addVectorCompose(no.man->man, no.node, vec);
+    _res.node = Cuddaux_addVectorCompose(no.man, no.node, vec);
     _vres = camlidl_cudd_node_c2ml(&_res);
   }
   free(vec);

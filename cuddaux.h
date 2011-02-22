@@ -187,7 +187,7 @@ int Cuddaux_SetVarMap(DdManager *manager, int* array, int size);
 DdNode* Cuddaux_addVectorComposeCommon(struct common* common,
 				       DdNode* f, DdNode** vector);
 DdNode* Cuddaux_addPermuteCommon(struct common* common, DdNode* f, int* permut);
-DdNode* Cuddaux_addVectorCompose(DdManager* dd, DdNode* f, DdNode** vector);
+DdNode* Cuddaux_addVectorCompose(struct CuddauxMan* man, DdNode* f, DdNode** vector);
 /* f is a BDD, vector an array of BDDs */
 DdNode* Cuddaux_bddVectorComposeCommon(struct common* common, DdNode* f, DdNode** vector);
 DdNode* Cuddaux_bddPermuteCommon(struct common* common, DdNode* f, int* permut);

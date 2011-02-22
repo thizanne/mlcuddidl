@@ -79,7 +79,7 @@ let make_common ?memo arity =
   let pid = newpid () in
   let memo = match memo with
     | None -> Memo.Hash(Hash.create arity)
-    | Some x -> 
+    | Some x ->
 	let ok = match x with
 	    | Memo.Global -> arity<=2
 	    | Memo.Hash x -> (Hash.arity x) = arity
@@ -103,7 +103,7 @@ let clear_exist op = clear_common op.commonexist
 let clear_existand op = clear_common op.commonexistand
 let clear_existop1 op = clear_common op.commonexistop1
 let clear_existandop1 op = clear_common op.commonexistandop1
-    
+
 (*  ********************************************************************** *)
 (** {3 Making operations} *)
 (*  ********************************************************************** *)
@@ -161,9 +161,9 @@ let make_opN ?memo arityB arityV op =
 let make_opG ?memo ?beforeRec ?ite arityB arityV op =
   let common = make_common ?memo (arityB+arityV) in
   {
-    commonG=common; 
+    commonG=common;
     arityGbdd=arityB;
-    closureG=op; 
+    closureG=op;
     oclosureBeforeRec=beforeRec;
     oclosureIte=ite;
   }
@@ -203,38 +203,38 @@ let map_op1 ?memo op d1 =
   let op = make_op1 ?memo op in
   let res = apply_op1 op d1 in
   if memo=None then Memo.clear op.common1.memo;
-  res  
+  res
 
 let map_op2
     ?memo
     ?commutative ?idempotent
     ?special
-    op d1 d2 
+    op d1 d2
     =
-  let op = 
+  let op =
     make_op2 ?memo
       ?commutative ?idempotent
       ?special op
   in
   let res = apply_op2 op d1 d2 in
   if memo=None then Memo.clear op.common2.memo;
-  res  
+  res
 
 let map_op3 ?memo ?special op d1 d2 d3
     =
   let op = make_op3 ?memo ?special op in
   let res = apply_op3 op d1 d2 d3 in
   if memo=None then Memo.clear op.common3.memo;
-  res  
+  res
 
-let map_opN ?memo op tbdd tvdd 
+let map_opN ?memo op tbdd tvdd
     =
   let arityB = Array.length tbdd in
   let arityV = Array.length tvdd in
   let op = make_opN ?memo arityB arityV op in
   let res = apply_opN op tbdd tvdd in
   if memo=None then Memo.clear op.commonN.memo;
-  res  
+  res
 
 let map_test2
     ?memo
@@ -244,7 +244,7 @@ let map_test2
     :
     bool
     =
-  let op = 
+  let op =
     make_test2 ?memo
       ?symetric ?reflexive
       ?special op
@@ -252,4 +252,3 @@ let map_test2
   let res = apply_test2 op d1 d2 in
   if memo=None then Memo.clear op.common2t.memo;
   res
-
