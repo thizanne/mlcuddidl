@@ -316,22 +316,23 @@ Cuddaux_addPermuteCommon(struct common* common,
 
 DdNode *
 Cuddaux_addVectorCompose(
-  DdManager * dd,
-  DdNode * f,
-  DdNode ** vector)
+    struct CuddauxMan* man,
+    DdNode * f,
+    DdNode ** vector
+)
 {
-  struct CuddauxMan man;
   struct common common;
+  struct CuddauxHash hash;
   DdNode* res;
-  man.man = dd;
-  man.count = 16;
-  man.caml = false;
   common.pid = 0;
   common.arity = 1;
   common.memo.discr = Hash;
-  common.memo.u.hash = NULL;
-  common.man = &man;
-
+  common.memo.u.hash = &hash;
+  common.man = man;
+  hash.hash = NULL;
+  hash.arity = 1;
+  hash.initialsize = 0;
+  hash.man = NULL;
   res = Cuddaux_addVectorComposeCommon(&common,f,vector);
   if (res!=NULL) cuddRef(res);
   cuddauxCommonClear(&common);
