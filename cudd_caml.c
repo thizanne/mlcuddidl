@@ -117,19 +117,17 @@ void camlidl_custom_man_finalize(value val)
 }
 int camlidl_custom_man_compare(value val1, value val2)
 {
-  CAMLparam2(val1,val2);
   int res;
   DdManager* man1 = DdManager_of_vmanager(val1);
   DdManager* man2 = DdManager_of_vmanager(val2);
   res = (long)man1==(long)man2 ? 0 : (long)man1<(long)man2 ? -1 : 1;
-  CAMLreturnT(int,res);
+  return res;
 }
 long camlidl_custom_man_hash(value val)
 {
-  CAMLparam1(val);
   DdManager* man = DdManager_of_vmanager(val);
   long hash = (long)man;
-  CAMLreturnT(long,hash);
+  return hash;
 }
 
 struct custom_operations camlidl_custom_manager = {
@@ -138,7 +136,8 @@ struct custom_operations camlidl_custom_manager = {
   &camlidl_custom_man_compare,
   &camlidl_custom_man_hash,
   custom_serialize_default,
-  custom_deserialize_default
+  custom_deserialize_default,
+  custom_compare_ext_default
 };
 
 /* \subsubsection{Hashtables} */
@@ -151,20 +150,18 @@ void camlidl_custom_hash_finalize(value val)
 }
 int camlidl_custom_hash_compare(value val1, value val2)
 {
-  CAMLparam2(val1,val2);
   struct CuddauxHash* hash1,*hash2;
   camlidl_cudd_hash_ml2c(val1,&hash1);
   camlidl_cudd_hash_ml2c(val2,&hash2);
   ptrdiff_t res = hash1->hash - hash2->hash;
   res = res > 0 ? 1 : (res < 0 ? -1 : 0);
-  CAMLreturnT(int,res);
+  return res;
 }
 long camlidl_custom_hash_hash(value val)
 {
-  CAMLparam1(val);
   struct CuddauxHash* hash;
   camlidl_cudd_hash_ml2c(val,&hash);
-  CAMLreturnT(long,(long)hash->hash);
+  return (long)hash->hash;
 }
 
 struct custom_operations camlidl_custom_hash = {
@@ -173,7 +170,8 @@ struct custom_operations camlidl_custom_hash = {
   &camlidl_custom_hash_compare,
   &camlidl_custom_hash_hash,
   custom_serialize_default,
-  custom_deserialize_default
+  custom_deserialize_default,
+  custom_compare_ext_default
 };
 
 /* \subsubsection{Local Caches} */
@@ -186,20 +184,18 @@ void camlidl_custom_cache_finalize(value val)
 }
 int camlidl_custom_cache_compare(value val1, value val2)
 {
-  CAMLparam2(val1,val2);
   struct CuddauxCache* cache1,*cache2;
   camlidl_cudd_cache_ml2c(val1,&cache1);
   camlidl_cudd_cache_ml2c(val2,&cache2);
   ptrdiff_t res = cache1->cache - cache2->cache;
   res = res > 0 ? 1 : (res < 0 ? -1 : 0);
-  CAMLreturnT(int,res);
+  return (int)res;
 }
 long camlidl_custom_cache_cache(value val)
 {
-  CAMLparam1(val);
   struct CuddauxCache* cache;
   camlidl_cudd_cache_ml2c(val,&cache);
-  CAMLreturnT(long,(long)cache->cache);
+  return (long)cache->cache;
 }
 
 struct custom_operations camlidl_custom_cache = {
@@ -208,7 +204,8 @@ struct custom_operations camlidl_custom_cache = {
   &camlidl_custom_cache_compare,
   &camlidl_custom_cache_cache,
   custom_serialize_default,
-  custom_deserialize_default
+  custom_deserialize_default,
+  custom_compare_ext_default
 };
 
 /* \subsubsection{PID)} */
@@ -236,7 +233,8 @@ struct custom_operations camlidl_custom_custom_pid = {
   &camlidl_custom_custom_pid_compare,
   &camlidl_custom_custom_pid_hash,
   custom_serialize_default,
-  custom_deserialize_default
+  custom_deserialize_default,
+  custom_compare_ext_default
 };
 
 /* \subsubsection{Standard nodes (BDDs \& ADDs)} */
@@ -251,7 +249,6 @@ void camlidl_custom_node_finalize(value val)
 }
 int camlidl_custom_node_compare(value val1, value val2)
 {
-  CAMLparam2(val1,val2);
   int res;
   DdManager* man1 = DdManager_of_vnode(val1);
   DdNode* node1 = DdNode_of_vnode(val1);
@@ -261,14 +258,13 @@ int camlidl_custom_node_compare(value val1, value val2)
   res = (long)man1==(long)man2 ? 0 : ( (long)man1<(long)man2 ? -1 : 1);
   if (res==0)
     res = (long)node1==(long)node2 ? 0 : ( (long)node1<(long)node2 ? -1 : 1);
-  CAMLreturnT(int,res);
+  return (int)res;
 }
 long camlidl_custom_node_hash(value val)
 {
-  CAMLparam1(val);
   DdNode* node = DdNode_of_vnode(val);
   long hash = (long)node;
-  CAMLreturnT(long,hash);
+  return hash;
 }
 
 struct custom_operations camlidl_custom_node = {
@@ -277,7 +273,8 @@ struct custom_operations camlidl_custom_node = {
   &camlidl_custom_node_compare,
   &camlidl_custom_node_hash,
   custom_serialize_default,
-  custom_deserialize_default
+  custom_deserialize_default,
+  custom_compare_ext_default
 };
 
 /* \subsubsection{BDD nodes} */
@@ -297,7 +294,8 @@ struct custom_operations camlidl_custom_bdd = {
   &camlidl_custom_node_compare,
   &camlidl_custom_node_hash,
   custom_serialize_default,
-  custom_deserialize_default
+  custom_deserialize_default,
+  custom_compare_ext_default
 };
 
 /* %------------------------------------------------------------------------ */
@@ -407,8 +405,7 @@ value camlidl_cudd_node_c2ml(struct node__t* no)
   */
 
   val = caml_alloc_custom(&camlidl_custom_node, sizeof(struct node__t), 1, camlidl_cudd_heap);
-  ((node__t*)(Data_custom_val(val)))->man = no->man;
-  ((node__t*)(Data_custom_val(val)))->node = no->node;
+  *(node__t*)(Data_custom_val(val)) = *no;
   return val;
 }
 
@@ -445,8 +442,7 @@ value camlidl_cudd_bdd_c2ml(struct node__t* bdd)
   assert(Cudd_DebugCheck(bdd->man->man)==0);
   */
   val = caml_alloc_custom(&camlidl_custom_bdd, sizeof(struct node__t), 1, camlidl_cudd_heap);
-  ((node__t*)(Data_custom_val(val)))->man = bdd->man;
-  ((node__t*)(Data_custom_val(val)))->node = bdd->node;
+  *(node__t*)(Data_custom_val(val)) = *bdd;
   return val;
 }
 

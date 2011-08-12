@@ -40,10 +40,7 @@ static inline void camlidl_cudd_cache_ml2c(value val, struct CuddauxCache** cach
 static inline void camlidl_cudd_pid_ml2c(value val, pid* ppid)
 { *ppid = *((void**)(Data_custom_val(val))); }
 static inline void camlidl_cudd_node_ml2c(value val, struct node__t* node)
-{
-  node->man = ((node__t*)(Data_custom_val(val)))->man;
-  node->node = ((node__t*)(Data_custom_val(val)))->node;
-}
+{*node = *(node__t*)(Data_custom_val(val)); }
 
 value camlidl_cudd_man_c2ml(struct CuddauxMan** man);
 value camlidl_cudd_hash_c2ml(struct CuddauxHash** hash);
