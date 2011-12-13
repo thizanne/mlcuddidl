@@ -1,5 +1,5 @@
 dnl This file is part of the MLCUDDIDL Library, released under LGPL license.
-dnl Please read the COPYING file packaged in the distribution 
+dnl Please read the COPYING file packaged in the distribution
 dnl
 changequote([[, ]])dnl
 dnl
@@ -127,7 +127,7 @@ value camlidl_bdd_$1(value _v_no)
     break;
   case 1:
     _v_res = Val_int(0);
-    cuddDeref(tab[0]);		
+    cuddDeref(tab[0]);
     free(tab);
     break;
   case 2:
@@ -143,7 +143,7 @@ value camlidl_bdd_$1(value _v_no)
     Field(_v_pair,1) = _v_b;
     _v_res = alloc_small(0,1);
     Field(_v_res,0) = _v_pair;
-    free(tab);	
+    free(tab);
     break;
   }
   CAMLreturn(_v_res);

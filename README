@@ -18,7 +18,7 @@
 - FINDLIB (http://projects.camlcity.org/projects/findlib.html)
 - An ANSI C compiler (gcc is the only tested compiler)
 - GNU MAKE
-- OBJECTIVE CAML 3.12.x (recent version, http://caml.inria.fr)
+- OBJECTIVE CAML 3.12.1 or up (recent version, http://caml.inria.fr)
 - CAMLIDL 1.05 (http://caml.inria.fr/camlidl)
 
 - GREP, GNU SED, GNU M4
