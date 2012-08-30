@@ -35,7 +35,7 @@ OCAMLCCOPT = \
 
 IDLMODULES = hash cache memo man bdd vdd custom add
 
-MLMODULES = hash cache memo man bdd vdd custom weakke pWeakke mtbdd mtbddc user mapleaf add 
+MLMODULES = hash cache memo man bdd vdd custom weakke pWeakke mtbdd mtbddc user mapleaf add
 
 CCMODULES = \
 	cuddauxAddCamlTable cuddauxAddIte cuddauxBridge cuddauxCompose \
@@ -43,7 +43,7 @@ CCMODULES = \
 	cuddauxTDGenCof cuddauxAddApply \
 	$(IDLMODULES:%=%_caml) cudd_caml
 
-CCLIB = libcuddcaml.a libcuddcaml.d.a libcuddcaml.p.a 
+CCLIB = libcuddcaml.a libcuddcaml.d.a libcuddcaml.p.a
 ifneq ($(HAS_SHARED),)
 	CCLIB += dllcuddcaml.so
 endif
@@ -66,6 +66,10 @@ ifneq ($(OCAMLPACK),)
 FILES_TOINSTALL += cudd_ocamldoc.mli
 endif
 
+ifneq ($(HAS_TYPEREX),)
+FILES_TOINSTALL += cudd.cmt
+endif
+
 #---------------------------------------
 # Rules
 #---------------------------------------
@@ -77,7 +81,7 @@ all: $(FILES_TOINSTALL)
 %.byte: %.ml
 	$(OCAMLFIND) ocamlc $(OCAMLFLAGS) $(OCAMLINC) -o $@ $*.ml \
 	-package cudd -linkpkg
-%.opt: %.ml 
+%.opt: %.ml
 	$(OCAMLFIND) ocamlopt -verbose $(OCAMLOPTFLAGS) $(OCAMLINC) -o $@ $*.ml \
 	-package cudd -linkpkg
 
@@ -109,7 +113,7 @@ distclean: mostlyclean
 clean:
 	/bin/rm -f cuddtop *.byte *.opt
 	/bin/rm -f cuddaux.?? cuddaux.??? cuddaux.info
-	/bin/rm -f *.[ao] *.so *.cm[ioxa] *.cmxa *.opt *.opt2 *.annot cudd_ocamldoc.mli
+	/bin/rm -f *.[ao] *.so *.cm[ioxat] *.cmti *.cmxa *.opt *.opt2 *.annot cudd_ocamldoc.mli
 	/bin/rm -f cmttb*
 	/bin/rm -fr html
 

@@ -15,13 +15,11 @@ let make_table
   =
   PWeakke.create hash equal 23
 
-external copy_shr : 'a -> 'a = "camlidl_cudd_custom_copy_shr"
-
 let unique (table:'a table) (elt:'a) : 'a unique =
   if Obj.is_int (Obj.repr elt) then
     elt
   else
-    PWeakke.merge_map table elt copy_shr
+    PWeakke.merge_map table elt Man.copy_shr
 
 let get (leaf:'a unique) : 'a = leaf
 

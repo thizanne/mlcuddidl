@@ -25,10 +25,8 @@ let make_table
   let equal x y = x==y || equal x.content y.content in
   PWeakke.create hash equal 23
 
-external copy_shr : 'a -> 'a = "camlidl_cudd_custom_copy_shr"
-
 let unique (table:'a table) (elt:'a) : 'a capsule =
-  PWeakke.merge_map table {content=elt} copy_shr
+  PWeakke.merge_map table {content=elt} Man.copy_shr
 
 let get (leaf:'a capsule) : 'a = leaf.content
 

@@ -235,6 +235,10 @@ quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_Chec
 int check_keys(man__t man)
      quote(call, "_res = Cudd_CheckKeys(man->man);");
 
+quote(MLMLI,"(** Internal use: duplicate a block to the major heap. Used by {!Mtbdd} and {!Mtbddc} modules *)
+external copy_shr : 'a -> 'a = \"camlidl_cudd_custom_copy_shr\"
+")
+
 /* ====================================================================== */
 /* Variables, Reordering and Mapping */
 /* ====================================================================== */

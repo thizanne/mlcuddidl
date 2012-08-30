@@ -51,7 +51,11 @@ quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_IsCo
 boolean is_complement(bdd__t no) quote(call, "_res = Cudd_IsComplement(no.node);");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_NodeReadIndex}[Cudd_NodeReadIndex]}. Returns the index of the (top node of the) BDD (65535 for a constant BDD) *)")
-int topvar(bdd__t no) quote(call, "_res = Cudd_NodeReadIndex(no.node);");
+int topvar(bdd__t no) quote(call, "
+if (!Cudd_IsConstant(no.node))  
+  caml_invalid_argument (\"Bdd.topvar: constant BDD\");
+_res = Cudd_NodeReadIndex(no.node);
+");
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_T}[Cudd_T]}. Returns the positive subnode of the BDD *)")
 bdd__t dthen(bdd__t no)
