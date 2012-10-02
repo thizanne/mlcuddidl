@@ -50,14 +50,14 @@ boolean is_cst(bdd__t no) quote(call, "_res = Cudd_IsConstant(no.node);");
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_IsComplement}[Cudd_IsComplement]}. Is the BDD a complemented one ? *)")
 boolean is_complement(bdd__t no) quote(call, "_res = Cudd_IsComplement(no.node);");
 
-quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_NodeReadIndex}[Cudd_NodeReadIndex]}. Returns the index of the (top node of the) BDD (65535 for a constant BDD) *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_NodeReadIndex}[Cudd_NodeReadIndex]}. Returns the index of the (top node of the) BDD, raises [Invalid_argument] if given a constant BDD *)")
 int topvar(bdd__t no) quote(call, "
-if (!Cudd_IsConstant(no.node))  
+if (Cudd_IsConstant(no.node))
   caml_invalid_argument (\"Bdd.topvar: constant BDD\");
 _res = Cudd_NodeReadIndex(no.node);
 ");
 
-quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_T}[Cudd_T]}. Returns the positive subnode of the BDD *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_T}[Cudd_T]}. Returns the positive subnode of the BDD, raises [Invalid_argument] if given a constant BDD *)")
 bdd__t dthen(bdd__t no)
      quote(call, "
 if (Cudd_IsConstant(no.node))
@@ -68,7 +68,7 @@ _res.node = Cudd_T(no.node);
 if (Cudd_IsComplement(no.node)) _res.node = Cudd_Not(_res.node);
 ");
 
-quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_E}[Cudd_E]}. Returns the negative subnode of the BDD *)")
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_E}[Cudd_E]}. Returns the negative subnode of the BDD, raises [Invalid_argument] if given a constant BDD *)")
 bdd__t delse(bdd__t no)
      quote(call, "
 if (Cudd_IsConstant(no.node))
