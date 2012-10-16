@@ -66,10 +66,6 @@ ifneq ($(OCAMLPACK),)
 FILES_TOINSTALL += cudd_ocamldoc.mli
 endif
 
-ifneq ($(HAS_TYPEREX),)
-FILES_TOINSTALL += cudd.cmt
-endif
-
 #---------------------------------------
 # Rules
 #---------------------------------------
@@ -84,15 +80,6 @@ all: $(FILES_TOINSTALL)
 %.opt: %.ml
 	$(OCAMLFIND) ocamlopt -verbose $(OCAMLOPTFLAGS) $(OCAMLINC) -o $@ $*.ml \
 	-package cudd -linkpkg
-
-META: Makefile
-	/bin/rm -f META
-	echo "description = \"Interface to CUDD BDD library, together with CUDD library\"" >META
-	echo "version = \"2.2.0\"" >>META
-	echo "archive(byte) = \"cudd.cma\"" >>META
-	echo "archive(native) = \"cudd.cmxa\"" >>META
-	echo "archive(native,debug) = \"cudd.d.cmxa\"" >>META
-	echo "archive(native,gprof) = \"cudd.p.cmxa\"" >>META
 
 install: $(FILES_TOINSTALL)
 	$(OCAMLFIND) remove $(PKG-NAME)
@@ -170,13 +157,13 @@ cudd-2.4.2/libcuddall.p.a:
 	make libcuddall.p.a CPP="$(CC)" CC="$(CC)" XCFLAGS="$(XCFLAGS)" ICFLAGS="$(CFLAGS_PROF)" RANLIB="$(RANLIB)" DDDEBUG="" MTRDEBUG="")
 cudd-2.4.2/libcuddall.d.a:
 	(cd cudd-2.4.2; \
-	make libcuddall.d.a CPP="$(CC)" CC="$(CC)" XCFLAGS="$(XCFLAGS)" ICFLAGS="$(CFLAGS_DEBUG)" RANLIB="$(RANLIB)" DDDEBUG="-DDD.D -DDD_VERBOSE -DDD_STATS -DDD_CACHE_PROFILE -DDD_UNIQUE_PROFILE -DDD_COUNT" MTRDEBUG="-DMTR_DEBUG")
+	make libcuddall.d.a CPP="$(CC)" CC="$(CC)" XCFLAGS="$(XCFLAGS)" ICFLAGS="$(CFLAGS_DEBUG)" RANLIB="$(RANLIB)" DDDEBUG="-DDD_DEBUG -DDD_VERBOSE -DDD_STATS -DDD_CACHE_PROFILE -DDD_UNIQUE_PROFILE -DDD_COUNT" MTRDEBUG="-DMTR_DEBUG")
 
 # HTML and LATEX rules
 .PHONY: html
 
-cudd_ocamldoc.mli: $(MLMODULES:%=%.mli) introduction.odoc
-	$(OCAMLPACK) -o cudd_ocamldoc -title "Interface to CUDD library" -intro introduction.odoc -intf $(MLMODULES)
+cudd_ocamldoc.mli: cudd.mlpacki $(MLMODULES:%=%.mli)
+	$(OCAMLPACK) -o $@ -intro cudd.mlpacki -level 2 $(MLMODULES:%=%.mli)
 
 mlcuddidl.pdf: mlcuddidl.dvi
 	$(DVIPDF) mlcuddidl.dvi
@@ -197,12 +184,12 @@ mlcuddidl.dvi: cudd_ocamldoc.mli
 dot: $(MLMODULES:%=%.ml)
 	$(OCAMLDOC) -dot -dot-reduce -o cudd.dot $(MLMODULES:%=%.ml)
 
-html: mlcuddidl.odoc cudd_ocamldoc.mli
+html: mlcuddidl.odoci cudd_ocamldoc.mli
 	mkdir -p tmp
 	cp cudd_ocamldoc.mli tmp/cudd.mli
 	(cd tmp; $(OCAMLC) $(OCAMLINC) -c cudd.mli)
 	mkdir -p html
-	$(OCAMLDOC) $(OCAMLINC) -I tmp -html -d html -colorize-code -intro mlcuddidl.odoc tmp/cudd.mli
+	$(OCAMLDOC) $(OCAMLINC) -I tmp -html -d html -colorize-code -intro mlcuddidl.odoci tmp/cudd.mli
 
 homepage: html mlcuddidl.pdf
 	hyperlatex index
