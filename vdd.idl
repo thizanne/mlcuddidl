@@ -360,7 +360,7 @@ let print print_bdd print_leaf fmt dd =
     for i=Array.length leaves - 1 downto 0 do
       let leaf = leaves.(i) in
       let bdd = guard_of_leaf dd leaf in
-      fprintf fmt \"%a IF %a\"
+      fprintf fmt \"@[<hv>%a@ IF %a@]\"
 	print_leaf leaf print_bdd bdd;
       if i > 0 then
 	fprintf fmt \",@ \";
