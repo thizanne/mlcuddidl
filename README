@@ -44,4 +44,12 @@ make html:
 
 You can also look at session.ml.
 
+* IN CASE OF PROBLEM (Makefile.config not configured, bad versions
+  of tools, etc...), empty files may be generated from .idl and strange
+  errors may occur at compilation. In this case, do
+
+  make distclean
+
+  to reinitialize properly things.
+
 * Documentation: DVI (mlcuddidl.dvi), HTML (html/index.html)
