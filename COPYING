@@ -1,8 +1,12 @@
 Copyright (C) INRIA 2002-2012 for the mlcuddidl package
 Author: Bertrand Jeannet
 
-This license applies to all files distributed in the MLCUDDIDL library,
-including all source code, libraries, binaries, and documentation.
+This license applies to all files distributed in the MLCUDDIDL library
+*THAT ARE NOT in the cudd-2.4.2 subdirectory*.
+
+(The cudd-2.4.2 directory contains the CUDD library,
+http://vlsi.colorado.edu/software.html, and is
+included for ease of distribution only.)
 
 The Library is distributed under the terms of the GNU Library General Public
 License version 2 (included below).
