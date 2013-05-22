@@ -38,12 +38,7 @@ quote(call,"_res = cache->arity;");
 
 quote(MLI,"(** Clears the content of the local cache. *)")
 void clear(cache__t cache)
-  quote(call,"
-if (cache->cache){
-  cuddLocalCacheQuit(cache->cache);
-  cache->cache = NULL;
-}
-");
+  quote(call,"cuddauxCacheClear(cache);");
 
 quote(ML,"
 let create ?(size=0) ?(maxsize=max_int) ~arity =
