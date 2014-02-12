@@ -57,9 +57,10 @@ CC = gcc
 #
 # FOR CUDD: IMPORTANT
 # GCC on i386
-XCFLAGS = -fPIC -march=pentium4 -malign-double -DHAVE_IEEE_754 -DBSD
+XCFLAGS = -fPIC -malign-double -DHAVE_IEEE_754 -DBSD
 # GCC on x86_64
 #XCFLAGS = -fPIC -m64 -DHAVE_IEEE_754 -DSIZEOF_VOID_P=8 -DSIZEOF_LONG=8 -DSIZEOF_INT=4
+# For Mac x86_64, add -m64 -flat_namespace -undefined suppress
 
 # C compilation flags
 CFLAGS = \
@@ -68,7 +69,6 @@ CFLAGS = \
 -Wno-unused \
 -std=c99 \
 -fPIC -O3 -DNDEBUG
-# For Mac x86_64, add -m64 -flat_namespace -undefined suppress
 
 # C compilation flags in debug mode
 CFLAGS_DEBUG = \
