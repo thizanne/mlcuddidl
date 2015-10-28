@@ -59,7 +59,8 @@ CC = gcc
 # GCC on i386
 XCFLAGS = -fPIC -malign-double -DHAVE_IEEE_754 -DBSD
 # GCC on x86_64
-#XCFLAGS = -fPIC -m64 -DHAVE_IEEE_754 -DSIZEOF_VOID_P=8 -DSIZEOF_LONG=8 -DSIZEOF_INT=4
+#XCFLAGS = -fPIC -m64 -DHAVE_IEEE_754 -DSIZEOF_VOID_P=8 -DSIZEOF_LONG=8 -DSIZEOF_INT=4 \
+    -D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED
 # For Mac x86_64, add -m64 -flat_namespace -undefined suppress
 
 # C compilation flags

@@ -17,7 +17,7 @@ SITE-LIB-PKG = $(SITE-LIB)/$(PKG-NAME)
 #---------------------------------------
 
 ICFLAGS = -Icudd-2.4.2/cudd -Icudd-2.4.2/mtr -Icudd-2.4.2/epd -Icudd-2.4.2/st -Icudd-2.4.2/util \
--I$(CAML_PREFIX)/lib/ocaml -I$(CAMLIDL_PREFIX)/lib/ocaml
+-I$(CAML_PREFIX)/lib/ocaml -I$(CAMLIDL_PREFIX)/lib/camlidl
 
 #---------------------------------------
 # OCaml part
@@ -146,7 +146,7 @@ dllcuddcaml.so: libcuddcaml.a
 	mkdir -p tmp
 	(cd tmp; /bin/rm -fr *.o; $(AR) x ../$^)
 	$(CC) $(CFLAGS) $(XCFLAGS) -shared -o $@ tmp/*.o \
-	-L$(CAMLIDL_PREFIX)/lib/ocaml -lcamlidl
+	-L$(CAMLIDL_PREFIX)/lib/ocaml
 	/bin/rm -f tmp/*.o
 
 cudd-2.4.2/libcuddall.a:

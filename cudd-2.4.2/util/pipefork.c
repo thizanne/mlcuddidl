@@ -42,11 +42,7 @@ util_pipefork(
     (void) pipe(topipe);
     (void) pipe(frompipe);
 
-#ifdef __CYGWIN32__
     if ((forkpid = fork()) == 0) {
-#else
-    if ((forkpid = vfork()) == 0) {
-#endif
 	/* child here, connect the pipes */
 	(void) dup2(topipe[0], fileno(stdin));
 	(void) dup2(frompipe[1], fileno(stdout));
@@ -66,11 +62,7 @@ util_pipefork(
         *pid = forkpid;
     }
 
-#ifdef __CYGWIN32__
     waitPid = waitpid(-1, &status, WNOHANG);
-#else
-    waitPid = wait3(&status, WNOHANG, NULL);
-#endif
 
     /* parent here, use slimey vfork() semantics to get return status */
     if (waitPid == forkpid && WIFEXITED(status)) {
